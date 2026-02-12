@@ -65,3 +65,4 @@
             display: block;
         }
     </style>
+<script src="${pageContext.request.contextPath}/assets/js/utils.js"></script>
