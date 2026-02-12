@@ -4,258 +4,372 @@
 
     <head>
         <jsp:include page="components/head.jsp" />
-        <title>Layout Customization | NexusAI Admin</title>
+        <title>Visual Layout Editor | NexusAI Admin</title>
         <style>
-            .canvas-drop-zone {
-                background-image: url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' stroke='%23CBD5E1' stroke-width='2' stroke-dasharray='8%2c 8' stroke-dashoffset='0' stroke-linecap='square'/%3e%3c/svg%3e");
-            }
-
-            .wireframe-block {
-                background: #ffffff;
-                border: 1px solid #e2e8f0;
-                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-            }
-
-            .grab-handle {
+            .source-item {
                 cursor: grab;
             }
 
-            .grab-handle:active {
+            .source-item:active {
                 cursor: grabbing;
+            }
+
+            .drop-zone {
+                min-height: 400px;
+                background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+                background-size: 20px 20px;
+                transition: all 0.2s;
+            }
+
+            .drop-zone.drag-over {
+                background-color: rgba(59, 130, 246, 0.05);
+                border: 2px dashed #3b82f6;
+            }
+
+            /* Preview Component Styles */
+            .preview-component {
+                position: relative;
+                transition: all 0.2s;
+            }
+
+            .preview-component:hover {
+                box-shadow: 0 0 0 2px #3b82f6;
+            }
+
+            .preview-component .actions {
+                display: none;
+                position: absolute;
+                top: -12px;
+                right: 10px;
+                background: white;
+                border-radius: 6px;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+                padding: 2px;
+                z-index: 10;
+            }
+
+            .preview-component:hover .actions {
+                display: flex;
+            }
+
+            /* Mock Skeleton Loaders for Preview */
+            .skeleton {
+                @apply bg-slate-200 dark:bg-slate-700 animate-pulse rounded;
             }
         </style>
     </head>
 
-    <body
-        class="bg-background-light dark:bg-background-dark font-sans text-slate-800 dark:text-slate-100 overflow-hidden">
+    <body class="bg-dashboard-bg dark:bg-background-dark font-sans text-slate-800 dark:text-slate-100 overflow-hidden">
         <div class="flex h-screen overflow-hidden">
             <jsp:include page="components/sidebar.jsp">
                 <jsp:param name="activePage" value="layout" />
             </jsp:include>
 
-            <main class="flex-1 ml-64 flex flex-col min-w-0 bg-dashboard-bg dark:bg-slate-900">
+            <main class="flex-1 ml-64 flex flex-col min-w-0 bg-dashboard-bg dark:bg-slate-900 overflow-hidden">
+                <!-- Header -->
                 <header
-                    class="h-16 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 px-6 flex items-center justify-between z-30">
-                    <div class="flex items-center gap-4">
-                        <h2 class="text-lg font-bold text-slate-800 dark:text-white">Homepage Layout</h2>
-                        <div class="h-6 w-px bg-slate-200 dark:bg-slate-700"></div>
-                        <div class="flex items-center gap-3">
-                            <span class="text-sm font-medium text-slate-500">AI Smart Layout</span>
-                            <button
-                                class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none bg-primary">
-                                <span
-                                    class="translate-x-5 pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
-                            </button>
-                        </div>
+                    class="bg-white dark:bg-slate-800 px-6 py-3 flex items-center justify-between border-b border-slate-200 dark:border-slate-700 shrink-0">
+                    <div>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Visual Editor</p>
+                        <h2 class="text-xl font-bold text-slate-800 dark:text-white">Homepage Builder</h2>
                     </div>
                     <div class="flex items-center gap-3">
+                        <button onclick="resetCanvas()"
+                            class="text-xs font-bold text-slate-500 hover:text-red-500 transition-colors">Reset</button>
                         <button
-                            class="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white transition-colors">Reset
-                            to Default</button>
-                        <button
-                            class="px-4 py-2 text-sm font-medium text-slate-600 border border-slate-200 dark:border-slate-700 dark:text-slate-400 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-all flex items-center gap-2">
-                            <span class="material-icons text-sm">visibility</span> Preview
+                            class="px-5 py-2 bg-primary text-white text-sm font-bold rounded-lg shadow-md hover:bg-primary/90 transition-all flex items-center gap-2">
+                            <span class="material-symbols-outlined text-[18px]">save</span> Save Layout
                         </button>
-                        <button
-                            class="px-6 py-2 bg-primary text-white text-sm font-bold rounded-lg shadow-md shadow-primary/20 hover:bg-primary/90 transition-all">Save
-                            Changes</button>
                     </div>
                 </header>
+
                 <div class="flex-1 flex overflow-hidden">
+                    <!-- Sidebar Tools -->
                     <aside
-                        class="w-1/5 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 overflow-y-auto p-4">
-                        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Component Library
-                        </h3>
+                        class="w-64 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 overflow-y-auto p-4 shrink-0 z-10">
+                        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Components</h3>
+
                         <div class="space-y-3">
-                            <div
-                                class="p-4 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-900/50 cursor-move hover:border-primary transition-all group">
-                                <div class="flex items-center gap-3">
-                                    <span
-                                        class="material-icons text-slate-400 group-hover:text-primary">featured_play_list</span>
-                                    <span class="text-sm font-semibold">Hero Section</span>
+                            <!-- Tool: Hero -->
+                            <div draggable="true" ondragstart="handleDragStart(event)" data-type="HERO"
+                                class="source-item p-3 border border-slate-200 dark:border-slate-700 rounded-lg hover:border-primary hover:shadow-md bg-slate-50 dark:bg-slate-900 transition-all">
+                                <div class="flex items-center gap-3 pointer-events-none">
+                                    <span class="material-symbols-outlined text-indigo-500">view_carousel</span>
+                                    <div>
+                                        <p class="text-sm font-bold">Hero Slider</p>
+                                        <p class="text-[10px] text-slate-400">Main features</p>
+                                    </div>
                                 </div>
                             </div>
-                            <div
-                                class="p-4 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-900/50 cursor-move hover:border-primary transition-all group">
-                                <div class="flex items-center gap-3">
-                                    <span
-                                        class="material-icons text-slate-400 group-hover:text-primary">view_list</span>
-                                    <span class="text-sm font-semibold">Category List</span>
+
+                            <!-- Tool: Grid -->
+                            <div draggable="true" ondragstart="handleDragStart(event)" data-type="GRID"
+                                class="source-item p-3 border border-slate-200 dark:border-slate-700 rounded-lg hover:border-primary hover:shadow-md bg-slate-50 dark:bg-slate-900 transition-all">
+                                <div class="flex items-center gap-3 pointer-events-none">
+                                    <span class="material-symbols-outlined text-blue-500">grid_view</span>
+                                    <div>
+                                        <p class="text-sm font-bold">News Grid</p>
+                                        <p class="text-[10px] text-slate-400">Rows & Columns</p>
+                                    </div>
                                 </div>
                             </div>
-                            <div
-                                class="p-4 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-900/50 cursor-move hover:border-primary transition-all group">
-                                <div class="flex items-center gap-3">
-                                    <span
-                                        class="material-icons text-slate-400 group-hover:text-primary">view_carousel</span>
-                                    <span class="text-sm font-semibold">Image Slider</span>
+
+                            <!-- Tool: List -->
+                            <div draggable="true" ondragstart="handleDragStart(event)" data-type="LIST"
+                                class="source-item p-3 border border-slate-200 dark:border-slate-700 rounded-lg hover:border-primary hover:shadow-md bg-slate-50 dark:bg-slate-900 transition-all">
+                                <div class="flex items-center gap-3 pointer-events-none">
+                                    <span class="material-symbols-outlined text-green-500">view_list</span>
+                                    <div>
+                                        <p class="text-sm font-bold">Vertical List</p>
+                                        <p class="text-[10px] text-slate-400">Traditional Feed</p>
+                                    </div>
                                 </div>
                             </div>
-                            <div
-                                class="p-4 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-900/50 cursor-move hover:border-primary transition-all group">
-                                <div class="flex items-center gap-3">
-                                    <span class="material-icons text-slate-400 group-hover:text-primary">ad_units</span>
-                                    <span class="text-sm font-semibold">Ad Banner</span>
-                                </div>
-                            </div>
-                            <div
-                                class="p-4 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-900/50 cursor-move hover:border-primary transition-all group">
-                                <div class="flex items-center gap-3">
-                                    <span
-                                        class="material-icons text-slate-400 group-hover:text-primary">play_circle</span>
-                                    <span class="text-sm font-semibold">Video News</span>
+
+                            <!-- Tool: HTML -->
+                            <div draggable="true" ondragstart="handleDragStart(event)" data-type="HTML"
+                                class="source-item p-3 border border-slate-200 dark:border-slate-700 rounded-lg hover:border-primary hover:shadow-md bg-slate-50 dark:bg-slate-900 transition-all">
+                                <div class="flex items-center gap-3 pointer-events-none">
+                                    <span class="material-symbols-outlined text-orange-500">code</span>
+                                    <div>
+                                        <p class="text-sm font-bold">Custom HTML</p>
+                                        <p class="text-[10px] text-slate-400">Ad / Banner</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="mt-8">
-                            <p class="text-[10px] text-slate-400 italic">Drag and drop components to the center canvas
-                                to build
-                                your homepage.</p>
+
+                        <div
+                            class="mt-8 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-100 dark:border-blue-800">
+                            <p class="text-xs text-blue-800 dark:text-blue-200 leading-relaxed">
+                                <strong>Tip:</strong> Drag items from here to the right canvas to build your page.
+                            </p>
                         </div>
                     </aside>
-                    <main class="w-3/5 p-8 overflow-y-auto bg-slate-100 dark:bg-slate-900/30">
-                        <div class="max-w-3xl mx-auto space-y-4">
-                            <div class="wireframe-block rounded-lg p-4 relative ring-2 ring-primary">
-                                <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-2">
-                                    <div class="flex items-center gap-2">
-                                        <span class="material-icons text-slate-400 grab-handle">drag_indicator</span>
-                                        <span class="text-xs font-bold uppercase text-primary tracking-wider">Hero
-                                            Section</span>
-                                    </div>
-                                    <div class="flex gap-1">
-                                        <button class="p-1 text-slate-400 hover:text-slate-600"><span
-                                                class="material-icons text-sm">visibility_off</span></button>
-                                        <button class="p-1 text-slate-400 hover:text-red-500"><span
-                                                class="material-icons text-sm">delete</span></button>
-                                    </div>
-                                </div>
-                                <div
-                                    class="h-40 bg-slate-50 dark:bg-slate-800 rounded flex items-center justify-center">
-                                    <span class="material-icons text-slate-300 text-5xl">image</span>
-                                </div>
-                            </div>
-                            <div class="wireframe-block rounded-lg p-4 relative">
-                                <div class="flex items-center justify-between mb-2">
-                                    <div class="flex items-center gap-2">
-                                        <span class="material-icons text-slate-300 grab-handle">drag_indicator</span>
-                                        <span class="text-xs font-bold uppercase text-slate-400 tracking-wider">Ad
-                                            Banner
-                                            (Full Width)</span>
-                                    </div>
-                                    <div class="flex gap-1">
-                                        <button class="p-1 text-slate-400 hover:text-red-500"><span
-                                                class="material-icons text-sm">delete</span></button>
-                                    </div>
-                                </div>
-                                <div
-                                    class="h-16 bg-slate-50 dark:bg-slate-800 rounded border border-dashed border-slate-200 dark:border-slate-700 flex items-center justify-center">
-                                    <span class="text-xs text-slate-400 font-medium">ADVERTISEMENT SPACE</span>
-                                </div>
-                            </div>
-                            <div class="wireframe-block rounded-lg p-4 relative">
-                                <div class="flex items-center justify-between mb-4">
-                                    <div class="flex items-center gap-2">
-                                        <span class="material-icons text-slate-300 grab-handle">drag_indicator</span>
-                                        <span class="text-xs font-bold uppercase text-slate-400 tracking-wider">Category
-                                            List: Technology</span>
-                                    </div>
-                                    <div class="flex gap-1">
-                                        <button class="p-1 text-slate-400 hover:text-red-500"><span
-                                                class="material-icons text-sm">delete</span></button>
-                                    </div>
-                                </div>
-                                <div class="grid grid-cols-3 gap-3">
-                                    <div class="h-24 bg-slate-50 dark:bg-slate-800 rounded"></div>
-                                    <div class="h-24 bg-slate-50 dark:bg-slate-800 rounded"></div>
-                                    <div class="h-24 bg-slate-50 dark:bg-slate-800 rounded"></div>
-                                </div>
-                            </div>
+
+                    <!-- Canvas -->
+                    <main class="flex-1 overflow-y-auto p-8 bg-slate-100 dark:bg-slate-900/50">
+                        <div
+                            class="max-w-4xl mx-auto bg-white dark:bg-slate-800 min-h-[800px] shadow-xl rounded-xl border border-slate-200 dark:border-slate-700 flex flex-col">
+                            <!-- Mock Browser Header -->
                             <div
-                                class="canvas-drop-zone h-32 rounded-lg flex items-center justify-center flex-col gap-2">
-                                <span class="material-icons text-slate-300 text-3xl">add_circle_outline</span>
-                                <span class="text-sm font-medium text-slate-400">Drop components here</span>
+                                class="h-8 bg-slate-100 dark:bg-slate-700 border-b border-slate-200 dark:border-slate-600 rounded-t-xl flex items-center px-4 gap-2">
+                                <div class="flex gap-1.5">
+                                    <div class="w-2.5 h-2.5 rounded-full bg-red-400"></div>
+                                    <div class="w-2.5 h-2.5 rounded-full bg-yellow-400"></div>
+                                    <div class="w-2.5 h-2.5 rounded-full bg-green-400"></div>
+                                </div>
+                                <div
+                                    class="mx-auto w-1/2 h-5 bg-white dark:bg-slate-800 rounded text-[10px] flex items-center justify-center text-slate-400 overflow-hidden">
+                                    neuralnews.com
+                                </div>
+                            </div>
+
+                            <!-- Drop Zone -->
+                            <div id="canvas" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)"
+                                ondrop="handleDrop(event)" class="drop-zone flex-1 p-4 space-y-4">
+
+                                <!-- Placeholder message -->
+                                <div id="emptyState"
+                                    class="h-full flex flex-col items-center justify-center text-slate-300 pointer-events-none mt-20">
+                                    <span class="material-symbols-outlined text-6xl mb-4">drag_click</span>
+                                    <p class="text-lg font-bold">Drag components here</p>
+                                </div>
+
                             </div>
                         </div>
                     </main>
-                    <aside
-                        class="w-1/5 bg-white dark:bg-slate-800 border-l border-slate-200 dark:border-slate-700 overflow-y-auto p-6">
-                        <div class="flex items-center justify-between mb-6">
-                            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest">Property Editor</h3>
-                            <span
-                                class="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-bold">HERO</span>
-                        </div>
-                        <div class="space-y-6">
-                            <div>
-                                <label
-                                    class="block text-xs font-bold text-slate-600 dark:text-slate-400 uppercase mb-2">Display
-                                    Category</label>
-                                <select
-                                    class="w-full bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:ring-primary focus:border-primary">
-                                    <option>Breaking News</option>
-                                    <option>World Events</option>
-                                    <option>Technology</option>
-                                    <option>AI Trends</option>
-                                </select>
-                            </div>
-                            <div>
-                                <div class="flex justify-between items-center mb-2">
-                                    <label
-                                        class="block text-xs font-bold text-slate-600 dark:text-slate-400 uppercase">Article
-                                        Count</label>
-                                    <span class="text-xs font-bold text-primary">5</span>
-                                </div>
-                                <input
-                                    class="w-full h-2 bg-slate-100 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-primary"
-                                    max="10" min="1" type="range" value="5" />
-                                <div class="flex justify-between text-[10px] text-slate-400 mt-1">
-                                    <span>1</span>
-                                    <span>10</span>
-                                </div>
-                            </div>
-                            <div>
-                                <label
-                                    class="block text-xs font-bold text-slate-600 dark:text-slate-400 uppercase mb-3">Display
-                                    Style</label>
-                                <div
-                                    class="flex bg-slate-50 dark:bg-slate-900 p-1 rounded-lg border border-slate-200 dark:border-slate-700">
-                                    <button
-                                        class="flex-1 py-1.5 text-xs font-bold rounded-md bg-white dark:bg-slate-800 shadow-sm text-primary">Grid</button>
-                                    <button
-                                        class="flex-1 py-1.5 text-xs font-bold text-slate-400 hover:text-slate-600">Slider</button>
-                                    <button
-                                        class="flex-1 py-1.5 text-xs font-bold text-slate-400 hover:text-slate-600">List</button>
-                                </div>
-                            </div>
-                            <div class="pt-6 border-t border-slate-100 dark:border-slate-700">
-                                <label class="flex items-center gap-3 cursor-pointer">
-                                    <input checked="" class="rounded text-primary focus:ring-primary h-4 w-4"
-                                        type="checkbox" />
-                                    <span class="text-sm font-medium text-slate-600 dark:text-slate-300">Show Date &amp;
-                                        Time</span>
-                                </label>
-                            </div>
-                            <div>
-                                <label class="flex items-center gap-3 cursor-pointer">
-                                    <input class="rounded text-primary focus:ring-primary h-4 w-4" type="checkbox" />
-                                    <span class="text-sm font-medium text-slate-600 dark:text-slate-300">Enable
-                                        Auto-refresh</span>
-                                </label>
-                            </div>
-                            <div
-                                class="mt-8 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-100 dark:border-blue-900/30">
-                                <div class="flex items-center gap-2 mb-2">
-                                    <span class="material-icons text-primary text-sm">auto_awesome</span>
-                                    <span class="text-xs font-bold text-primary">AI Optimization</span>
-                                </div>
-                                <p class="text-[10px] text-slate-600 dark:text-slate-400 leading-relaxed">
-                                    AI has optimized this section for peak morning engagement (07:00 - 10:00).
-                                </p>
-                            </div>
-                        </div>
-                    </aside>
                 </div>
             </main>
         </div>
-    </body>
+
+        <script>
+            // --- Drag & Drop Logic ---
+            function handleDragStart(e) {
+                e.dataTransfer.setData("type", e.target.dataset.type);
+                e.dataTransfer.effectAllowed = "copy";
+            }
+
+            function handleDragOver(e) {
+                e.preventDefault();
+                e.currentTarget.classList.add('drag-over');
+                e.dataTransfer.dropEffect = "copy";
+            }
+
+            function handleDragLeave(e) {
+                e.currentTarget.classList.remove('drag-over');
+            }
+
+            function handleDrop(e) {
+                e.preventDefault();
+                const canvas = document.getElementById('canvas');
+                canvas.classList.remove('drag-over');
+                document.getElementById('emptyState').classList.add('hidden'); // Hide placeholder
+
+                const type = e.dataTransfer.getData("type");
+                const newComponent = createComponent(type);
+                canvas.appendChild(newComponent);
+            }
+
+            // --- Component Factory ---
+            function createComponent(type) {
+                const div = document.createElement('div');
+                div.className = "preview-component bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-700 rounded-lg p-2 group hover:ring-2 hover:ring-primary hover:border-transparent transition-all relative";
+
+                let contentHtml = '';
+
+                // Generate visual mockups based on type
+                if (type === 'HERO') {
+                    contentHtml = `
+                    <div class="w-full h-48 bg-slate-200 dark:bg-slate-700 rounded animate-pulse flex items-center justify-center">
+                        <span class="text-slate-400 font-bold text-2xl">HERO SLIDER</span>
+                    </div>
+                `;
+                } else if (type === 'GRID') {
+                    contentHtml = `
+                    <div class="grid grid-cols-3 gap-2">
+                        <div class="h-24 bg-slate-100 dark:bg-slate-800 rounded"></div>
+                        <div class="h-24 bg-slate-100 dark:bg-slate-800 rounded"></div>
+                        <div class="h-24 bg-slate-100 dark:bg-slate-800 rounded"></div>
+                        <div class="h-24 bg-slate-100 dark:bg-slate-800 rounded"></div>
+                        <div class="h-24 bg-slate-100 dark:bg-slate-800 rounded"></div>
+                        <div class="h-24 bg-slate-100 dark:bg-slate-800 rounded"></div>
+                    </div>
+                `;
+                } else if (type === 'LIST') {
+                    contentHtml = `
+                    <div class="space-y-2">
+                        <div class="h-16 bg-slate-100 dark:bg-slate-800 rounded flex gap-2 p-1">
+                            <div class="w-14 h-full bg-slate-200 dark:bg-slate-700 rounded"></div>
+                            <div class="flex-1 space-y-1 py-1">
+                                <div class="w-3/4 h-2 bg-slate-200 dark:bg-slate-700 rounded"></div>
+                                <div class="w-1/2 h-2 bg-slate-200 dark:bg-slate-700 rounded"></div>
+                            </div>
+                        </div>
+                         <div class="h-16 bg-slate-100 dark:bg-slate-800 rounded flex gap-2 p-1">
+                            <div class="w-14 h-full bg-slate-200 dark:bg-slate-700 rounded"></div>
+                            <div class="flex-1 space-y-1 py-1">
+                                <div class="w-3/4 h-2 bg-slate-200 dark:bg-slate-700 rounded"></div>
+                                <div class="w-1/2 h-2 bg-slate-200 dark:bg-slate-700 rounded"></div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                } else if (type === 'HTML') {
+                    contentHtml = `
+                    <div class="w-full h-20 bg-orange-50 dark:bg-orange-900/20 border border-dashed border-orange-200 dark:border-orange-800 rounded flex items-center justify-center">
+                        <span class="text-orange-400 font-mono text-xs">< HTML Embed /></span>
+                    </div>
+                `;
+                }
+
+                div.innerHTML = `
+                <div class="actions">
+                    <button class="p-1 hover:bg-slate-100 rounded text-slate-400 hover:text-red-500" onclick="this.closest('.preview-component').remove()">
+                        <span class="material-symbols-outlined text-[16px]">delete</span>
+                    </button>
+                     <button class="p-1 hover:bg-slate-100 rounded text-slate-400 hover:text-primary" onclick="openSettings(this)">
+                        <span class="material-symbols-outlined text-[16px]">settings</span>
+                    </button>
+                    <button class="p-1 hover:bg-slate-100 rounded text-slate-400 hover:text-slate-600 cursor-move">
+                        <span class="material-symbols-outlined text-[16px]">drag_indicator</span>
+                    </button>
+                </div>
+                <!-- Label -->
+                <div class="mb-2 flex items-center justify-between">
+                    <span class="text-[10px] bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded font-bold uppercase text-slate-500">${type} Section</span>
+                </div>
+                ${contentHtml}
+            `;
+
+                return div;
+            }
+
+            function resetCanvas() {
+                document.getElementById('canvas').innerHTML = `
+                <div id="emptyState" class="h-full flex flex-col items-center justify-center text-slate-300 pointer-events-none mt-20">
+                     <span class="material-symbols-outlined text-6xl mb-4">drag_click</span>
+                     <p class="text-lg font-bold">Drag components here</p>
+                 </div>
+            `;
+            }
+
+            // --- Settings Modal Logic ---
+            let currentComponent = null;
+
+            function openSettings(btn) {
+                currentComponent = btn.closest('.preview-component');
+                const type = currentComponent.querySelector('span.uppercase').innerText.split(' ')[0]; // HERO, GRID...
+
+                // Show/Hide fields based on type
+                document.getElementById('gridSettings').style.display = type === 'GRID' ? 'block' : 'none';
+
+                document.getElementById('settingsModal').showModal();
+            }
+
+            function saveSettings() {
+                if (!currentComponent) return;
+
+                const cols = document.getElementById('settingColumns').value;
+                const limit = document.getElementById('settingLimit').value;
+                const category = document.getElementById('settingCategory').value;
+
+                // Update visual label to reflect changes
+                const label = currentComponent.querySelector('span.uppercase');
+                const type = label.innerText.split(' ')[0];
+
+                let infoText = "";
+                if (type === 'GRID') infoText = ` - ${category} (${cols} Cols)`;
+                else if (type === 'LIST') infoText = ` - ${category} (List)`;
+
+                label.innerText = type + " SECTION" + infoText;
+
+                document.getElementById('settingsModal').close();
+            }
+        </script>
+
+        <!-- Settings Modal -->
+        <dialog id="settingsModal"
+            class="modal bg-transparent p-0 backdrop:bg-black/50 backdrop:backdrop-blur-sm open:animate-fade-in">
+            <div
+                class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-[400px] border border-slate-100 dark:border-slate-700 p-6">
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white mb-4">Component Settings</h3>
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Category Source</label>
+                        <select id="settingCategory"
+                            class="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
+                            <option>Technology</option>
+                            <option>Politics</option>
+                            <option>Health</option>
+                            <option>Latest News</option>
+                        </select>
+                    </div>
+
+                    <div id="gridSettings" class="hidden">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Columns</label>
+                                <input id="settingColumns" type="number" value="3"
+                                    class="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Max Items</label>
+                                <input id="settingLimit" type="number" value="6"
+                                    class="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-2 mt-6">
+                    <button onclick="document.getElementById('settingsModal').close()"
+                        class="px-4 py-2 text-sm font-bold text-slate-500 hover:bg-slate-100 rounded-lg">Cancel</button>
+                    <button onclick="saveSettings()"
+                        class="px-4 py-2 text-sm font-bold bg-primary text-white rounded-lg shadow-md hover:bg-primary/90">Apply</button>
+                </div>
+            </div>
+        </dialog>
 
     </html>
