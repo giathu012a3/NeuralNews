@@ -2,16 +2,26 @@
     <div class="relative z-50">
         <button onclick="toggleAdminProfile()" id="adminProfileBtn"
             class="block h-10 w-10 rounded-full overflow-hidden border-2 border-slate-100 dark:border-slate-700 shadow-sm cursor-pointer hover:border-primary transition-all focus:ring-4 focus:ring-primary/20 outline-none">
-            <img alt="Admin user profile avatar" class="w-full h-full object-cover"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuC4v1Xj-x5c0-BNWvuQMWrNKnYpUqHJu2FzBC2ANgMo6855wzRgUZD-tyPVU_iWy9HANXuBFUBSMxHPeds14WCinCTTRCtzwz4MqbtS_WsSwg5Gy0dENGvERGxaw9BORVzow9HavpimbV7bIQ6_ZH8VevoPeGWPT5YBZAurWMoIevRvkLkGWt1gp_7QPG9XNSgbrNUujAcFewuJkhw1rocmmASWGj67hq21d4jI11-j3ZZxxaxhgSjEO9Fx64PNgntutDDQHHdl5Ubo" />
+            <% String avatarUrl=(String) session.getAttribute("avatarUrl"); String displayName=(String)
+                session.getAttribute("userName"); if (displayName==null) displayName="Admin" ; if (avatarUrl==null ||
+                avatarUrl.isEmpty()) { avatarUrl="https://ui-avatars.com/api/?name=" +
+                java.net.URLEncoder.encode(displayName, "UTF-8" ) + "&background=0D8ABC&color=fff" ; } %>
+                <img alt="<%= displayName %>" class="w-full h-full object-cover" src="<%= avatarUrl %>" />
         </button>
 
         <!-- Dropdown Menu -->
         <div id="adminProfileDropdown"
             class="hidden absolute right-0 top-full mt-2 w-64 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-xl shadow-xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 origin-top-right transform transition-all">
             <div class="p-4 border-b border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/50">
-                <p class="text-sm font-bold text-slate-800 dark:text-white">Admin User</p>
-                <p class="text-xs text-slate-500 dark:text-slate-400">System Administrator</p>
+                <% String adminName=(String) session.getAttribute("userName"); String adminRole=(String)
+                    session.getAttribute("userRole"); if (adminName==null) adminName="Admin User" ; if (adminRole==null)
+                    adminRole="Administrator" ; %>
+                    <p class="text-sm font-bold text-slate-800 dark:text-white">
+                        <%= adminName %>
+                    </p>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 capitalize">
+                        <%= adminRole.toLowerCase() %>
+                    </p>
             </div>
             <div class="p-2">
                 <a href="${pageContext.request.contextPath}/admin/settings.jsp"
