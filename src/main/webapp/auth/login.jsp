@@ -6,7 +6,7 @@
     <head>
         <meta charset="utf-8" />
         <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-        <title>Sign In - NeuralNews</title>
+        <title>Đăng nhập - NeuralNews</title>
         <!-- Fonts -->
         <link href="https://fonts.googleapis.com" rel="preconnect" />
         <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
@@ -64,11 +64,10 @@
                 </div>
             </div>
             <div class="relative z-10 max-w-lg">
-                <h2 class="text-white text-4xl font-bold leading-tight mb-4">Empowering Journalism with Intelligent
-                    Insights
+                <h2 class="text-white text-4xl font-bold leading-tight mb-4">Nâng tầm Báo chí với Thông tin Trí tuệ
                 </h2>
-                <p class="text-white/90 text-lg font-light">Join thousands of journalists and readers using our
-                    AI-integrated platform to uncover truth faster.</p>
+                <p class="text-white/90 text-lg font-light">Tham gia cùng hàng ngàn nhà báo và độc giả sử dụng nền tảng
+                    tích hợp AI của chúng tôi để khám phá sự thật nhanh hơn.</p>
             </div>
             <div class="relative z-10 flex gap-2">
                 <div class="w-12 h-1 bg-white rounded-full"></div>
@@ -87,9 +86,10 @@
                 <div class="max-w-[480px] w-full mx-auto space-y-8">
                     <!-- Header -->
                     <div class="space-y-2">
-                        <h1 class="text-[#111418] dark:text-white text-3xl font-bold tracking-tight">Welcome Back</h1>
-                        <p class="text-[#60758a] dark:text-[#9aa0a6] text-base">Enter your credentials to access your
-                            dashboard.</p>
+                        <h1 class="text-[#111418] dark:text-white text-3xl font-bold tracking-tight">Chào mừng trở lại
+                        </h1>
+                        <p class="text-[#60758a] dark:text-[#9aa0a6] text-base">Nhập thông tin đăng nhập để truy cập
+                            bảng điều khiển.</p>
                     </div>
 
                     <%-- Thông báo lỗi / thành công --%>
@@ -136,12 +136,12 @@
                                                 <!-- Password Input -->
                                                 <div class="space-y-2">
                                                     <label class="text-[#111418] dark:text-white text-sm font-medium"
-                                                        for="password">Password</label>
+                                                        for="password">Mật khẩu</label>
                                                     <div class="relative group">
                                                         <input
                                                             class="form-input block w-full rounded-lg border border-[#dbe0e6] dark:border-[#3e4c59] bg-white dark:bg-[#101922] h-12 px-4 text-[#111418] dark:text-white placeholder:text-[#60758a] focus:border-primary focus:ring-1 focus:ring-primary transition-colors pr-10"
                                                             id="password" name="password"
-                                                            placeholder="Enter your password" type="password"
+                                                            placeholder="Nhập mật khẩu của bạn" type="password"
                                                             required />
                                                         <button
                                                             class="absolute right-3 top-3 text-[#60758a] hover:text-[#111418] dark:hover:text-white focus:outline-none transition-colors"
@@ -158,33 +158,33 @@
                                                             class="checkbox-primary form-checkbox rounded text-primary focus:ring-primary border-[#dbe0e6] dark:border-[#3e4c59] bg-white dark:bg-[#101922] w-4 h-4"
                                                             type="checkbox" />
                                                         <span
-                                                            class="text-sm text-[#60758a] dark:text-[#9aa0a6] font-medium select-none">Remember
-                                                            me</span>
+                                                            class="text-sm text-[#60758a] dark:text-[#9aa0a6] font-medium select-none">Ghi
+                                                            nhớ đăng nhập</span>
                                                     </label>
                                                     <a class="text-sm font-semibold text-primary hover:text-primary/80 transition-colors"
-                                                        href="#">Forgot Password?</a>
+                                                        href="#">Quên mật khẩu?</a>
                                                 </div>
                                                 <!-- Main Action -->
                                                 <button
                                                     class="w-full h-12 bg-primary hover:bg-primary/90 text-white font-semibold rounded-lg transition-all shadow-sm flex items-center justify-center gap-2"
                                                     type="submit">
-                                                    Sign In
+                                                    Đăng nhập
                                                     <span
                                                         class="material-symbols-outlined text-[20px]">arrow_forward</span>
                                                 </button>
                                             </form>
                                             <!-- Footer Link -->
                                             <p class="text-center text-[#60758a] dark:text-[#9aa0a6] text-sm">
-                                                Don't have an account?
+                                                Chưa có tài khoản?
                                                 <a class="text-primary font-semibold hover:underline"
-                                                    href="${pageContext.request.contextPath}/auth/register.jsp">Sign
-                                                    up</a>
+                                                    href="${pageContext.request.contextPath}/auth/register.jsp">Đăng
+                                                    ký</a>
                                             </p>
                 </div>
             </div>
             <!-- Footer -->
             <div class="py-6 text-center text-xs text-[#60758a] dark:text-[#9aa0a6]">
-                © 2025 NeuralNews Media. All rights reserved.
+                © 2025 NeuralNews Media. Mọi quyền được bảo lưu.
             </div>
         </div>
 

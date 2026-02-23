@@ -5,7 +5,7 @@
     <head>
         <meta charset="utf-8" />
         <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-        <title>Sign Up - NeuralNews</title>
+        <title>Đăng ký - NeuralNews</title>
         <link href="https://fonts.googleapis.com" rel="preconnect" />
         <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
         <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&display=swap"
@@ -57,11 +57,10 @@
                 </div>
             </div>
             <div class="relative z-10 max-w-lg">
-                <h2 class="text-white text-4xl font-bold leading-tight mb-4">Empowering Journalism with Intelligent
-                    Insights
+                <h2 class="text-white text-4xl font-bold leading-tight mb-4">Nâng tầm Báo chí với Thông tin Trí tuệ
                 </h2>
-                <p class="text-white/90 text-lg font-light">Join thousands of journalists and readers using our
-                    AI-integrated platform to uncover truth faster.</p>
+                <p class="text-white/90 text-lg font-light">Tham gia cùng hàng ngàn nhà báo và độc giả sử dụng nền tảng
+                    tích hợp AI của chúng tôi để khám phá sự thật nhanh hơn.</p>
             </div>
             <div class="relative z-10 flex gap-2">
                 <div class="w-12 h-1 bg-white rounded-full"></div>
@@ -77,11 +76,10 @@
                 </div>
                 <div class="max-w-[480px] w-full mx-auto space-y-6">
                     <div class="space-y-2">
-                        <h1 class="text-[#111418] dark:text-white text-3xl font-bold tracking-tight">Create an Account
+                        <h1 class="text-[#111418] dark:text-white text-3xl font-bold tracking-tight">Tạo tài khoản
                         </h1>
-                        <p class="text-[#60758a] dark:text-[#9aa0a6] text-base">Get started with your free AI-powered
-                            news
-                            dashboard.</p>
+                        <p class="text-[#60758a] dark:text-[#9aa0a6] text-base">Bắt đầu với bảng điều khiển tin tức AI
+                            miễn phí của bạn.</p>
                     </div>
 
                     <%-- Thông báo lỗi --%>
@@ -107,8 +105,7 @@
                                         <!-- Full Name -->
                                         <div class="space-y-2">
                                             <label class="text-[#111418] dark:text-white text-sm font-medium"
-                                                for="fullname">Full
-                                                Name</label>
+                                                for="fullname">Họ và tên</label>
                                             <input
                                                 class="form-input block w-full rounded-lg border border-[#dbe0e6] dark:border-[#3e4c59] bg-white dark:bg-[#101922] h-12 px-4 text-[#111418] dark:text-white placeholder:text-[#60758a] focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
                                                 id="fullname" name="fullname" placeholder="e.g. Nguyễn Văn A"
@@ -117,8 +114,7 @@
                                         <!-- Email -->
                                         <div class="space-y-2">
                                             <label class="text-[#111418] dark:text-white text-sm font-medium"
-                                                for="email">Email
-                                                Address</label>
+                                                for="email">Địa chỉ Email</label>
                                             <div class="relative">
                                                 <input
                                                     class="form-input block w-full rounded-lg border border-[#dbe0e6] dark:border-[#3e4c59] bg-white dark:bg-[#101922] h-12 px-4 text-[#111418] dark:text-white placeholder:text-[#60758a] focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
@@ -129,7 +125,7 @@
                                         <!-- Password -->
                                         <div class="space-y-2">
                                             <label class="text-[#111418] dark:text-white text-sm font-medium"
-                                                for="password">Password</label>
+                                                for="password">Mật khẩu</label>
                                             <div class="relative group">
                                                 <input
                                                     class="form-input block w-full rounded-lg border border-[#dbe0e6] dark:border-[#3e4c59] bg-white dark:bg-[#101922] h-12 px-4 text-[#111418] dark:text-white placeholder:text-[#60758a] focus:border-primary focus:ring-1 focus:ring-primary transition-colors pr-10"
@@ -157,14 +153,13 @@
                                                     class="flex-1 bg-[#dbe0e6] dark:bg-[#3e4c59] rounded-full h-full transition-colors">
                                                 </div>
                                             </div>
-                                            <p class="text-xs text-[#60758a] dark:text-[#9aa0a6]">Strength: <span
+                                            <p class="text-xs text-[#60758a] dark:text-[#9aa0a6]">Độ mạnh: <span
                                                     id="strengthLabel" class="font-medium">—</span></p>
                                         </div>
                                         <!-- Confirm Password -->
                                         <div class="space-y-2">
                                             <label class="text-[#111418] dark:text-white text-sm font-medium"
-                                                for="confirmPassword">Confirm
-                                                Password</label>
+                                                for="confirmPassword">Xác nhận mật khẩu</label>
                                             <input
                                                 class="form-input block w-full rounded-lg border border-[#dbe0e6] dark:border-[#3e4c59] bg-white dark:bg-[#101922] h-12 px-4 text-[#111418] dark:text-white placeholder:text-[#60758a] focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
                                                 id="confirmPassword" name="confirmPassword"
@@ -180,28 +175,28 @@
                                             <label
                                                 class="text-sm text-[#60758a] dark:text-[#9aa0a6] select-none leading-5"
                                                 for="terms">
-                                                I agree to the <a class="text-primary hover:text-primary/80"
-                                                    href="#">Terms of Service</a>
-                                                and <a class="text-primary hover:text-primary/80" href="#">Privacy
-                                                    Policy</a>.
+                                                Tôi đồng ý với <a class="text-primary hover:text-primary/80"
+                                                    href="#">Điều khoản dịch vụ</a>
+                                                và <a class="text-primary hover:text-primary/80" href="#">Chính sách bảo
+                                                    mật</a>.
                                             </label>
                                         </div>
                                         <button
                                             class="w-full h-12 bg-primary hover:bg-primary/90 text-white font-semibold rounded-lg transition-all shadow-sm flex items-center justify-center gap-2 mt-2"
                                             type="submit">
-                                            Create Account
+                                            Tạo tài khoản
                                             <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
                                         </button>
                                     </form>
                                     <p class="text-center text-[#60758a] dark:text-[#9aa0a6] text-sm">
-                                        Already have an account?
+                                        Đã có tài khoản?
                                         <a class="text-primary font-semibold hover:underline"
-                                            href="${pageContext.request.contextPath}/auth/login.jsp">Sign In</a>
+                                            href="${pageContext.request.contextPath}/auth/login.jsp">Đăng nhập</a>
                                     </p>
                 </div>
             </div>
             <div class="py-6 text-center text-xs text-[#60758a] dark:text-[#9aa0a6]">
-                © 2025 NeuralNews Media. All rights reserved.
+                © 2025 NeuralNews Media. Mọi quyền được bảo lưu.
             </div>
         </div>
 

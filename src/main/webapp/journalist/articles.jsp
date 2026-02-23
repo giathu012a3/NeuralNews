@@ -3,7 +3,7 @@
 
 <head>
     <jsp:include page="components/head.jsp" />
-    <title>My Articles Management Library - Newsroom</title>
+    <title>Thư viện Quản lý Bài viết của tôi - Newsroom</title>
 </head>
 
 <body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen">
@@ -15,11 +15,11 @@
             <header
                 class="h-16 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-border-dark flex items-center justify-between px-8 shrink-0 z-20">
                 <div class="flex items-center gap-6">
-                    <h2 class="text-lg font-bold tracking-tight">Articles Library</h2>
+                    <h2 class="text-lg font-bold tracking-tight">Thư viện Bài viết</h2>
                     <div class="hidden md:flex items-center gap-2 text-xs text-slate-500 font-medium">
-                        <span>Journalist Portal</span>
+                        <span>Cổng thông tin Nhà báo</span>
                         <span class="material-symbols-outlined text-sm">chevron_right</span>
-                        <span class="text-slate-900 dark:text-slate-200">Management</span>
+                        <span class="text-slate-900 dark:text-slate-200">Quản lý</span>
                     </div>
                 </div>
                 <div class="flex items-center gap-3">
@@ -28,7 +28,7 @@
                             class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
                         <input
                             class="bg-slate-100 dark:bg-slate-800 border-none rounded-lg py-1.5 pl-10 pr-4 w-64 focus:ring-2 focus:ring-primary text-xs transition-all"
-                            placeholder="Search articles by title or tag..." type="text" />
+                            placeholder="Tìm kiếm bài viết theo tiêu đề hoặc thẻ..." type="text" />
                     </div>
                     <div class="h-6 w-px bg-slate-200 dark:border-border-dark mx-1"></div>
                     <button
@@ -47,20 +47,21 @@
                 <div class="p-8 max-w-[1200px] mx-auto space-y-6">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
                         <div>
-                            <h3 class="text-xl font-bold">My Articles</h3>
-                            <p class="text-slate-500 dark:text-slate-400 text-xs mt-1">Managing 124 articles written for
-                                the Nexus Portal</p>
+                            <h3 class="text-xl font-bold">Bài viết của tôi</h3>
+                            <p class="text-slate-500 dark:text-slate-400 text-xs mt-1">Quản lý 124 bài viết được viết
+                                cho
+                                Cổng thông tin Nexus</p>
                         </div>
                         <div class="flex items-center gap-3">
                             <button
                                 class="flex items-center gap-2 px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-border-dark hover:border-primary/50 rounded-lg text-xs font-semibold transition-all shadow-sm">
                                 <span class="material-symbols-outlined text-sm">tune</span>
-                                Advanced Filters
+                                Bộ lọc Nâng cao
                             </button>
                             <a href="${pageContext.request.contextPath}/journalist/create_article.jsp"
                                 class="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg text-xs font-semibold transition-all shadow-sm">
                                 <span class="material-symbols-outlined text-sm">add</span>
-                                Create New Article
+                                Tạo Bài viết Mới
                             </a>
                         </div>
                     </div>
@@ -70,11 +71,11 @@
                             <table class="w-full border-collapse">
                                 <thead>
                                     <tr>
-                                        <th class="table-header w-1/2">Article Title</th>
-                                        <th class="table-header">Status</th>
-                                        <th class="table-header">Views</th>
-                                        <th class="table-header">Date</th>
-                                        <th class="table-header text-right">Actions</th>
+                                        <th class="table-header w-1/2">Tiêu đề Bài viết</th>
+                                        <th class="table-header">Trạng thái</th>
+                                        <th class="table-header">Lượt xem</th>
+                                        <th class="table-header">Ngày</th>
+                                        <th class="table-header text-right">Hành động</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-slate-100 dark:divide-border-dark/30">
@@ -88,10 +89,11 @@
                                                         src="https://lh3.googleusercontent.com/aida-public/AB6AXuDv7_zQY6hKHubY11GE7c-fH7AS3uz4TZ2UXutFm2jUlWhMuU9Nfgv6lmsIUOVUKbh7XVNI699T3klTof_V7hhKc5jxEokzdtqULxXjLBe3kfluz7_YChleKF9ZVL7KfsjI0_jXy0-mhpXmMZVZnQXzdq8kLeDjUEW0nmDNyLsFcilcON0w4gKtXuktZqIadYUzNtUJc_qmDWG3zMD49_88JsqFjKN25D08cu_6wk4HS6eVRSFKhrSI8rteOrmqlfpwOwM-ssWjZItt" />
                                                 </div>
                                                 <div class="min-w-0">
-                                                    <p class="font-bold text-slate-900 dark:text-white truncate">The
-                                                        Future of AI in Modern News Reporting</p>
-                                                    <p class="text-[11px] text-slate-400 font-medium">Technology • 8 min
-                                                        read</p>
+                                                    <p class="font-bold text-slate-900 dark:text-white truncate">Tương
+                                                        lai
+                                                        của AI trong Báo chí Hiện đại</p>
+                                                    <p class="text-[11px] text-slate-400 font-medium">Công nghệ • 8 phút
+                                                        đọc</p>
                                                 </div>
                                             </div>
                                         </td>
@@ -99,7 +101,7 @@
                                             <div
                                                 class="badge-base bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400 ring-1 ring-inset ring-emerald-500/20 w-fit">
                                                 <span class="size-1.5 rounded-full bg-emerald-500"></span>
-                                                Published
+                                                Đã xuất bản
                                             </div>
                                         </td>
                                         <td class="table-cell font-medium">12.4k</td>
@@ -108,17 +110,17 @@
                                             <div class="flex items-center justify-end gap-1">
                                                 <button
                                                     class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-400 hover:text-primary transition-colors"
-                                                    title="Edit">
+                                                    title="Chỉnh sửa">
                                                     <span class="material-symbols-outlined text-xl">edit</span>
                                                 </button>
                                                 <button
                                                     class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-400 hover:text-slate-200 transition-colors"
-                                                    title="Preview">
+                                                    title="Xem trước">
                                                     <span class="material-symbols-outlined text-xl">visibility</span>
                                                 </button>
                                                 <button
                                                     class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-400 hover:text-emerald-500 transition-colors"
-                                                    title="Analytics">
+                                                    title="Phân tích">
                                                     <span class="material-symbols-outlined text-xl">insights</span>
                                                 </button>
                                             </div>
@@ -135,9 +137,9 @@
                                                 </div>
                                                 <div class="min-w-0">
                                                     <p class="font-bold text-slate-900 dark:text-white truncate">
-                                                        Cybersecurity in the Age of Quantum Computing</p>
-                                                    <p class="text-[11px] text-slate-400 font-medium">Security • 12 min
-                                                        read</p>
+                                                        An ninh mạng trong Kỷ nguyên Điện toán Lượng tử</p>
+                                                    <p class="text-[11px] text-slate-400 font-medium">Bảo mật • 12 phút
+                                                        đọc</p>
                                                 </div>
                                             </div>
                                         </td>
@@ -145,7 +147,7 @@
                                             <div
                                                 class="badge-base bg-amber-100 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400 ring-1 ring-inset ring-amber-500/20 w-fit">
                                                 <span class="size-1.5 rounded-full bg-amber-500"></span>
-                                                Pending
+                                                Đang chờ
                                             </div>
                                         </td>
                                         <td class="table-cell font-medium">--</td>
@@ -154,17 +156,17 @@
                                             <div class="flex items-center justify-end gap-1">
                                                 <button
                                                     class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-400 hover:text-primary transition-colors"
-                                                    title="Edit">
+                                                    title="Chỉnh sửa">
                                                     <span class="material-symbols-outlined text-xl">edit</span>
                                                 </button>
                                                 <button
                                                     class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-400 hover:text-slate-200 transition-colors"
-                                                    title="Preview">
+                                                    title="Xem trước">
                                                     <span class="material-symbols-outlined text-xl">visibility</span>
                                                 </button>
                                                 <button
                                                     class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-400 hover:text-emerald-500 transition-colors"
-                                                    title="Analytics">
+                                                    title="Phân tích">
                                                     <span class="material-symbols-outlined text-xl">insights</span>
                                                 </button>
                                             </div>
@@ -180,10 +182,11 @@
                                                         src="https://lh3.googleusercontent.com/aida-public/AB6AXuDYnlCUCW-2kzU0THl_Yk3-7tb-1hzdGPHiuZVcwKTIfHAuC1A9oBU-L-bm7O56lj1QHclFjaa8-LKPSLrNlbIldu0OHo_bbnUFg-hGc4zBBX-j5qMcHmPsYDW8sRFzJ4n7UFo9sLjd5ByhQ-v02sy1IVUbqqUPzLSVV0FEzOEhhefAV14zu4NEJDY3Dxrsx4ocDbrhS8hooNjUX_zvJ9Hb0oLHozNhOslnCI1JCTtK78KCpksRwM-DrGauoXbOo9BYGVxOWJRfjWkN" />
                                                 </div>
                                                 <div class="min-w-0">
-                                                    <p class="font-bold text-slate-900 dark:text-white truncate">The
-                                                        Rise of Low-Code Platforms for Enterprise</p>
-                                                    <p class="text-[11px] text-slate-400 font-medium">DevOps • 6 min
-                                                        read</p>
+                                                    <p class="font-bold text-slate-900 dark:text-white truncate">Sự trỗi
+                                                        dậy
+                                                        của Nền tảng Low-Code cho Doanh nghiệp</p>
+                                                    <p class="text-[11px] text-slate-400 font-medium">DevOps • 6 phút
+                                                        đọc</p>
                                                 </div>
                                             </div>
                                         </td>
@@ -191,7 +194,7 @@
                                             <div
                                                 class="badge-base bg-slate-100 text-slate-600 dark:bg-slate-500/10 dark:text-slate-400 ring-1 ring-inset ring-slate-500/20 w-fit">
                                                 <span class="size-1.5 rounded-full bg-slate-400"></span>
-                                                Draft
+                                                Bản nháp
                                             </div>
                                         </td>
                                         <td class="table-cell font-medium">--</td>
@@ -226,10 +229,10 @@
                                                         src="https://lh3.googleusercontent.com/aida-public/AB6AXuC4iOlCLsgfGkQc6UuSJ6yqP-PZfMwb3CZBplPDPSLR18G0r6OKia49VvnMG_Xa0wWtrxkIdT8B_wp-sDVLM2Qy1r88-3yH1VicBYxLmOJkdLFMT5arxCu-2PfvuBAam4fJQK7uN9sCbRgIOVxPYUoiWLPU2lknwVOpxSkhUO79_VXzfhGen3zJLEQL7Uq_Sv_AS370uaIsuhAo5hFToNqzba3OEcxzKkByAst5vH4_N1HSClacTxlf_c79iwhYTXnIYEvFCtlo_2U8" />
                                                 </div>
                                                 <div class="min-w-0">
-                                                    <p class="font-bold text-slate-900 dark:text-white truncate">Ethics
-                                                        in AI: Where to Draw the Line</p>
-                                                    <p class="text-[11px] text-slate-400 font-medium">Ethics • 15 min
-                                                        read</p>
+                                                    <p class="font-bold text-slate-900 dark:text-white truncate">Đạo đức
+                                                        trong AI: Vạch ra Ranh giới ở Đâu</p>
+                                                    <p class="text-[11px] text-slate-400 font-medium">Đạo đức • 15 phút
+                                                        đọc</p>
                                                 </div>
                                             </div>
                                         </td>
@@ -237,7 +240,7 @@
                                             <div
                                                 class="badge-base bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400 ring-1 ring-inset ring-emerald-500/20 w-fit">
                                                 <span class="size-1.5 rounded-full bg-emerald-500"></span>
-                                                Published
+                                                Đã xuất bản
                                             </div>
                                         </td>
                                         <td class="table-cell font-medium">8.2k</td>
@@ -246,17 +249,17 @@
                                             <div class="flex items-center justify-end gap-1">
                                                 <button
                                                     class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-400 hover:text-primary transition-colors"
-                                                    title="Edit">
+                                                    title="Chỉnh sửa">
                                                     <span class="material-symbols-outlined text-xl">edit</span>
                                                 </button>
                                                 <button
                                                     class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-400 hover:text-slate-200 transition-colors"
-                                                    title="Preview">
+                                                    title="Xem trước">
                                                     <span class="material-symbols-outlined text-xl">visibility</span>
                                                 </button>
                                                 <button
                                                     class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-400 hover:text-emerald-500 transition-colors"
-                                                    title="Analytics">
+                                                    title="Phân tích">
                                                     <span class="material-symbols-outlined text-xl">insights</span>
                                                 </button>
                                             </div>
@@ -269,13 +272,13 @@
                     <div
                         class="flex items-center justify-between py-6 border-t border-slate-200 dark:border-border-dark">
                         <p class="text-xs font-medium text-slate-500 dark:text-slate-400">
-                            Displaying <span class="text-slate-900 dark:text-white">1-10</span> of 124 articles
+                            Hiển thị <span class="text-slate-900 dark:text-white">1-10</span> trong số 124 bài viết
                         </p>
                         <div class="flex items-center gap-1.5">
                             <button
                                 class="px-3 py-1.5 rounded-md border border-slate-200 dark:border-border-dark hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-40 transition-all text-xs font-semibold"
                                 disabled="">
-                                Previous
+                                Trước
                             </button>
                             <button
                                 class="px-4 py-1.5 rounded-md bg-primary/10 text-primary text-xs font-bold">1</button>
@@ -285,7 +288,7 @@
                                 class="px-4 py-1.5 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-medium">3</button>
                             <button
                                 class="px-3 py-1.5 rounded-md border border-slate-200 dark:border-border-dark hover:bg-slate-50 dark:hover:bg-slate-800 transition-all text-xs font-semibold">
-                                Next
+                                Tiếp
                             </button>
                         </div>
                     </div>
