@@ -1,7 +1,7 @@
-package com.neuralnews.dao;
+package neuralnews.dao;
 
-import com.neuralnews.model.User;
-import com.neuralnews.util.DBConnection;
+import neuralnews.model.User;
+import neuralnews.util.DBConnection;
 
 import java.sql.*;
 
@@ -42,7 +42,7 @@ public class UserDAO {
                     // Set Role duy nhất
                     int roleId = rs.getInt("role_id");
                     if (!rs.wasNull()) {
-                        com.neuralnews.model.Role role = new com.neuralnews.model.Role();
+                        neuralnews.model.Role role = new neuralnews.model.Role();
                         role.setId(roleId);
                         role.setName(rs.getString("role_name"));
                         role.setDescription(rs.getString("role_desc"));

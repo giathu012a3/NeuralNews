@@ -1,4 +1,4 @@
-package com.neuralnews.model;
+package neuralnews.model;
 
 import java.sql.Timestamp;
 

@@ -1,4 +1,4 @@
-package com.neuralnews.util;
+package neuralnews.util;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

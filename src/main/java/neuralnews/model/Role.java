@@ -1,4 +1,4 @@
-package com.neuralnews.model;
+package neuralnews.model;
 
 /**
  * POJO model ánh xạ bảng `roles` trong database.

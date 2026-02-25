@@ -1,7 +1,7 @@
-package com.neuralnews.controller;
+package neuralnews.controller;
 
-import com.neuralnews.dao.UserDAO;
-import com.neuralnews.model.User;
+import neuralnews.dao.UserDAO;
+import neuralnews.model.User;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
