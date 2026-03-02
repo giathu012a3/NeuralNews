@@ -45,7 +45,7 @@ CREATE TABLE categories (
 CREATE TABLE articles (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
-    content TEXT NOT NULL,
+    content LONGTEXT NOT NULL,
     summary TEXT,
     image_url VARCHAR(500),
     author_id BIGINT,
