@@ -52,15 +52,15 @@ public class AdminContentController extends HttpServlet {
         for (Article article : articles) {
             String status = article.getStatus();
             if ("PUBLISHED".equals(status)) {
-                article.setStatus("ĐÃ ĐĂNG");
+                article.setStatus("\u0110\u00c3 \u0110\u0102NG");
             } else if ("PENDING".equals(status)) {
-                article.setStatus("CHỜ DUYỆT");
+                article.setStatus("CH\u1EDC DUY\u1EC6T");
             } else if ("REJECTED".equals(status)) {
-                article.setStatus("BỊ TỪ CHỐI");
+                article.setStatus("B\u1ECA T\u1EEA CH\u1ED0I");
             } else if ("ARCHIVED".equals(status)) {
-                article.setStatus("ĐÃ LƯU TRỮ");
+                article.setStatus("\u0110\u00c3 L\u01AFU TR\u1EEE");
             } else if ("DRAFT".equals(status)) {
-                article.setStatus("BẢN NHÁP");
+                article.setStatus("B\u1EA2N NH\u00C1P");
             }
         }
 
