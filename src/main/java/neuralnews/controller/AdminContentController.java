@@ -34,33 +34,48 @@ public class AdminContentController extends HttpServlet {
 
         int pageNum = 1;
         int limit = 10;
-        
+
         String pageStr = request.getParameter("page");
         if (pageStr != null && !pageStr.isEmpty()) {
             try {
                 pageNum = Integer.parseInt(pageStr);
-                if (pageNum < 1) pageNum = 1;
+                if (pageNum < 1)
+                    pageNum = 1;
             } catch (NumberFormatException e) {
                 pageNum = 1;
             }
         }
-        
+
         int offset = (pageNum - 1) * limit;
 
         List<Article> articles = dao.getAllArticles(limit, offset);
-        
+
         for (Article article : articles) {
             String status = article.getStatus();
+            // Set display label (tiếng Việt) và badge CSS cho JSP
             if ("PUBLISHED".equals(status)) {
-                article.setStatus("\u0110\u00c3 \u0110\u0102NG");
+                article.setStatusLabel("ĐÃ ĐĂNG");
+                article.setStatusBadgeClass("bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400");
             } else if ("PENDING".equals(status)) {
-                article.setStatus("CH\u1EDC DUY\u1EC6T");
+                article.setStatusLabel("CHỜ DUYỆT");
+                article.setStatusBadgeClass("bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400");
             } else if ("REJECTED".equals(status)) {
-                article.setStatus("B\u1ECA T\u1EEA CH\u1ED0I");
+                article.setStatusLabel("BỊ TỪ CHỐI");
+                article.setStatusBadgeClass("bg-red-100 text-red-700 dark:bg-red-500/10 dark:text-red-400");
             } else if ("ARCHIVED".equals(status)) {
-                article.setStatus("\u0110\u00c3 L\u01AFU TR\u1EEE");
-            } else if ("DRAFT".equals(status)) {
-                article.setStatus("B\u1EA2N NH\u00C1P");
+                article.setStatusLabel("ĐÃ LƯU TRỮ");
+                article.setStatusBadgeClass("bg-slate-100 text-slate-600 dark:bg-slate-500/10 dark:text-slate-400");
+            } else {
+                article.setStatusLabel(status != null ? status : "N/A");
+                article.setStatusBadgeClass("bg-slate-100 text-slate-600");
+            }
+
+            // Format views
+            int views = article.getViews();
+            if (views >= 1000) {
+                article.setFormattedViews(String.format("%.1fK", views / 1000.0));
+            } else {
+                article.setFormattedViews(String.valueOf(views));
             }
         }
 
@@ -71,6 +86,7 @@ public class AdminContentController extends HttpServlet {
         request.setAttribute("currentPage", pageNum);
         request.setAttribute("totalPages", totalPages);
         request.setAttribute("totalArticles", totalArticles);
+        request.setAttribute("limit", limit);
 
         request.getRequestDispatcher("/admin/content.jsp").forward(request, response);
     }
@@ -78,16 +94,16 @@ public class AdminContentController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
+
         request.setCharacterEncoding("UTF-8");
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
-        
+
         String action = request.getParameter("action");
         String articleIdStr = request.getParameter("articleId");
-        
+
         boolean success = false;
-        
+
         if ("bulk_approve".equals(action)) {
             String[] ids = request.getParameterValues("ids[]");
             if (ids != null && ids.length > 0) {
@@ -105,7 +121,7 @@ public class AdminContentController extends HttpServlet {
         } else if (action != null && articleIdStr != null) {
             try {
                 int articleId = Integer.parseInt(articleIdStr);
-                
+
                 switch (action) {
                     case "approve":
                         success = dao.updateArticleStatus(articleId, "PUBLISHED");
@@ -126,7 +142,7 @@ public class AdminContentController extends HttpServlet {
                 return;
             }
         }
-        
+
         PrintWriter out = response.getWriter();
         out.print("{\"success\": " + success + "}");
         out.flush();

@@ -8,7 +8,7 @@ import jakarta.servlet.http.*;
 import java.io.IOException;
 
 /**
- * Xử lý đăng nhập: POST /LoginController
+ * Handle login: POST /LoginController
  */
 @WebServlet("/LoginController")
 public class LoginController extends HttpServlet {
@@ -27,26 +27,26 @@ public class LoginController extends HttpServlet {
 
 		String contextPath = request.getContextPath();
 
-		// Validate đầu vào cơ bản
+		// Validate input
 		if (email == null || email.trim().isEmpty() || password == null || password.trim().isEmpty()) {
 			response.sendRedirect(contextPath + "/auth/login.jsp?error=empty");
 			return;
 		}
 
-		// Tìm user theo email
+		// Find user by email
 		User user = userDAO.findByEmail(email.trim());
 		if (user == null) {
 			response.sendRedirect(contextPath + "/auth/login.jsp?error=invalid");
 			return;
 		}
 
-		// Kiểm tra mật khẩu
+		// Check password
 		if (!userDAO.verifyPassword(password, user.getPasswordHash())) {
 			response.sendRedirect(contextPath + "/auth/login.jsp?error=invalid");
 			return;
 		}
 
-		// Kiểm tra trạng thái tài khoản
+		// Check account status
 		if ("BANNED".equals(user.getStatus()) || "SUSPENDED".equals(user.getStatus())) {
 			response.sendRedirect(contextPath + "/auth/login.jsp?error=banned");
 			return;
@@ -56,7 +56,7 @@ public class LoginController extends HttpServlet {
 			return;
 		}
 
-		// Lưu thông tin user vào session
+		// Save user info to session
 		HttpSession session = request.getSession();
 		session.setAttribute("currentUser", user);
 		session.setAttribute("userId", user.getId());
@@ -64,7 +64,7 @@ public class LoginController extends HttpServlet {
 		session.setAttribute("userRole", user.getRole().getName());
 		session.setAttribute("userName", user.getFullName());
 
-		// Redirect theo role
+		// Redirect by role
 		boolean isAdmin = user.hasRole("ADMIN");
 		if (isAdmin) {
 			response.sendRedirect(contextPath + "/admin/home.jsp");
@@ -76,7 +76,7 @@ public class LoginController extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		// GET /LoginController → chuyển về trang login
+		// GET /LoginController -> redirect to login page
 		response.sendRedirect(request.getContextPath() + "/auth/login.jsp");
 	}
 }

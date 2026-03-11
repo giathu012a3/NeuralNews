@@ -27,30 +27,30 @@ public class Articlecontroller extends HttpServlet {
             return;
         }
 
-        // Lấy data từ DB
+        // Fetch data from DB
         ArticleDao dao = new ArticleDao();
         List<Article> articles = dao.getArticlesByAuthor(user.getId());
 
-        // Xử lý status badge (dùng đúng class của journalist/components/head.jsp)
+        // Set status badge
         for (Article a : articles) {
             switch (a.getStatus()) {
                 case "PUBLISHED":
-                    a.setStatusLabel("Đã xuất bản");
+                    a.setStatusLabel("\u0110\u00e3 xu\u1ea5t b\u1ea3n");
                     a.setStatusBadgeClass("bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400 ring-emerald-500/20");
                     a.setStatusDotClass("bg-emerald-500");
                     break;
                 case "DRAFT":
-                    a.setStatusLabel("Bản nháp");
+                    a.setStatusLabel("B\u1ea3n nh\u00e1p");
                     a.setStatusBadgeClass("bg-slate-100 text-slate-600 dark:bg-slate-500/10 dark:text-slate-400 ring-slate-500/20");
                     a.setStatusDotClass("bg-slate-400");
                     break;
                 case "PENDING":
-                    a.setStatusLabel("Đang chờ");
+                    a.setStatusLabel("\u0110ang ch\u1edd");
                     a.setStatusBadgeClass("bg-amber-100 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400 ring-amber-500/20");
                     a.setStatusDotClass("bg-amber-500");
                     break;
                 case "REJECTED":
-                    a.setStatusLabel("Bị từ chối");
+                    a.setStatusLabel("B\u1ecb t\u1eeb ch\u1ed1i");
                     a.setStatusBadgeClass("bg-red-100 text-red-700 dark:bg-red-500/10 dark:text-red-400 ring-red-500/20");
                     a.setStatusDotClass("bg-red-500");
                     break;
@@ -71,7 +71,7 @@ public class Articlecontroller extends HttpServlet {
             }
         }
 
-        // Forward sang JSP để hiển thị
+        // Forward to JSP
         request.setAttribute("articles", articles);
         request.getRequestDispatcher("/journalist/articles.jsp")
                 .forward(request, response);
