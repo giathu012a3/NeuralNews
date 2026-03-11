@@ -22,70 +22,180 @@ public class Article {
     private String categoryName;
 
     // Display fields - được set bởi Controller
+    private String authorName;
     private String statusLabel;
     private String statusBadgeClass;
     private String statusDotClass;
     private String formattedViews;
 
-    public Article() {}
+    public Article() {
+    }
 
-    public long getId() { return id; }
-    public void setId(long id) { this.id = id; }
+    public long getId() {
+        return id;
+    }
 
-    public String getTitle() { return title; }
-    public void setTitle(String title) { this.title = title; }
+    public void setId(long id) {
+        this.id = id;
+    }
 
-    public String getContent() { return content; }
-    public void setContent(String content) { this.content = content; }
+    public String getTitle() {
+        return title;
+    }
 
-    public String getSummary() { return summary; }
-    public void setSummary(String summary) { this.summary = summary; }
+    public void setTitle(String title) {
+        this.title = title;
+    }
 
-    public String getImageUrl() { return imageUrl; }
-    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+    public String getContent() {
+        return content;
+    }
 
-    public long getAuthorId() { return authorId; }
-    public void setAuthorId(long authorId) { this.authorId = authorId; }
+    public void setContent(String content) {
+        this.content = content;
+    }
 
-    public int getCategoryId() { return categoryId; }
-    public void setCategoryId(int categoryId) { this.categoryId = categoryId; }
+    public String getSummary() {
+        return summary;
+    }
 
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
+    public void setSummary(String summary) {
+        this.summary = summary;
+    }
 
-    public int getViews() { return views; }
-    public void setViews(int views) { this.views = views; }
+    public String getImageUrl() {
+        return imageUrl;
+    }
 
-    public int getLikesCount() { return likesCount; }
-    public void setLikesCount(int likesCount) { this.likesCount = likesCount; }
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
 
-    public String getSentimentLabel() { return sentimentLabel; }
-    public void setSentimentLabel(String sentimentLabel) { this.sentimentLabel = sentimentLabel; }
+    public long getAuthorId() {
+        return authorId;
+    }
 
-    public double getSourceScore() { return sourceScore; }
-    public void setSourceScore(double sourceScore) { this.sourceScore = sourceScore; }
+    public void setAuthorId(long authorId) {
+        this.authorId = authorId;
+    }
 
-    public double getPopularityScore() { return popularityScore; }
-    public void setPopularityScore(double popularityScore) { this.popularityScore = popularityScore; }
+    public int getCategoryId() {
+        return categoryId;
+    }
 
-    public Timestamp getPublishedAt() { return publishedAt; }
-    public void setPublishedAt(Timestamp publishedAt) { this.publishedAt = publishedAt; }
+    public void setCategoryId(int categoryId) {
+        this.categoryId = categoryId;
+    }
 
-    public Timestamp getCreatedAt() { return createdAt; }
-    public void setCreatedAt(Timestamp createdAt) { this.createdAt = createdAt; }
+    public String getStatus() {
+        return status;
+    }
 
-    public String getCategoryName() { return categoryName; }
-    public void setCategoryName(String categoryName) { this.categoryName = categoryName; }
+    public void setStatus(String status) {
+        this.status = status;
+    }
 
-    public String getStatusLabel() { return statusLabel; }
-    public void setStatusLabel(String statusLabel) { this.statusLabel = statusLabel; }
+    public int getViews() {
+        return views;
+    }
 
-    public String getStatusBadgeClass() { return statusBadgeClass; }
-    public void setStatusBadgeClass(String statusBadgeClass) { this.statusBadgeClass = statusBadgeClass; }
+    public void setViews(int views) {
+        this.views = views;
+    }
 
-    public String getStatusDotClass() { return statusDotClass; }
-    public void setStatusDotClass(String statusDotClass) { this.statusDotClass = statusDotClass; }
+    public int getLikesCount() {
+        return likesCount;
+    }
 
-    public String getFormattedViews() { return formattedViews; }
-    public void setFormattedViews(String formattedViews) { this.formattedViews = formattedViews; }
+    public void setLikesCount(int likesCount) {
+        this.likesCount = likesCount;
+    }
+
+    public String getSentimentLabel() {
+        return sentimentLabel;
+    }
+
+    public void setSentimentLabel(String sentimentLabel) {
+        this.sentimentLabel = sentimentLabel;
+    }
+
+    public double getSourceScore() {
+        return sourceScore;
+    }
+
+    public void setSourceScore(double sourceScore) {
+        this.sourceScore = sourceScore;
+    }
+
+    public double getPopularityScore() {
+        return popularityScore;
+    }
+
+    public void setPopularityScore(double popularityScore) {
+        this.popularityScore = popularityScore;
+    }
+
+    public Timestamp getPublishedAt() {
+        return publishedAt;
+    }
+
+    public void setPublishedAt(Timestamp publishedAt) {
+        this.publishedAt = publishedAt;
+    }
+
+    public Timestamp getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Timestamp createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public String getCategoryName() {
+        return categoryName;
+    }
+
+    public void setCategoryName(String categoryName) {
+        this.categoryName = categoryName;
+    }
+
+    public String getStatusLabel() {
+        return statusLabel;
+    }
+
+    public void setStatusLabel(String statusLabel) {
+        this.statusLabel = statusLabel;
+    }
+
+    public String getAuthorName() {
+        return authorName;
+    }
+
+    public void setAuthorName(String authorName) {
+        this.authorName = authorName;
+    }
+
+    public String getStatusBadgeClass() {
+        return statusBadgeClass;
+    }
+
+    public void setStatusBadgeClass(String statusBadgeClass) {
+        this.statusBadgeClass = statusBadgeClass;
+    }
+
+    public String getStatusDotClass() {
+        return statusDotClass;
+    }
+
+    public void setStatusDotClass(String statusDotClass) {
+        this.statusDotClass = statusDotClass;
+    }
+
+    public String getFormattedViews() {
+        return formattedViews;
+    }
+
+    public void setFormattedViews(String formattedViews) {
+        this.formattedViews = formattedViews;
+    }
 }
