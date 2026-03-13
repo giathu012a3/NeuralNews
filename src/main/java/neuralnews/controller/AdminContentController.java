@@ -9,8 +9,6 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonArray;
 import neuralnews.dao.ArticleDao;
 import neuralnews.model.Article;
 
@@ -101,40 +99,20 @@ public class AdminContentController extends HttpServlet {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
 
-        String action = null;
-        String articleIdStr = null;
-        String[] ids = null;
-
-        // Xử lý dữ liệu từ JSON (utils.js gửi JSON) hoặc Form thông thường
-        String contentType = request.getContentType();
-        if (contentType != null && contentType.contains("application/json")) {
-            try {
-                com.google.gson.JsonObject json = gson.fromJson(request.getReader(), com.google.gson.JsonObject.class);
-                if (json.has("action")) action = json.get("action").getAsString();
-                if (json.has("articleId")) articleIdStr = json.get("articleId").getAsString();
-                if (json.has("ids[]")) {
-                    com.google.gson.JsonArray idArray = json.getAsJsonArray("ids[]");
-                    ids = new String[idArray.size()];
-                    for (int i = 0; i < idArray.size(); i++) {
-                        ids[i] = idArray.get(i).getAsString();
-                    }
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        } else {
-            action = request.getParameter("action");
-            articleIdStr = request.getParameter("articleId");
-            ids = request.getParameterValues("ids[]");
-        }
+        String action = request.getParameter("action");
+        String articleIdStr = request.getParameter("articleId");
 
         boolean success = false;
 
         if ("bulk_approve".equals(action)) {
+            // Using articleIds[] to match either current JS or a fixed JS
+            String[] ids = request.getParameterValues("articleIds[]");
+            if (ids == null) ids = request.getParameterValues("ids[]"); // support both just in case
+            
             if (ids != null && ids.length > 0) {
                 try {
                     for (String idStr : ids) {
-                        int id = Integer.parseInt(idStr);
+                        long id = Long.parseLong(idStr);
                         dao.updateArticleStatus(id, "PUBLISHED");
                     }
                     success = true;
@@ -145,7 +123,7 @@ public class AdminContentController extends HttpServlet {
             }
         } else if (action != null && articleIdStr != null) {
             try {
-                int articleId = Integer.parseInt(articleIdStr);
+                long articleId = Long.parseLong(articleIdStr);
 
                 switch (action) {
                     case "approve":
