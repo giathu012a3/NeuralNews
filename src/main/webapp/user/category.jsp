@@ -91,7 +91,7 @@
                             class="md:col-span-2 flex flex-col md:flex-row gap-6 bg-white dark:bg-surface-dark p-4 rounded-xl border border-slate-100 dark:border-border-dark hover:shadow-lg transition-all group cursor-pointer">
                             <div class="md:w-1/2 h-64 shrink-0 rounded-lg overflow-hidden">
                                 <div class="w-full h-full bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
-                                    style="background-image: url('<%= firstArt.getImageUrl() %>');">
+                                    style="background-image: url('<%= firstArt.getDisplayImageUrl(request.getContextPath()) %>');">
                                 </div>
                             </div>
                             <div class="flex flex-col justify-between py-2">
@@ -126,7 +126,7 @@
                                         động</span>
                                 </div>
                                 <div class="w-full h-full bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
-                                    style="background-image: url('<%= art.getImageUrl() %>');">
+                                    style="background-image: url('<%= art.getDisplayImageUrl(request.getContextPath()) %>');">
                                 </div>
                             </div>
                             <div class="p-4">

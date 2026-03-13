@@ -28,7 +28,7 @@
                         <article onclick="window.location.href='user/article?id=<%= featured.getId() %>'"
                             class="relative md:col-span-2 lg:col-span-1 xl:col-span-1 h-[450px] rounded-xl overflow-hidden group cursor-pointer shadow-sm hover:shadow-md transition-shadow">
                             <div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
-                                style="background-image: url('<%= featured.getImageUrl() %>');">
+                                style="background-image: url('<%= featured.getDisplayImageUrl(request.getContextPath()) %>');">
                             </div>
                             <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent">
                             </div>
@@ -68,7 +68,7 @@
                                 class="flex-1 flex gap-4 bg-white dark:bg-surface-dark p-3 rounded-lg border border-border-light dark:border-border-dark hover:border-primary/50 transition-colors cursor-pointer group">
                                 <div class="w-1/3 h-full rounded-md overflow-hidden bg-slate-100">
                                     <div class="w-full h-full bg-cover bg-center"
-                                        style="background-image: url('<%= art.getImageUrl() %>');">
+                                        style="background-image: url('<%= art.getDisplayImageUrl(request.getContextPath()) %>');">
                                     </div>
                                 </div>
                                 <div class="w-2/3 flex flex-col justify-center">
@@ -115,7 +115,7 @@
                                         class="absolute top-2 left-2 bg-black/60 backdrop-blur-sm text-white text-[10px] font-bold px-2 py-0.5 rounded">
                                         <%= art.getCategoryName() %></div>
                                     <div class="w-full h-full bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
-                                        style="background-image: url('<%= art.getImageUrl() %>');">
+                                        style="background-image: url('<%= art.getDisplayImageUrl(request.getContextPath()) %>');">
                                     </div>
                                 </div>
                                 <div class="flex flex-col flex-1 justify-between py-1">

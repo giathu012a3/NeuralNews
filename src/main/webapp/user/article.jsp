@@ -114,7 +114,17 @@
                         </div>
                     </div>
                     
-                    <%= (art != null) ? art.getContent() : "Nội dung đang được cập nhật..." %>
+                    <% if (art != null && art.getImageUrl() != null && !art.getImageUrl().isBlank()) { %>
+                    <div class="my-8 rounded-2xl overflow-hidden shadow-2xl">
+                        <img src="<%= art.getDisplayImageUrl(request.getContextPath()) %>" 
+                             alt="<%= art.getTitle() %>" 
+                             class="w-full h-auto object-cover max-h-[500px]" />
+                    </div>
+                    <% } %>
+
+                    <div class="article-content prose prose-slate dark:prose-invert max-w-none">
+                        <%= (art != null) ? art.getContent() : "Nội dung đang được cập nhật..." %>
+                    </div>
                     
                     <div class="mt-16 pt-12 border-t border-slate-200 dark:border-slate-800">
                         <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-8">Thảo luận (128)</h3>

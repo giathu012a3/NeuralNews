@@ -76,10 +76,33 @@
 
             <%-- Ảnh đại diện --%>
             <section>
-                <h3 class="text-[11px] font-bold uppercase tracking-[0.1em] text-slate-500 mb-3">Ảnh đại diện (URL)</h3>
-                <input id="imageUrlInput" type="text" placeholder="https://..."
-                       value="<%= artImage %>"
-                       class="w-full bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-border-dark rounded-lg px-3 py-2 text-xs text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-primary outline-none" />
+                <h3 class="text-[11px] font-bold uppercase tracking-[0.1em] text-slate-500 mb-3">Ảnh đại diện</h3>
+                <div class="space-y-3">
+                    <%-- Preview --%>
+                    <div id="imagePreview" 
+                         class="w-full h-32 rounded-lg bg-slate-100 dark:bg-white/5 border border-dashed border-slate-300 dark:border-border-dark flex items-center justify-center overflow-hidden">
+                        <% if (artImage != null && !artImage.isBlank()) { 
+                            // Reuse Article display logic here
+                            String displayUrl = artImage.startsWith("http") ? artImage : request.getContextPath() + "/" + artImage;
+                        %>
+                            <img src="<%= displayUrl %>" class="w-full h-full object-cover" />
+                        <% } else { %>
+                            <span class="material-symbols-outlined text-slate-400">image</span>
+                        <% } %>
+                    </div>
+                    
+                    <div class="flex gap-2">
+                        <input id="imageUrlInput" type="text" placeholder="URL hoặc đường dẫn ảnh..."
+                               value="<%= artImage %>"
+                               class="flex-1 bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-border-dark rounded-lg px-3 py-2 text-[10px] text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-primary outline-none" />
+                        <button type="button" onclick="document.getElementById('fileInput').click()"
+                                class="bg-primary/20 text-primary hover:bg-primary/30 p-2 rounded-lg transition-colors">
+                            <span class="material-symbols-outlined text-sm">upload</span>
+                        </button>
+                    </div>
+                    <input type="file" id="fileInput" accept="image/*" class="hidden" onchange="uploadImage(this)" />
+                    <p class="text-[10px] text-slate-500 italic">* Tải ảnh lên hoặc dán link Unsplash</p>
+                </div>
             </section>
 
             <%-- Tóm tắt --%>
@@ -306,6 +329,50 @@
         const url = prompt('Nhập URL ảnh:');
         if (url) document.execCommand('insertImage', false, url);
     }
+    function uploadImage(input) {
+        if (!input.files || !input.files[0]) return;
+        
+        const formData = new FormData();
+        formData.append('image', input.files[0]);
+        
+        const preview = document.getElementById('imagePreview');
+        const urlInput = document.getElementById('imageUrlInput');
+        
+        // Show loading
+        preview.innerHTML = '<div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>';
+        
+        fetch('${pageContext.request.contextPath}/api/upload', {
+            method: 'POST',
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                urlInput.value = data.url;
+                preview.innerHTML = `<img src="${pageContext.request.contextPath}/${data.url}" class="w-full h-full object-cover" />`;
+            } else {
+                alert('Tải ảnh thất bại: ' + data.message);
+                preview.innerHTML = '<span class="material-symbols-outlined text-red-500">error</span>';
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert('Lỗi hệ thống khi tải ảnh!');
+            preview.innerHTML = '<span class="material-symbols-outlined text-red-500">error</span>';
+        });
+    }
+
+    // Cập nhật preview khi nhập link thủ công
+    document.getElementById('imageUrlInput').addEventListener('change', function() {
+        const url = this.value;
+        const preview = document.getElementById('imagePreview');
+        if (url) {
+            const displayUrl = url.startsWith('http') ? url : '${pageContext.request.contextPath}/' + url;
+            preview.innerHTML = `<img src="${displayUrl}" class="w-full h-full object-cover" />`;
+        } else {
+            preview.innerHTML = '<span class="material-symbols-outlined text-slate-400">image</span>';
+        }
+    });
 </script>
 </body>
 </html>
