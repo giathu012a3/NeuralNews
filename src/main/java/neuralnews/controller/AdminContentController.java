@@ -9,6 +9,8 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonArray;
 import neuralnews.dao.ArticleDao;
 import neuralnews.model.Article;
 
@@ -99,13 +101,36 @@ public class AdminContentController extends HttpServlet {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
 
-        String action = request.getParameter("action");
-        String articleIdStr = request.getParameter("articleId");
+        String action = null;
+        String articleIdStr = null;
+        String[] ids = null;
+
+        // Xử lý dữ liệu từ JSON (utils.js gửi JSON) hoặc Form thông thường
+        String contentType = request.getContentType();
+        if (contentType != null && contentType.contains("application/json")) {
+            try {
+                com.google.gson.JsonObject json = gson.fromJson(request.getReader(), com.google.gson.JsonObject.class);
+                if (json.has("action")) action = json.get("action").getAsString();
+                if (json.has("articleId")) articleIdStr = json.get("articleId").getAsString();
+                if (json.has("ids[]")) {
+                    com.google.gson.JsonArray idArray = json.getAsJsonArray("ids[]");
+                    ids = new String[idArray.size()];
+                    for (int i = 0; i < idArray.size(); i++) {
+                        ids[i] = idArray.get(i).getAsString();
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else {
+            action = request.getParameter("action");
+            articleIdStr = request.getParameter("articleId");
+            ids = request.getParameterValues("ids[]");
+        }
 
         boolean success = false;
 
         if ("bulk_approve".equals(action)) {
-            String[] ids = request.getParameterValues("ids[]");
             if (ids != null && ids.length > 0) {
                 try {
                     for (String idStr : ids) {
