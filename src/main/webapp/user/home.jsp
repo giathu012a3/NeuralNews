@@ -1,7 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="java.util.List" %>
-<%@ page import="neuralnews.model.Article_Model" %>
-<%@ page import="neuralnews.dao.Article_Dao" %>
+<%@ page import="neuralnews.model.Article" %>
+<%@ page import="neuralnews.dao.ArticleDao" %>
 
     <!DOCTYPE html>
     <html class="dark" lang="en">
@@ -21,7 +21,7 @@
                     <section class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     
 			                    <% 
-			    Article_Model featured = (Article_Model) request.getAttribute("featuredArt"); 
+			    Article featured = (Article) request.getAttribute("featuredArt"); 
 			    if(featured != null) {
 			%>
                     
@@ -58,9 +58,9 @@
                         <div class="flex flex-col gap-4 h-[450px]">
                         
 			                        <% 
-			        List<Article_Model> subArts = (List<Article_Model>) request.getAttribute("subFeaturedArts");
+			        List<Article> subArts = (List<Article>) request.getAttribute("subFeaturedArts");
 			        if(subArts != null) {
-			            for(Article_Model art : subArts) {
+			            for(Article art : subArts) {
 			    %>
                         
                             <article
