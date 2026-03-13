@@ -1,4 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+
     <header
         class="sticky top-0 z-50 w-full border-b border-border-light dark:border-border-dark bg-white/95 dark:bg-background-dark/95 backdrop-blur-md">
         <div class="max-w-[1440px] mx-auto px-4 lg:px-8 h-16 flex items-center justify-between gap-4">
@@ -11,14 +12,7 @@
                         class="text-primary">AI</span></h1>
             </a>
             <nav class="hidden lg:flex items-center gap-8">
-                <a class="text-sm font-semibold text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary transition-colors uppercase tracking-wide"
-                    href="${pageContext.request.contextPath}/user/category.jsp">Chính trị</a>
-                <a class="text-sm font-semibold text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary transition-colors uppercase tracking-wide"
-                    href="${pageContext.request.contextPath}/user/category.jsp">Đời sống</a>
-                <a class="text-sm font-semibold text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary transition-colors uppercase tracking-wide"
-                    href="${pageContext.request.contextPath}/user/category.jsp">Công nghệ</a>
-                <a class="text-sm font-semibold text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary transition-colors uppercase tracking-wide"
-                    href="${pageContext.request.contextPath}/user/category.jsp">Thể thao</a>
+					     <jsp:include page="Category.jsp" />
             </nav>
             <div class="flex items-center gap-4 flex-1 lg:flex-none justify-end">
                 <div class="relative hidden md:flex items-center w-full max-w-xs group">
