@@ -69,7 +69,7 @@ public class LoginController extends HttpServlet {
 		if (isAdmin) {
 			response.sendRedirect(contextPath + "/admin/home.jsp");
 		} else {
-			response.sendRedirect(contextPath + "/index.jsp");
+			response.sendRedirect(contextPath + "/home");
 		}
 	}
 
