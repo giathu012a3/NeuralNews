@@ -3,7 +3,7 @@
     <header
         class="sticky top-0 z-50 w-full border-b border-border-light dark:border-border-dark bg-white/95 dark:bg-background-dark/95 backdrop-blur-md">
         <div class="max-w-[1440px] mx-auto px-4 lg:px-8 h-16 flex items-center justify-between gap-4">
-            <a class="flex items-center gap-2 group" href="${pageContext.request.contextPath}/user/home.jsp">
+            <a class="flex items-center gap-2 group" href="${pageContext.request.contextPath}/home">
                 <div
                     class="flex items-center justify-center size-9 rounded bg-primary text-white group-hover:bg-primary-dark transition-colors">
                     <span class="material-symbols-outlined text-[22px]">newsmode</span>
