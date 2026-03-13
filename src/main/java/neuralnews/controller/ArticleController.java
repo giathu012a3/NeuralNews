@@ -7,24 +7,25 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
-import neuralnews.dao.Article_Dao;
-import neuralnews.dao.Category_Dao;
-import neuralnews.model.Article_Model;
-import neuralnews.model.Category_Model;
+import neuralnews.dao.ArticleDao;
+import neuralnews.dao.CategoryDao;
+import neuralnews.model.Article;
+import neuralnews.model.Category;
 
 @WebServlet("/user/article")
-public class Article_Controller extends HttpServlet {
+public class ArticleController extends HttpServlet {
+    @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String idParam = request.getParameter("id");
         if (idParam != null) {
             try {
-                int articleId = Integer.parseInt(idParam);
-                Article_Dao artDao = new Article_Dao();
-                Article_Model article = artDao.getArticleById(articleId);
+                long articleId = Long.parseLong(idParam);
+                ArticleDao artDao = new ArticleDao();
+                Article article = artDao.getArticleById(articleId);
                 request.setAttribute("articleDetail", article);
 
-                Category_Dao catDao = new Category_Dao();
-                List<Category_Model> listCat = catDao.getAllCategory();
+                CategoryDao catDao = new CategoryDao();
+                List<Category> listCat = catDao.getAllCategory();
                 request.setAttribute("listCategory", listCat);
             } catch (NumberFormatException ignored) {}
         }

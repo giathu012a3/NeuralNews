@@ -9,6 +9,57 @@ import java.util.List;
 
 public class ArticleDao {
 
+    // ======================================================
+    // CAC HAM CHO DOC GIA (VISITOR)
+    // ======================================================
+
+    public List<Article> getArticlesCommon(int limit, int offset, int categoryId) {
+        List<Article> list = new ArrayList<>();
+        String sql = """
+            SELECT a.*, c.name AS category_name FROM articles a 
+            JOIN categories c ON a.category_id = c.id 
+            WHERE a.status='PUBLISHED' 
+        """;
+        if (categoryId > 0) sql += "AND a.category_id=? ";
+        sql += "ORDER BY a.published_at DESC LIMIT ? OFFSET ?";
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            int i = 1;
+            if (categoryId > 0) ps.setInt(i++, categoryId);
+            ps.setInt(i++, limit);
+            ps.setInt(i, offset);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) list.add(mapArticle(rs));
+        } catch (Exception e) { e.printStackTrace(); }
+        return list;
+    }
+
+    public Article getFeaturedArticle() {
+        List<Article> list = getArticlesCommon(1, 0, 0);
+        return list.isEmpty() ? null : list.get(0);
+    }
+
+    public List<Article> getMostViewedArticles(int limit) {
+        List<Article> list = new ArrayList<>();
+        String sql = """
+            SELECT a.*, c.name AS category_name FROM articles a 
+            JOIN categories c ON a.category_id=c.id 
+            WHERE a.status='PUBLISHED' ORDER BY a.views DESC LIMIT ?
+        """;
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, limit);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) list.add(mapArticle(rs));
+        } catch (Exception e) { e.printStackTrace(); }
+        return list;
+    }
+
+    public Article getArticleById(long id) {
+        return getById(id);
+    }
+
     // ── Lấy tất cả bài viết (Admin dùng) ───────────────────────────────────
     public List<Article> getAllArticles(int limit, int offset) {
         String sql = """
