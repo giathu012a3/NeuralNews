@@ -8,7 +8,7 @@ import jakarta.servlet.http.*;
 import java.io.IOException;
 
 /**
- * Xử lý đăng ký tài khoản mới: POST /RegisterController
+ * Handle new account registration: POST /RegisterController
  */
 @WebServlet("/RegisterController")
 public class RegisterController extends HttpServlet {
@@ -29,32 +29,32 @@ public class RegisterController extends HttpServlet {
 
 		String contextPath = request.getContextPath();
 
-		// Validate: không được để trống
+		// Validate: must not be empty
 		if (fullName == null || fullName.trim().isEmpty() || email == null || email.trim().isEmpty() || password == null
 				|| password.trim().isEmpty()) {
 			response.sendRedirect(contextPath + "/auth/register.jsp?error=empty");
 			return;
 		}
 
-		// Validate: mật khẩu xác nhận phải khớp
+		// Validate: passwords must match
 		if (!password.equals(confirmPassword)) {
 			response.sendRedirect(contextPath + "/auth/register.jsp?error=mismatch");
 			return;
 		}
 
-		// Validate: mật khẩu tối thiểu 6 ký tự
+		// Validate: password minimum 6 chars
 		if (password.length() < 6) {
 			response.sendRedirect(contextPath + "/auth/register.jsp?error=weakpassword");
 			return;
 		}
 
-		// Kiểm tra email đã tồn tại
+		// Check if email already exists
 		if (userDAO.emailExists(email.trim())) {
 			response.sendRedirect(contextPath + "/auth/register.jsp?error=exists");
 			return;
 		}
 
-		// Tạo user mới (plain-text password — nâng cấp lên BCrypt nếu cần)
+		// Create new user (plain-text password - upgrade to BCrypt if needed)
 		User newUser = new User();
 		newUser.setFullName(fullName.trim());
 		newUser.setEmail(email.trim());
@@ -67,7 +67,7 @@ public class RegisterController extends HttpServlet {
 			return;
 		}
 
-		// Đăng ký thành công → chuyển về login
+		// Registration successful -> redirect to login
 		response.sendRedirect(contextPath + "/auth/login.jsp?success=registered");
 	}
 
