@@ -1,4 +1,8 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ page import="neuralnews.model.Article_Model" %>
+<%
+    Article_Model art = (Article_Model) request.getAttribute("articleDetail");
+%>
     <!DOCTYPE html>
     <html class="dark" lang="en">
 
@@ -45,7 +49,7 @@
                     </div>
                     <h1
                         class="text-4xl md:text-5xl lg:text-6xl font-black text-slate-900 dark:text-white leading-[1.1] mb-8">
-                        Mô hình AI dự báo thời tiết với độ chính xác 99%
+                        <%= (art != null) ? art.getTitle() : "Không tìm thấy bài viết" %>
                     </h1>
                     <div
                         class="flex flex-wrap items-center justify-between gap-4 pb-8 border-b border-slate-200 dark:border-slate-800">
@@ -109,38 +113,9 @@
                             </ul>
                         </div>
                     </div>
-                    <div class="article-content mt-10">
-                        <img alt="AI Visualization" class="w-full h-[500px] object-cover rounded-2xl mb-12 shadow-xl"
-                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuAJYXTTOH-j3MgaNT2onqeIEXdT2yZnwu0uY83A9u6SXAwhdNe0mIGM1L0eh3j5wGCVrRHfKSbV2NhX2YL1tqdHhnvL4S3raWE13J3n_CcoRUW1_cAw5OhcC2OgvV3JXF63Z_pRn7iEl1OeuAYmSlghfJXddKECmxVUZI5XCsBY4BfQsSArn3on1In-WLU3B7YZtRuPFofa9W5LArXz-UR8XDxzXKPQ6IWyOYZkGxgwksAZqztiXXLawxLkRB6Aq8Ivn1bo8KOFL8pu" />
-                        <p>
-                            Một bước đột phá trong xử lý dữ liệu khí tượng cho phép các mô hình thay đổi kiến trúc mới
-                            dự đoán
-                            các biến đổi khí hậu trước nhiều tuần. Trong nhiều thập kỷ, dự báo thời tiết phụ thuộc vào
-                            các
-                            siêu máy tính khổng lồ chạy các mô phỏng dựa trên vật lý phức tạp, thường gặp khó khăn với
-                            độ chính xác tầm xa.
-                        </p>
-                        <p>
-                            Tuy nhiên, sự xuất hiện của AI sáng tạo và mạng lưới thần kinh chuyên dụng đang thay đổi
-                            cuộc chơi. Bằng cách
-                            phân tích các mẫu thay vì chỉ tính toán động lực học chất lỏng, các hệ thống này có thể xác
-                            định
-                            "tín hiệu sơ bộ" của các đợt bão lớn mà trước đây các thiết bị giám sát truyền thống không
-                            thể nhận thấy.
-                        </p>
-                        <blockquote
-                            class="my-10 pl-6 border-l-4 border-primary italic text-2xl font-medium text-slate-800 dark:text-slate-200">
-                            "Chúng ta đang bước vào một kỷ nguyên mà sự khó đoán của thiên nhiên cuối cùng đang được lập
-                            bản đồ bởi trí thông minh của máy móc."
-                        </blockquote>
-                        <p>
-                            Những ý nghĩa đối với nông nghiệp, logistics hàng hải và quản lý khẩn cấp là rất sâu sắc.
-                            Trong
-                            các thử nghiệm trên khắp Thái Bình Dương, công cụ dự báo NexusAI đã xác định chính xác ba
-                            sự hình thành bão theo chu kỳ riêng biệt sáu ngày trước khi trinh sát vệ tinh xác nhận sự
-                            phát triển của chúng.
-                        </p>
-                    </div>
+                    
+                    <%= (art != null) ? art.getContent() : "Nội dung đang được cập nhật..." %>
+                    
                     <div class="mt-16 pt-12 border-t border-slate-200 dark:border-slate-800">
                         <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-8">Thảo luận (128)</h3>
                         <div class="flex gap-4 mb-10">
