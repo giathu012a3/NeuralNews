@@ -12,7 +12,7 @@ public class Category_Dao {
 
     public List<Category_Model> getAllCategory() {
         List<Category_Model> list = new ArrayList<>();
-        String sql = "SELECT id, name FROM categories";
+        String sql = "SELECT id, name FROM categories ORDER BY id ASC";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
