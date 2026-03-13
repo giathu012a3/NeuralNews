@@ -14,6 +14,37 @@ public class ArticleDao {
         return getArticlesByAuthorFiltered(authorId, "", "", "", "", "", 0, Integer.MAX_VALUE);
     }
 
+    // ── Lấy tất cả bài viết (cho Admin) ───────────────────────────────────
+    public List<Article> getAllArticles(int limit, int offset) {
+        String sql = """
+            SELECT a.*, c.name AS category_name
+            FROM articles a
+            LEFT JOIN categories c ON a.category_id = c.id
+            ORDER BY a.created_at DESC LIMIT ? OFFSET ?
+        """;
+        List<Article> list = new ArrayList<>();
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, limit);
+            ps.setInt(2, offset);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) list.add(mapArticle(rs));
+        } catch (Exception e) { e.printStackTrace(); }
+        return list;
+    }
+
+    // ── Đếm tổng số bài viết trong hệ thống ───────────────────────────────
+    public int getTotalArticleCount() {
+        String sql = "SELECT COUNT(*) FROM articles";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) return rs.getInt(1);
+        } catch (Exception e) { e.printStackTrace(); }
+        return 0;
+    }
+
+
     // ── Đếm tổng bài viết có filter ──────────────────────────────────────
     public int countArticlesByAuthorFiltered(long authorId,
                                               String keyword, String status,
@@ -183,6 +214,19 @@ public class ArticleDao {
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setLong(1, articleId);
             ps.setLong(2, authorId);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) { e.printStackTrace(); return false; }
+    }
+
+    /**
+     * Cập nhật status bài viết (Admin dùng, không cần check authorId).
+     */
+    public boolean updateArticleStatus(long articleId, String status) {
+        String sql = "UPDATE articles SET status = ? WHERE id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, status);
+            ps.setLong(2, articleId);
             return ps.executeUpdate() > 0;
         } catch (Exception e) { e.printStackTrace(); return false; }
     }

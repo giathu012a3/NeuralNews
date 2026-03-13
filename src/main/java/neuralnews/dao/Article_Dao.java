@@ -1,6 +1,7 @@
 package neuralnews.dao;
 
 
+import neuralnews.model.Article;
 import neuralnews.model.Article_Model;
 import neuralnews.model.Category_Model;
 import neuralnews.util.DBConnection;
@@ -12,7 +13,7 @@ import java.util.List;
 public class Article_Dao {
 
     // ======================================================
-    // CÁC HÀM CHO NGƯỜI DÙNG (Dùng ArticleModel)
+    // CAC HAM CHO NGUOI DUNG (Dung Article_Model)
     // ======================================================
 
     public List<Article_Model> getArticlesCommon(int limit, int offset, int categoryId) {
@@ -79,7 +80,7 @@ public class Article_Dao {
     }
 
     // ======================================================
-    // CÁC HÀM CHO NHÀ BÁO (Dùng Article)
+    // CAC HAM CHO NHA BAO (Dung Article)
     // ======================================================
 
     public List<Article> getArticlesByAuthorFiltered(long authorId, String keyword, String status, String category, String dateFrom, String dateTo, int offset, int limit) {
@@ -221,21 +222,20 @@ public class Article_Dao {
         if (dateFrom != null && !dateFrom.isBlank()) { sql.append(" AND DATE(a.created_at) >= ?"); params.add(dateFrom.trim()); }
         if (dateTo != null && !dateTo.isBlank()) { sql.append(" AND DATE(a.created_at) <= ?"); params.add(dateTo.trim()); }
     }
-//
-//    private Article_Model mapArticle(ResultSet rs) throws Exception {
-//        Article_Model a = new Article_Model();
-//        a.setId(rs.getLong("id"));
-//        a.setTitle(rs.getString("title"));
-//        a.setSummary(rs.getString("summary"));
-//        a.setContent(rs.getString("content"));
-//        a.setImageUrl(rs.getString("image_url"));
-//        a.setAuthorId(rs.getLong("author_id"));
-//        a.setCategoryId(rs.getInt("category_id"));
-//        a.setStatus(rs.getString("status"));
-//        a.setViews(rs.getInt("views"));
-//        a.setPublishedAt(rs.getTimestamp("published_at"));
-//        a.setCreatedAt(rs.getTimestamp("created_at"));
-//        a.setCategoryName(rs.getString("category_name"));
-//        return a;
-//    }
+    private Article mapArticle(ResultSet rs) throws Exception {
+        Article a = new Article();
+        a.setId(rs.getLong("id"));
+        a.setTitle(rs.getString("title"));
+        a.setSummary(rs.getString("summary"));
+        a.setContent(rs.getString("content"));
+        a.setImageUrl(rs.getString("image_url"));
+        a.setAuthorId(rs.getLong("author_id"));
+        a.setCategoryId(rs.getInt("category_id"));
+        a.setStatus(rs.getString("status"));
+        a.setViews(rs.getInt("views"));
+        a.setPublishedAt(rs.getTimestamp("published_at"));
+        a.setCreatedAt(rs.getTimestamp("created_at"));
+        a.setCategoryName(rs.getString("category_name"));
+        return a;
+    }
 }
