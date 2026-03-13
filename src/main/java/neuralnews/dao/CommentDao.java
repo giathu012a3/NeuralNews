@@ -11,14 +11,26 @@ public class CommentDao {
 
     /** Đếm tổng comment gốc thuộc bài viết của author */
     public int countCommentsByAuthor(long authorId) {
-        String sql = """
-            SELECT COUNT(*) FROM comments c
-            JOIN articles a ON c.article_id = a.id
-            WHERE a.author_id = ? AND c.parent_id IS NULL
-        """;
+        return countCommentsByAuthor(authorId, null);
+    }
+
+    /** Đếm tổng comment gốc thuộc bài viết của author (có keyword) */
+    public int countCommentsByAuthor(long authorId, String keyword) {
+        boolean hasKeyword = keyword != null && !keyword.trim().isEmpty();
+        String sql = "SELECT COUNT(*) FROM comments c"
+                   + " JOIN articles a ON c.article_id = a.id"
+                   + " JOIN users u ON c.user_id = u.id"
+                   + " WHERE a.author_id = ? AND c.parent_id IS NULL"
+                   + (hasKeyword ? " AND (c.content LIKE ? OR u.full_name LIKE ? OR a.title LIKE ?)" : "");
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setLong(1, authorId);
+            if (hasKeyword) {
+                String like = "%" + keyword.trim() + "%";
+                ps.setString(2, like);
+                ps.setString(3, like);
+                ps.setString(4, like);
+            }
             ResultSet rs = ps.executeQuery();
             if (rs.next()) return rs.getInt(1);
         } catch (Exception e) { e.printStackTrace(); }
@@ -27,6 +39,12 @@ public class CommentDao {
 
     /** Lấy comment gốc có phân trang + sort (latest = mới nhất, oldest = cũ nhất) */
     public List<Comment> getCommentsByAuthor(long authorId, int offset, int limit, String sort) {
+        return getCommentsByAuthor(authorId, offset, limit, sort, null);
+    }
+
+    /** Lấy comment gốc có phân trang + sort + keyword search */
+    public List<Comment> getCommentsByAuthor(long authorId, int offset, int limit, String sort, String keyword) {
+        boolean hasKeyword = keyword != null && !keyword.trim().isEmpty();
         String orderBy = "oldest".equals(sort) ? "c.created_at ASC" : "c.created_at DESC";
         String sql = "SELECT c.id, c.content, c.status, c.created_at, c.parent_id,"
                    + " u.id AS user_id, u.full_name AS user_name,"
@@ -35,14 +53,22 @@ public class CommentDao {
                    + " JOIN users u ON c.user_id = u.id"
                    + " JOIN articles a ON c.article_id = a.id"
                    + " WHERE a.author_id = ? AND c.parent_id IS NULL"
+                   + (hasKeyword ? " AND (c.content LIKE ? OR u.full_name LIKE ? OR a.title LIKE ?)" : "")
                    + " ORDER BY " + orderBy
                    + " LIMIT ? OFFSET ?";
         List<Comment> list = new ArrayList<>();
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setLong(1, authorId);
-            ps.setInt(2, limit);
-            ps.setInt(3, offset);
+            int idx = 1;
+            ps.setLong(idx++, authorId);
+            if (hasKeyword) {
+                String like = "%" + keyword.trim() + "%";
+                ps.setString(idx++, like);
+                ps.setString(idx++, like);
+                ps.setString(idx++, like);
+            }
+            ps.setInt(idx++, limit);
+            ps.setInt(idx, offset);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) list.add(mapRow(rs));
         } catch (Exception e) { e.printStackTrace(); }

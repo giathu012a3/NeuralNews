@@ -30,16 +30,20 @@ public class StaffCommentController extends HttpServlet {
         String sort = request.getParameter("sort");
         if (!"oldest".equals(sort)) sort = "latest";
 
+        // ── Keyword search ───────────────────────────────────────────────
+        String keyword = request.getParameter("keyword");
+        if (keyword != null && keyword.trim().isEmpty()) keyword = null;
+
         // ── Phân trang ───────────────────────────────────────────────────
         int page = 1;
         try { page = Math.max(1, Integer.parseInt(request.getParameter("page"))); } catch (Exception ignored) {}
 
         CommentDao dao     = new CommentDao();
-        int total          = dao.countCommentsByAuthor(user.getId());
+        int total          = dao.countCommentsByAuthor(user.getId(), keyword);
         int totalPages     = Math.max(1, (int) Math.ceil((double) total / PAGE_SIZE));
         if (page > totalPages) page = totalPages;
 
-        List<Comment> comments = dao.getCommentsByAuthor(user.getId(), (page - 1) * PAGE_SIZE, PAGE_SIZE, sort);
+        List<Comment> comments = dao.getCommentsByAuthor(user.getId(), (page - 1) * PAGE_SIZE, PAGE_SIZE, sort, keyword);
 
         for (Comment c : comments) {
             setStatusStyle(c); setFormattedTime(c); setUserAvatar(c);
@@ -53,6 +57,7 @@ public class StaffCommentController extends HttpServlet {
         request.setAttribute("currentPage",   page);
         request.setAttribute("totalPages",    totalPages);
         request.setAttribute("sort",          sort);
+        request.setAttribute("keyword",       keyword != null ? keyword : "");
         request.getRequestDispatcher("/journalist/comments.jsp").forward(request, response);
     }
 

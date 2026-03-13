@@ -85,12 +85,64 @@
                             placeholder="Tìm kiếm bài viết theo tiêu đề hoặc thẻ..." type="text" />
                     </form>
                     <div class="h-6 w-px bg-slate-200 dark:border-border-dark mx-1"></div>
-                    <button class="relative p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-slate-500">
-                        <span class="material-symbols-outlined">notifications</span>
-                        <span class="absolute top-2.5 right-2.5 size-2 bg-red-500 rounded-full border-2 border-white dark:border-slate-900"></span>
-                    </button>
-                    <button class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-slate-500">
-                        <span class="material-symbols-outlined">light_mode</span>
+
+                    <%-- Nút Thông báo --%>
+                    <div class="relative" id="notifWrapper">
+                        <button id="notifBtn" onclick="toggleNotif()"
+                                class="relative p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-slate-500">
+                            <span class="material-symbols-outlined">notifications</span>
+                            <span id="notifDot" class="absolute top-2 right-2 size-2 bg-red-500 rounded-full border-2 border-white dark:border-slate-900"></span>
+                        </button>
+                        <div id="notifDropdown"
+                             class="hidden absolute right-0 mt-2 w-80 bg-white dark:bg-slate-900 border border-slate-200 dark:border-border-dark rounded-xl shadow-xl z-50 overflow-hidden">
+                            <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100 dark:border-border-dark">
+                                <span class="text-sm font-bold text-slate-800 dark:text-white">Thông báo</span>
+                                <button onclick="markAllRead()" class="text-[11px] text-primary hover:underline font-semibold">Đánh dấu tất cả đã đọc</button>
+                            </div>
+                            <div class="max-h-72 overflow-y-auto divide-y divide-slate-100 dark:divide-border-dark">
+                                <div class="notif-item flex items-start gap-3 px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer bg-primary/5">
+                                    <div class="size-8 rounded-full bg-emerald-100 dark:bg-emerald-500/10 flex items-center justify-center shrink-0 mt-0.5">
+                                        <span class="material-symbols-outlined text-emerald-500 text-sm">check_circle</span>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs font-semibold text-slate-800 dark:text-white">Bài viết được duyệt</p>
+                                        <p class="text-[11px] text-slate-500 mt-0.5">Bài "Sự bùng nổ của AI..." đã được xuất bản.</p>
+                                        <p class="text-[10px] text-slate-400 mt-1">2 giờ trước</p>
+                                    </div>
+                                </div>
+                                <div class="notif-item flex items-start gap-3 px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer bg-primary/5">
+                                    <div class="size-8 rounded-full bg-red-100 dark:bg-red-500/10 flex items-center justify-center shrink-0 mt-0.5">
+                                        <span class="material-symbols-outlined text-red-500 text-sm">cancel</span>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs font-semibold text-slate-800 dark:text-white">Bài viết bị từ chối</p>
+                                        <p class="text-[11px] text-slate-500 mt-0.5">Vui lòng chỉnh sửa và gửi lại.</p>
+                                        <p class="text-[10px] text-slate-400 mt-1">5 giờ trước</p>
+                                    </div>
+                                </div>
+                                <div class="notif-item flex items-start gap-3 px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer">
+                                    <div class="size-8 rounded-full bg-blue-100 dark:bg-blue-500/10 flex items-center justify-center shrink-0 mt-0.5">
+                                        <span class="material-symbols-outlined text-blue-500 text-sm">comment</span>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs font-semibold text-slate-800 dark:text-white">Bình luận mới</p>
+                                        <p class="text-[11px] text-slate-500 mt-0.5">Có 3 bình luận mới trên bài viết của bạn.</p>
+                                        <p class="text-[10px] text-slate-400 mt-1">1 ngày trước</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="px-4 py-2.5 border-t border-slate-100 dark:border-border-dark text-center">
+                                <a href="${pageContext.request.contextPath}/journalist/comments"
+                                   class="text-xs text-primary font-semibold hover:underline">Xem tất cả thông báo</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <%-- Nút Dark/Light mode --%>
+                    <button id="themeToggleBtn" onclick="toggleTheme()"
+                            class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-slate-500"
+                            title="Chuyển giao diện">
+                        <span id="themeIcon" class="material-symbols-outlined">light_mode</span>
                     </button>
                 </div>
             </header>
@@ -115,7 +167,7 @@
                                 <span class="size-1.5 rounded-full bg-primary inline-block"></span>
                                 <% } %>
                             </button>
-                            <a href="${pageContext.request.contextPath}/journalist/create_article.jsp"
+                            <a href="${pageContext.request.contextPath}/journalist/create-article"
                                 class="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg text-xs font-semibold transition-all shadow-sm">
                                 <span class="material-symbols-outlined text-sm">add</span>
                                 Tạo Bài viết Mới
@@ -263,21 +315,48 @@
 
                                         <td class="table-cell">
                                             <div class="flex items-center justify-end gap-1">
-                                                <a href="${pageContext.request.contextPath}/journalist/create_article.jsp?id=<%= a.getId() %>"
+                                                <%
+                                                    String st = a.getStatus() != null ? a.getStatus() : "";
+                                                    boolean isPublished = "PUBLISHED".equals(st);
+                                                    boolean isRejected  = "REJECTED".equals(st);
+                                                %>
+
+                                                <%-- Nút Chỉnh sửa: ẩn khi PUBLISHED --%>
+                                                <% if (!isPublished) { %>
+                                                <a href="${pageContext.request.contextPath}/journalist/create-article?id=<%= a.getId() %>"
                                                     class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-400 hover:text-primary transition-colors"
                                                     title="Chỉnh sửa">
                                                     <span class="material-symbols-outlined text-xl">edit</span>
                                                 </a>
+                                                <% } %>
+
+                                                <%-- Nút Xem: luôn hiển thị --%>
                                                 <a href="${pageContext.request.contextPath}/user/article.jsp?id=<%= a.getId() %>"
                                                     class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-400 hover:text-slate-200 transition-colors"
-                                                    title="Xem trước">
+                                                    title="Xem bài viết">
                                                     <span class="material-symbols-outlined text-xl">visibility</span>
                                                 </a>
-                                                <a href="${pageContext.request.contextPath}/journalist/analytics.jsp?id=<%= a.getId() %>"
-                                                    class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-400 hover:text-emerald-500 transition-colors"
-                                                    title="Phân tích">
-                                                    <span class="material-symbols-outlined text-xl">insights</span>
+
+                                                <%-- Nút Lưu trữ: chỉ hiện khi PUBLISHED --%>
+                                                <% if (isPublished) { %>
+                                                <a href="${pageContext.request.contextPath}/journalist/articles?action=archive&id=<%= a.getId() %>&page=<%= currentPage %>&<%= filterQS %>"
+                                                    class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-400 hover:text-amber-500 transition-colors"
+                                                    title="Lưu trữ bài viết"
+                                                    onclick="return confirm('Bạn có chắc muốn lưu trữ bài viết này?')">
+                                                    <span class="material-symbols-outlined text-xl">archive</span>
                                                 </a>
+                                                <% } %>
+
+                                                <%-- Nút Xóa: chỉ hiện khi REJECTED --%>
+                                                <% if (isRejected) { %>
+                                                <a href="${pageContext.request.contextPath}/journalist/articles?action=delete&id=<%= a.getId() %>&page=<%= currentPage %>&<%= filterQS %>"
+                                                    class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-400 hover:text-red-500 transition-colors"
+                                                    title="Xóa bài viết"
+                                                    onclick="return confirm('Bài viết bị từ chối. Bạn có chắc muốn xóa?')">
+                                                    <span class="material-symbols-outlined text-xl">delete</span>
+                                                </a>
+                                                <% } %>
+
                                             </div>
                                         </td>
 
@@ -354,12 +433,79 @@
         function toggleFilterPanel() {
             document.getElementById('filterPanel').classList.toggle('hidden');
         }
+
+        // ── Realtime search debounce 400ms ────────────────────────────────
+        let searchTimer = null;
+        const searchInput = document.getElementById('headerKeyword');
+
+        // Tự động focus lại và đặt con trỏ cuối chuỗi sau khi reload
+        if (searchInput && searchInput.value.length > 0) {
+            searchInput.focus();
+            const len = searchInput.value.length;
+            searchInput.setSelectionRange(len, len);
+        }
+
+        searchInput.addEventListener('input', function () {
+            clearTimeout(searchTimer);
+            const keyword = this.value.trim();
+            searchTimer = setTimeout(function () {
+                window.location.href = '<%= servletUrl %>?page=1'
+                    + '&keyword='  + encodeURIComponent(keyword)
+                    + '&status='   + encodeURIComponent('<%= filterStatus %>')
+                    + '&category=' + encodeURIComponent('<%= filterCategory %>')
+                    + '&dateFrom=' + encodeURIComponent('<%= filterDateFrom %>')
+                    + '&dateTo='   + encodeURIComponent('<%= filterDateTo %>');
+            }, 400);
+        });
+
         document.getElementById('headerSearchForm').addEventListener('submit', function (e) {
             e.preventDefault();
-            document.getElementById('filterKeywordHidden').value =
-                document.getElementById('headerKeyword').value;
+            clearTimeout(searchTimer);
+            document.getElementById('filterKeywordHidden').value = searchInput.value;
             document.getElementById('filterForm').submit();
         });
+
+        // ── Thông báo dropdown ────────────────────────────────────────────
+        function toggleNotif() {
+            document.getElementById('notifDropdown').classList.toggle('hidden');
+        }
+
+        function markAllRead() {
+            document.querySelectorAll('.notif-item').forEach(el => el.classList.remove('bg-primary/5'));
+            document.getElementById('notifDot').classList.add('hidden');
+        }
+
+        document.addEventListener('click', function (e) {
+            const wrapper = document.getElementById('notifWrapper');
+            if (wrapper && !wrapper.contains(e.target)) {
+                document.getElementById('notifDropdown').classList.add('hidden');
+            }
+        });
+
+        // ── Dark / Light mode ─────────────────────────────────────────────
+        const html      = document.documentElement;
+        const themeIcon = document.getElementById('themeIcon');
+
+        // Áp dụng theme đã lưu ngay khi load
+        if (localStorage.getItem('theme') === 'light') {
+            html.classList.remove('dark');
+            themeIcon.textContent = 'dark_mode';
+        } else {
+            html.classList.add('dark');
+            themeIcon.textContent = 'light_mode';
+        }
+
+        function toggleTheme() {
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+                themeIcon.textContent = 'dark_mode';
+            } else {
+                html.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+                themeIcon.textContent = 'light_mode';
+            }
+        }
     </script>
 </body>
 </html>

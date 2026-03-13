@@ -31,6 +31,39 @@ public class StaffArticlecontroller extends HttpServlet {
             return;
         }
 
+        // ── Xử lý action delete / archive ────────────────────────────────
+        String action  = request.getParameter("action");
+        String idParam = request.getParameter("id");
+
+        if (idParam != null && !idParam.isBlank() && action != null) {
+            String page    = request.getParameter("page");
+            String keyword = req(request, "keyword");
+            String status2 = req(request, "status");
+            String cat     = req(request, "category");
+            String dfrom   = req(request, "dateFrom");
+            String dto     = req(request, "dateTo");
+
+            try {
+                long articleId = Long.parseLong(idParam);
+                ArticleDao dao = new ArticleDao();
+                switch (action) {
+                    case "delete"  -> dao.deleteArticle(articleId, user.getId());
+                    case "archive" -> dao.updateArticleStatus(articleId, user.getId(), "ARCHIVED");
+                }
+            } catch (NumberFormatException ignored) {}
+
+            // Redirect về đúng trang đang đứng, giữ nguyên filter
+            StringBuilder redirect = new StringBuilder(request.getContextPath() + "/journalist/articles?");
+            if (page != null && !page.isBlank()) redirect.append("page=").append(page).append("&");
+            redirect.append("keyword=").append(java.net.URLEncoder.encode(keyword, "UTF-8")).append("&");
+            redirect.append("status=").append(java.net.URLEncoder.encode(status2, "UTF-8")).append("&");
+            redirect.append("category=").append(java.net.URLEncoder.encode(cat, "UTF-8")).append("&");
+            redirect.append("dateFrom=").append(java.net.URLEncoder.encode(dfrom, "UTF-8")).append("&");
+            redirect.append("dateTo=").append(java.net.URLEncoder.encode(dto, "UTF-8"));
+            response.sendRedirect(redirect.toString());
+            return;
+        }
+
         // ── Đọc tham số lọc ──────────────────────────────────────────────
         String keyword  = req(request, "keyword");
         String status   = req(request, "status");
@@ -81,6 +114,11 @@ public class StaffArticlecontroller extends HttpServlet {
                     a.setStatusBadgeClass("bg-red-100 text-red-700 dark:bg-red-500/10 dark:text-red-400 ring-red-500/20");
                     a.setStatusDotClass("bg-red-500");
                     break;
+                case "ARCHIVED":
+                    a.setStatusLabel("Lưu trữ");
+                    a.setStatusBadgeClass("bg-violet-100 text-violet-700 dark:bg-violet-500/10 dark:text-violet-400 ring-violet-500/20");
+                    a.setStatusDotClass("bg-violet-400");
+                    break;
                 default:
                     a.setStatusLabel(a.getStatus() != null ? a.getStatus() : "");
                     a.setStatusBadgeClass("bg-slate-100 text-slate-600 dark:bg-slate-500/10 dark:text-slate-400 ring-slate-500/20");
@@ -93,20 +131,19 @@ public class StaffArticlecontroller extends HttpServlet {
         }
 
         // ── Set attributes → forward sang JSP ────────────────────────────
-        request.setAttribute("articles",      articles);
-        request.setAttribute("categories",    categories);
-        request.setAttribute("totalArticles", total);
-        request.setAttribute("totalPages",    totalPages);
-        request.setAttribute("currentPage",   page);
-        request.setAttribute("pageSize",      PAGE_SIZE);
+        request.setAttribute("articles",       articles);
+        request.setAttribute("categories",     categories);
+        request.setAttribute("totalArticles",  total);
+        request.setAttribute("totalPages",     totalPages);
+        request.setAttribute("currentPage",    page);
+        request.setAttribute("pageSize",       PAGE_SIZE);
         request.setAttribute("filterKeyword",  keyword);
         request.setAttribute("filterStatus",   status);
         request.setAttribute("filterCategory", category);
         request.setAttribute("filterDateFrom", dateFrom);
         request.setAttribute("filterDateTo",   dateTo);
 
-        request.getRequestDispatcher("/journalist/articles.jsp")
-                .forward(request, response);
+        request.getRequestDispatcher("/journalist/articles.jsp").forward(request, response);
     }
 
     private String req(HttpServletRequest r, String name) {
