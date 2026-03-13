@@ -13,7 +13,7 @@ import java.sql.SQLException;
  */
 public class DBConnection {
 
-	private static final String DB_URL = "jdbc:mysql://localhost:3306/neural_news";
+	private static final String DB_URL = "jdbc:mysql://localhost:3306/neuralnews";
 	private static final String DB_USER = "root";
 	private static final String DB_PASSWORD = "123456789"; // đổi nếu MySQL của bạn có mật khẩu
 

@@ -1,15 +1,9 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%@ page import="java.util.List" %>                 
-<%@ page import="neuralnews.model.ArticleModel" %> 
-<%@ page import="neuralnews.model.Category_Model" %> 
-
-<% String catName = (String) request.getAttribute("categoryName"); %> 
-<% List<ArticleModel> listArt = (List<ArticleModel>) request.getAttribute("listArticles"); %> 
     <!DOCTYPE html>
     <html class="dark" lang="en">
 
     <head>
-        <title><%= catName %> - NexusAI News</title>
+        <title>Công nghệ - NexusAI News</title>
         <jsp:include page="components/head.jsp" />
         <style type="text/tailwindcss">
             @layer utilities {
@@ -30,12 +24,12 @@
                 <div class="max-w-[1440px] mx-auto px-4 lg:px-8 py-10">
                     <nav
                         class="flex items-center gap-2 text-xs font-medium text-slate-400 uppercase tracking-widest mb-4">
-                        <a class="hover:text-primary" href="${pageContext.request.contextPath}/home">Trang
+                        <a class="hover:text-primary" href="${pageContext.request.contextPath}/user/home.jsp">Trang
                             chủ</a>
                         <span class="material-symbols-outlined text-xs">chevron_right</span>
-                        <span class="text-slate-600 dark:text-slate-300"><%= catName %></span>
+                        <span class="text-slate-600 dark:text-slate-300">Công nghệ</span>
                     </nav>
-                    <h1 class="text-4xl md:text-5xl font-black text-slate-900 dark:text-white mb-6"><%= catName %></h1>
+                    <h1 class="text-4xl md:text-5xl font-black text-slate-900 dark:text-white mb-6">Công nghệ</h1>
                     <div class="flex flex-wrap gap-2">
                         <button
                             class="px-4 py-1.5 rounded-full bg-primary text-white text-xs font-bold uppercase tracking-wider">Tất
@@ -80,18 +74,12 @@
                         </button>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    
-                    <%
-						if (listArt != null && !listArt.isEmpty()) {
-						    ArticleModel firstArt = listArt.get(0);
-						%>
-                    
                         <!-- Content Articles would go here, for now using static HTML from template -->
-                        <article onclick="window.location.href='article?id=<%= firstArt.getId() %>'"
+                        <article onclick="window.location.href='${pageContext.request.contextPath}/user/article.jsp'"
                             class="md:col-span-2 flex flex-col md:flex-row gap-6 bg-white dark:bg-surface-dark p-4 rounded-xl border border-slate-100 dark:border-border-dark hover:shadow-lg transition-all group cursor-pointer">
                             <div class="md:w-1/2 h-64 shrink-0 rounded-lg overflow-hidden">
                                 <div class="w-full h-full bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
-                                    style="background-image: url('<%= firstArt.getImageUrl() %>');">
+                                    style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAJYXTTOH-j3MgaNT2onqeIEXdT2yZnwu0uY83A9u6SXAwhdNe0mIGM1L0eh3j5wGCVrRHfKSbV2NhX2YL1tqdHhnvL4S3raWE13J3n_CcoRUW1_cAw5OhcC2OgvV3JXF63Z_pRn7iEl1OeuAYmSlghfJXddKECmxVUZI5XCsBY4BfQsSArn3on1In-WLU3B7YZtRuPFofa9W5LArXz-UR8XDxzXKPQ6IWyOYZkGxgwksAZqztiXXLawxLkRB6Aq8Ivn1bo8KOFL8pu');">
                                 </div>
                             </div>
                             <div class="flex flex-col justify-between py-2">
@@ -101,23 +89,23 @@
                                         &amp; Robotics</span>
                                     <h2
                                         class="text-2xl font-bold text-slate-900 dark:text-white mb-3 group-hover:text-primary transition-colors leading-tight">
-                                        <%= firstArt.getTitle() %></h2>
-                                    <p class="text-slate-600 dark:text-slate-400 text-sm line-clamp-3"><%= firstArt.getSummary() %></p>
+                                        Liên kết nơ-ron: Tương lai của tương tác Người-Máy tính năm 2024</h2>
+                                    <p class="text-slate-600 dark:text-slate-400 text-sm line-clamp-3">Nghiên cứu đột
+                                        phá mới
+                                        từ các viện công nghệ hàng đầu cho thấy các giao diện nơ-ron không xâm lấn đang
+                                        đang đạt đến hiệu suất trước đây được cho là chỉ có thể thực hiện thông qua cấy
+                                        ghép.</p>
                                 </div>
                                 <div class="flex items-center gap-4 text-xs text-slate-400 mt-4">
                                     <span class="flex items-center gap-1"><span
-                                            class="material-symbols-outlined text-sm">schedule</span> <%= firstArt.getCreatedAt() %></span>
+                                            class="material-symbols-outlined text-sm">schedule</span> 45 phút
+                                        trước</span>
                                     <span class="flex items-center gap-1"><span
                                             class="material-symbols-outlined text-sm">forum</span> 128 Bình luận</span>
                                 </div>
                             </div>
                         </article>
-                        <% } %>
-                        
-                        <% for (int i = 1; i < listArt.size(); i++) { 
-    						ArticleModel art = listArt.get(i); %>
-    						
-                        <article onclick="window.location.href='article?id=<%= art.getId() %>'"
+                        <article onclick="window.location.href='${pageContext.request.contextPath}/user/article.jsp'"
                             class="bg-white dark:bg-surface-dark rounded-xl border border-slate-100 dark:border-border-dark overflow-hidden hover:shadow-md transition-all group cursor-pointer">
                             <div class="h-48 overflow-hidden relative">
                                 <div class="absolute top-3 left-3 z-10">
@@ -126,25 +114,109 @@
                                         động</span>
                                 </div>
                                 <div class="w-full h-full bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
-                                    style="background-image: url('<%= art.getImageUrl() %>');">
+                                    style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDK__sk7UjLv8i1C_8OHskL_--6IxKe9kO8HlawaMoDvWPXzVAQWnbThQjVa0NVKFWNMCwOHhF4khSP0E_iZOi7RX0wNJGAhrrV9IBkrII3avkUkJqYRdYoqMN4vZtX7Hr92xkiHXYOiJcnUs5PwQTBaVtE8oC_BeGZZjLA9164Wl-nvsV7-_Gjkad5oNqMnIjkDMH5-Y5alDP_q1TM4Ci9fQeYtLaHDUKNaSMNTGU2zTN4IErbtptamGaFY02xGy2BLfE6iQY91cts');">
                                 </div>
                             </div>
                             <div class="p-4">
                                 <h3
                                     class="text-base font-bold text-slate-900 dark:text-white mb-2 line-clamp-2 group-hover:text-primary transition-colors">
-                                    <%= art.getTitle() %></h3>
-                                <p class="text-slate-500 dark:text-slate-400 text-xs line-clamp-2 mb-4"><%= art.getSummary() %></p>
+                                    Cuộc cách mạng điện thoại gập: Tại sao 2024 là năm của điện thoại vỏ sò</h3>
+                                <p class="text-slate-500 dark:text-slate-400 text-xs line-clamp-2 mb-4">Các nhà sản xuất
+                                    cuối cùng cũng đã
+                                    giải quyết được vấn đề nếp gấp, dẫn đến số lượng đơn đặt hàng trước phá kỷ lục trên
+                                    toàn cầu.</p>
                                 <div
                                     class="flex items-center justify-between text-[10px] text-slate-400 font-bold uppercase tracking-widest pt-3 border-t border-slate-50 dark:border-slate-800">
-                                    <span><%= art.getCreatedAt() %></span>
+                                    <span>2 giờ trước</span>
                                     <button class="text-slate-400 hover:text-primary"><span
                                             class="material-symbols-outlined text-lg">bookmark</span></button>
                                 </div>
                             </div>
                         </article>
-                        
-                        <% } %>
-
+                        <article onclick="window.location.href='${pageContext.request.contextPath}/user/article.jsp'"
+                            class="bg-white dark:bg-surface-dark rounded-xl border border-slate-100 dark:border-border-dark overflow-hidden hover:shadow-md transition-all group cursor-pointer">
+                            <div class="h-48 overflow-hidden relative">
+                                <div class="absolute top-3 left-3 z-10">
+                                    <span
+                                        class="px-2 py-1 rounded bg-black/60 backdrop-blur-md text-white text-[10px] font-bold uppercase tracking-wider">Phần
+                                        mềm</span>
+                                </div>
+                                <div class="w-full h-full bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
+                                    style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCrc_7XThJ5bAFGC03h2RGUpg2i4LGEanIMHmTjsApYkKda1tlYEyQlB0qYKhYImQ4lOhybrDjFu3zamKplFgbncnCxd7y4Y3S_EefRhQgK224OagGlzOIC6sFI_CafUwt_kXS-8vLmfW8iH5e8gXhSt0pmZBRpwc2Gd0DK1BeTFHNVeEWi8Kvc2fffea280_KCVJI5lZOJoH3D1IVjtPQgvmXXQ51k0UBribsipHUPoK0RCeTAOuNoBnmbyDqQIfikd98VZOU0GsaT');">
+                                </div>
+                            </div>
+                            <div class="p-4">
+                                <h3
+                                    class="text-base font-bold text-slate-900 dark:text-white mb-2 line-clamp-2 group-hover:text-primary transition-colors">
+                                    Các mô hình nguồn mở hiện đã có thể sánh ngang với các gã khổng lồ độc quyền</h3>
+                                <p class="text-slate-500 dark:text-slate-400 text-xs line-clamp-2 mb-4">Một nghiên cứu
+                                    mới xác nhận
+                                    rằng các mô hình có nguồn gốc từ Llama đang thu hẹp khoảng cách với GPT-4 trong các
+                                    tác vụ lập trình.</p>
+                                <div
+                                    class="flex items-center justify-between text-[10px] text-slate-400 font-bold uppercase tracking-widest pt-3 border-t border-slate-50 dark:border-slate-800">
+                                    <span>5 giờ trước</span>
+                                    <button class="text-slate-400 hover:text-primary"><span
+                                            class="material-symbols-outlined text-lg">bookmark</span></button>
+                                </div>
+                            </div>
+                        </article>
+                        <article onclick="window.location.href='${pageContext.request.contextPath}/user/article.jsp'"
+                            class="bg-white dark:bg-surface-dark rounded-xl border border-slate-100 dark:border-border-dark overflow-hidden hover:shadow-md transition-all group cursor-pointer">
+                            <div class="h-48 overflow-hidden relative">
+                                <div class="absolute top-3 left-3 z-10">
+                                    <span
+                                        class="px-2 py-1 rounded bg-black/60 backdrop-blur-md text-white text-[10px] font-bold uppercase tracking-wider">Phần
+                                        cứng</span>
+                                </div>
+                                <div class="w-full h-full bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
+                                    style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDjfrR0s1j9yaictFquQ1vY_YE1u56tiWzBQ1LqmWRlgixs9IPvIsK3E7dGf8FscFvnq2072Uz9jW2aP6A2x66gpkP3cKgu2YMmsC-re9FDsqOzul02RsRchF-xKxG5PCjjy6JhuAPBtMUmQd-RUAF46PPsEzQjHQnBLbl46Fkv2MgEW1TvPkm5He6Z_bLXIlNHUk2QMXmDcBqDZASnyqwAjWyaywA5RofmCZ_ZCvc1D9k1OONtsjCRJkTyChUSTjM4bgN2_CBMpbT0');">
+                                </div>
+                            </div>
+                            <div class="p-4">
+                                <h3
+                                    class="text-base font-bold text-slate-900 dark:text-white mb-2 line-clamp-2 group-hover:text-primary transition-colors">
+                                    Kiến trúc GPU thế hệ mới hứa hẹn hiệu quả gấp 3 lần</h3>
+                                <p class="text-slate-500 dark:text-slate-400 text-xs line-clamp-2 mb-4">Các bài kiểm tra
+                                    đo lường rò rỉ
+                                    cho thấy tỷ lệ hiệu suất trên năng lượng đáng ngạc nhiên của các dòng vi xử lý mới.
+                                </p>
+                                <div
+                                    class="flex items-center justify-between text-[10px] text-slate-400 font-bold uppercase tracking-widest pt-3 border-t border-slate-50 dark:border-slate-800">
+                                    <span>Hôm qua</span>
+                                    <button class="text-slate-400 hover:text-primary"><span
+                                            class="material-symbols-outlined text-lg">bookmark</span></button>
+                                </div>
+                            </div>
+                        </article>
+                        <article onclick="window.location.href='${pageContext.request.contextPath}/user/article.jsp'"
+                            class="bg-white dark:bg-surface-dark rounded-xl border border-slate-100 dark:border-border-dark overflow-hidden hover:shadow-md transition-all group cursor-pointer">
+                            <div class="h-48 overflow-hidden relative">
+                                <div class="absolute top-3 left-3 z-10">
+                                    <span
+                                        class="px-2 py-1 rounded bg-black/60 backdrop-blur-md text-white text-[10px] font-bold uppercase tracking-wider">Bảo
+                                        mật</span>
+                                </div>
+                                <div class="w-full h-full bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
+                                    style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDK__sk7UjLv8i1C_8OHskL_--6IxKe9kO8HlawaMoDvWPXzVAQWnbThQjVa0NVKFWNMCwOHhF4khSP0E_iZOi7RX0wNJGAhrrV9IBkrII3avkUkJqYRdYoqMN4vZtX7Hr92xkiHXYOiJcnUs5PwQTBaVtE8oC_BeGZZjLA9164Wl-nvsV7-_Gjkad5oNqMnIjkDMH5-Y5alDP_q1TM4Ci9fQeYtLaHDUKNaSMNTGU2zTN4IErbtptamGaFY02xGy2BLfE6iQY91cts');">
+                                </div>
+                            </div>
+                            <div class="p-4">
+                                <h3
+                                    class="text-base font-bold text-slate-900 dark:text-white mb-2 line-clamp-2 group-hover:text-primary transition-colors">
+                                    Lỗ hổng Zero-Day được tìm thấy trong công cụ trình duyệt phổ biến</h3>
+                                <p class="text-slate-500 dark:text-slate-400 text-xs line-clamp-2 mb-4">Các nhà nghiên
+                                    cứu bảo mật
+                                    khuyên người dùng cập nhật trình duyệt ngay lập tức để vá lỗ hổng nghiêm trọng này.
+                                </p>
+                                <div
+                                    class="flex items-center justify-between text-[10px] text-slate-400 font-bold uppercase tracking-widest pt-3 border-t border-slate-50 dark:border-slate-800">
+                                    <span>2 ngày trước</span>
+                                    <button class="text-slate-400 hover:text-primary"><span
+                                            class="material-symbols-outlined text-lg">bookmark</span></button>
+                                </div>
+                            </div>
+                        </article>
                     </div>
                     <button
                         class="w-full py-4 mt-4 text-sm font-bold text-primary border border-primary/20 rounded-xl hover:bg-primary/5 transition-all flex items-center justify-center gap-2">
