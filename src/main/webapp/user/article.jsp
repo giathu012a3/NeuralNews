@@ -1,7 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%@ page import="neuralnews.model.Article_Model" %>
+<%@ page import="neuralnews.model.Article" %>
 <%
-    Article_Model art = (Article_Model) request.getAttribute("articleDetail");
+    Article art = (Article) request.getAttribute("articleDetail");
 %>
     <!DOCTYPE html>
     <html class="dark" lang="en">

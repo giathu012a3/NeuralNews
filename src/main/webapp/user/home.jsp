@@ -102,9 +102,9 @@
                         <div class="flex flex-col gap-6">
                         
 						<% 
-						    List<Article_Model> latest = (List<Article_Model>) request.getAttribute("latestArtsWithCat");
+						    List<Article> latest = (List<Article>) request.getAttribute("latestArtsWithCat");
 						if(latest != null && !latest.isEmpty()) {
-					        for(Article_Model art : latest) {
+					        for(Article art : latest) {
 					%>
 					
                             <article
@@ -197,10 +197,10 @@
                         <div class="flex flex-col gap-4">
                         
 						<% 
-						    List<Article_Model> top = (List<Article_Model>) request.getAttribute("mostViewedArts");
+						    List<Article> top = (List<Article>) request.getAttribute("mostViewedArts");
 						    if(top != null && !top.isEmpty()) {
 						        for(int i = 0; i < top.size(); i++) {
-						            Article_Model art = top.get(i);
+						            Article art = top.get(i);
 						%>
                         
                             <a class="group flex gap-3 items-start" href="user/article?id=<%= art.getId() %>">

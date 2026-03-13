@@ -1,10 +1,10 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ page import="java.util.List" %>                 
-<%@ page import="neuralnews.model.Article_Model" %> 
-<%@ page import="neuralnews.model.Category_Model" %> 
+<%@ page import="neuralnews.model.Article" %> 
+<%@ page import="neuralnews.model.Category" %> 
 
 <% String catName = (String) request.getAttribute("categoryName"); %> 
-<% List<Article_Model> listArt = (List<Article_Model>) request.getAttribute("listArticles"); %> 
+<% List<Article> listArt = (List<Article>) request.getAttribute("listArticles"); %> 
     <!DOCTYPE html>
     <html class="dark" lang="en">
 
@@ -83,7 +83,7 @@
                     
                     <%
 						if (listArt != null && !listArt.isEmpty()) {
-						    Article_Model firstArt = listArt.get(0);
+						    Article firstArt = listArt.get(0);
 						%>
                     
                         <!-- Content Articles would go here, for now using static HTML from template -->
@@ -115,7 +115,7 @@
                         <% } %>
                         
                         <% for (int i = 1; i < listArt.size(); i++) { 
-    						Article_Model art = listArt.get(i); %>
+    						Article art = listArt.get(i); %>
     						
                         <article onclick="window.location.href='article?id=<%= art.getId() %>'"
                             class="bg-white dark:bg-surface-dark rounded-xl border border-slate-100 dark:border-border-dark overflow-hidden hover:shadow-md transition-all group cursor-pointer">
