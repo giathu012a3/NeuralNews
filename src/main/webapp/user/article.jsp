@@ -123,7 +123,7 @@
                     <% } %>
 
                     <div class="article-content prose prose-slate dark:prose-invert max-w-none">
-                        <%= (art != null) ? art.getContent() : "Nội dung đang được cập nhật..." %>
+                        <%= (art != null) ? art.getContentProcessed(request.getContextPath()) : "Nội dung đang được cập nhật..." %>
                     </div>
                     
                     <div class="mt-16 pt-12 border-t border-slate-200 dark:border-slate-800">
@@ -193,15 +193,16 @@
             <jsp:include page="components/footer.jsp" />
 
             <div class="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-4">
-                <div
-                    class="hidden md:flex w-80 bg-white dark:bg-surface-dark border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl flex-col overflow-hidden animate-in slide-in-from-bottom-4 duration-300">
+                <div id="aiAssistantPanel"
+                    class="hidden w-80 bg-white dark:bg-surface-dark border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300">
                     <div class="p-4 bg-primary text-white flex items-center justify-between">
                         <div class="flex items-center gap-2">
                             <span class="material-symbols-outlined text-xl">smart_toy</span>
                             <span class="font-bold text-sm">Trợ lý NexusAI</span>
                         </div>
-                        <button class="text-white/80 hover:text-white"><span
-                                class="material-symbols-outlined text-sm">close</span></button>
+                        <button id="closeAiPanel" class="text-white/80 hover:text-white transition-colors">
+                            <span class="material-symbols-outlined text-sm">close</span>
+                        </button>
                     </div>
                     <div class="p-4 h-64 overflow-y-auto space-y-4">
                         <div
@@ -233,13 +234,37 @@
                         </div>
                     </div>
                 </div>
-                <button
-                    class="size-14 rounded-full bg-primary text-white shadow-xl flex items-center justify-center hover:scale-110 transition-transform ring-4 ring-white dark:ring-background-dark">
+                <button id="toggleAiPanel"
+                    class="size-14 rounded-full bg-primary text-white shadow-xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all ring-4 ring-white dark:ring-background-dark">
                     <span class="material-symbols-outlined text-3xl">smart_toy</span>
                 </button>
             </div>
         </div>
 
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const aiPanel = document.getElementById('aiAssistantPanel');
+                const toggleBtn = document.getElementById('toggleAiPanel');
+                const closeBtn = document.getElementById('closeAiPanel');
+
+                function toggleAi() {
+                    if (aiPanel.classList.contains('hidden')) {
+                        aiPanel.classList.remove('hidden');
+                        aiPanel.classList.add('flex');
+                    } else {
+                        aiPanel.classList.add('hidden');
+                        aiPanel.classList.remove('flex');
+                    }
+                }
+
+                toggleBtn.addEventListener('click', toggleAi);
+                closeBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    aiPanel.classList.add('hidden');
+                    aiPanel.classList.remove('flex');
+                });
+            });
+        </script>
     </body>
 
     </html>

@@ -51,6 +51,19 @@ public class Article {
         return content;
     }
 
+    /**
+     * Xử lý nội dung HTML bài viết để đảm bảo các ảnh nội bộ (uploads/...)
+     * luôn có contextPath đi kèm, giúp hiển thị đúng dù ở bất kỳ URL nào.
+     */
+    public String getContentProcessed(String contextPath) {
+        if (content == null)
+            return "";
+        // Tìm các src="uploads/ và thay thế bằng src="contextPath/uploads/
+        String search = "src=\"uploads/";
+        String replace = "src=\"" + contextPath + "/uploads/";
+        return content.replace(search, replace);
+    }
+
     public void setContent(String content) {
         this.content = content;
     }
@@ -72,13 +85,13 @@ public class Article {
     }
 
     /**
-     * Trả về đường dẫn ảnh để hiển thị. 
+     * Trả về đường dẫn ảnh để hiển thị.
      * Nếu là URL tuyệt đối (http...) thì giữ nguyên.
      * Nếu là đường dẫn tương đối (uploads/...) thì thêm contextPath.
      */
     public String getDisplayImageUrl(String contextPath) {
         if (imageUrl == null || imageUrl.isBlank()) {
-            return contextPath + "/assets/images/placeholder.jpg";
+            return contextPath + "/uploads/images/placeholder.jpg";
         }
         if (imageUrl.startsWith("http")) {
             return imageUrl;

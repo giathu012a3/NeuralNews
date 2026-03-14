@@ -279,14 +279,14 @@ INSERT INTO articles (title, content, summary, image_url, author_id, category_id
     <h3>Hoạt động như thế nào?</h3>
     <p>Hệ thống hàng nghìn camera và cảm biến IoT được đặt dọc vỉa hè, thu thập lưu lượng phương tiện. Sau đó AI tự động dự báo dòng xe trong 15 phút tới để cân chỉnh số giây cho đèn xanh.</p>
     
-    <img src="https://images.unsplash.com/photo-1449824913935-59a10b8dce00?auto=format&fit=crop&q=80&w=1000" alt="Smart City Traffic" style="width:100%; border-radius:8px; margin: 15px 0;">
+    <img src="uploads/images/photo-1507721999472-8ed4421c4af2.jpg" alt="Smart City Traffic" style="width:100%; border-radius:8px; margin: 15px 0;">
     
     <div style="background-color: #f1f8ff; border-left: 5px solid #0366d6; padding: 15px; border-radius: 5px;">
         <strong>Thử nghiệm thực tế:</strong> Làn sóng "đèn xanh rải thảm" được tạo ra bởi AI đã giúp cắt giảm trung bình 18 phút di chuyển cho một lượt đi lại giờ cao điểm, giúp tiết kiệm hàng triệu giờ lao động mỗi năm cho cư dân.
     </div>
 </div>', 
 'Dự án Thành phố thông minh sử dụng hệ thống Trí tuệ nhân tạo tối ưu hóa lưu lượng giao thông đem lại những lợi ích thiết thực.', 
-'https://images.unsplash.com/photo-1449824913935-59a10b8dce00?auto=format&fit=crop&q=80&w=800', 
+'uploads/images/photo-1542744173-8e7e53415bb0.jpg', 
 1, 2, 'PUBLISHED', 1830, CURRENT_TIMESTAMP),
 
 -- Bài viết 13: Sức khỏe cộng đồng (Health)
@@ -295,7 +295,7 @@ INSERT INTO articles (title, content, summary, image_url, author_id, category_id
     <h2 style="color: #c0392b;">Báo động đỏ cho nhân loại</h2>
     <p>Nếu bạn nghĩ rằng ô nhiễm nhựa chỉ xảy ra ở dưới đáy đại dương, thì báo cáo nghiên cứu không khí mới nhất vừa dội gáo nước lạnh: <strong>Vi nhựa (Microplastics)</strong> đang rơi xuống ngay giữa những khu vực hẻo lánh nhất dưới dạng hạt mưa.</p>
     
-    <img src="https://images.unsplash.com/photo-1611273426858-450d8e3c9cce?auto=format&fit=crop&q=80&w=1000" alt="Plastic Pollution" style="width:100%; height: 350px; object-fit: cover; border-radius:12px; margin: 20px 0;">
+    <img src="uploads/images/photo-1529107386315-e1a2ed48a620.jpg" alt="Plastic Pollution" style="width:100%; height: 350px; object-fit: cover; border-radius:12px; margin: 20px 0;">
     
     <h3>Vòng tuần hoàn khép kín độc hại</h3>
     <p>Rác thải nhựa từ sinh hoạt bị phân rã, bốc hơi theo gió, hợp lại cùng độ ẩm trong tầng đối lưu và rửa trôi xuống lòng đất, len lỏi vô tình vào chuỗi thức ăn tự nhiên và xâm nhập vào cơ thể con người với nguy cơ tiềm tàng về viêm nhiễm hạt mịn (nano-level poisoning).</p>
@@ -304,5 +304,5 @@ INSERT INTO articles (title, content, summary, image_url, author_id, category_id
     <p>Các chuyên gia kêu gọi việc cấm phân phối hoàn toàn bao bì nhựa xốp, chai nhựa dùng một lần. Việc quản lý tái chế nhựa giờ đây không chỉ là "sống xanh", mà là sự bắt buộc sinh tồn cho chính sinh mạng thế hệ tương lai.</p>
 </article>', 
 'Hiện tượng hạt Vi Nhựa rơi cùng mưa gióng lên hồi chuông về vòng tuần hoàn ô nhiễm lan rộng và đe dọa sinh học tiềm ẩn.', 
-'https://images.unsplash.com/photo-1611273426858-450d8e3c9cce?auto=format&fit=crop&q=80&w=800', 
+'uploads/images/photo-1529107386315-e1a2ed48a620.jpg', 
 2, 5, 'PUBLISHED', 6000, CURRENT_TIMESTAMP);

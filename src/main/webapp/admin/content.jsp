@@ -158,9 +158,8 @@
                                                     type="checkbox" value="<%= a.getId() %>" /> </td>
                                             <td class="px-6 py-4">
                                                 <div class="flex items-center gap-4">
-                                                    <% String imgUrl=a.getImageUrl() !=null ? a.getImageUrl()
-                                                        : "https://via.placeholder.com/150" ; %>
-                                                        <img alt="Article Thumbnail"
+                                                    <% String imgUrl = a.getDisplayImageUrl(request.getContextPath()); %>
+                                                        <img alt="<%= a.getTitle() %>"
                                                             class="w-12 h-12 rounded object-cover" src="<%= imgUrl %>" />
                                                         <div>
                                                             <h4
@@ -188,12 +187,13 @@
                                                     class="px-2.5 py-1 text-[10px] font-bold rounded-full whitespace-nowrap <%= a.getStatusBadgeClass() %>">
                                                     <%= a.getStatusLabel() %>
                                                 </span> </td>
-                                            <td class="px-6 py-4">
+                                            <td class="px-6 py-4 text-center">
                                                 <div class="flex items-center justify-center gap-4 text-slate-400">
-                                                    <span class="flex items-center gap-1 text-[11px]"><span
-                                                            class="material-icons text-sm">visibility</span>
+                                                    <a href="${pageContext.request.contextPath}/user/article?id=<%= a.getId() %>"
+                                                        target="_blank" class="flex items-center gap-1 text-[11px] hover:text-primary transition-colors">
+                                                        <span class="material-icons text-sm">visibility</span>
                                                         <%= a.getFormattedViews() %>
-                                                    </span> </div>
+                                                    </a> </div>
                                             </td>
                                             <td class="px-6 py-4">
                                                 <div class="flex items-center gap-2">
@@ -204,7 +204,7 @@
                                             </td>
                                             <td class="px-6 py-4 text-right">
                                                 <div class="flex justify-end gap-1"> <a
-                                                        href="${pageContext.request.contextPath}/user/article.jsp?id=<%= a.getId() %>"
+                                                        href="${pageContext.request.contextPath}/user/article?id=<%= a.getId() %>"
                                                         target="_blank"
                                                         class="p-2 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-lg transition-all"
                                                         title="Xem bài viết"> <span
@@ -349,7 +349,7 @@
                             badgeSpan.className = 'px-2.5 py-1 text-[10px] font-bold rounded-full whitespace-nowrap bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400';
                             badgeSpan.textContent = 'ĐÃ ĐĂNG';
                             actionsContainer.innerHTML = `
-                                                <a href="${pageContext.request.contextPath}/user/article.jsp?id=` + articleId + `" target="_blank"
+                                                <a href="${pageContext.request.contextPath}/user/article?id=` + articleId + `" target="_blank"
                                                     class="p-2 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-lg transition-all"
                                                     title="Xem bài viết">
                                                     <span class="material-symbols-outlined text-[20px]">visibility</span>
@@ -365,7 +365,7 @@
                             badgeSpan.className = 'px-2.5 py-1 text-[10px] font-bold rounded-full whitespace-nowrap bg-red-100 text-red-700 dark:bg-red-500/10 dark:text-red-400';
                             badgeSpan.textContent = 'BỊ TỪ CHỐI';
                             actionsContainer.innerHTML = `
-                                                <a href="${pageContext.request.contextPath}/user/article.jsp?id=` + articleId + `" target="_blank"
+                                                <a href="${pageContext.request.contextPath}/user/article?id=` + articleId + `" target="_blank"
                                                     class="p-2 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-lg transition-all"
                                                     title="Xem bài viết">
                                                     <span class="material-symbols-outlined text-[20px]">visibility</span>
@@ -381,7 +381,7 @@
                             badgeSpan.className = 'px-2.5 py-1 text-[10px] font-bold rounded-full whitespace-nowrap bg-slate-100 text-slate-600 dark:bg-slate-500/10 dark:text-slate-400';
                             badgeSpan.textContent = 'ĐÃ LƯU TRỮ';
                             actionsContainer.innerHTML = `
-                                                <a href="${pageContext.request.contextPath}/user/article.jsp?id=` + articleId + `" target="_blank"
+                                                <a href="${pageContext.request.contextPath}/user/article?id=` + articleId + `" target="_blank"
                                                     class="p-2 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-lg transition-all"
                                                     title="Xem bài viết">
                                                     <span class="material-symbols-outlined text-[20px]">visibility</span>
