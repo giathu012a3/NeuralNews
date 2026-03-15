@@ -98,11 +98,7 @@ public class Article {
      */
     public String getDisplayImageUrl(String contextPath) {
         if (imageUrl == null || imageUrl.isBlank()) {
-<<<<<<< Updated upstream
             return contextPath + "/uploads/images/placeholder.jpg";
-=======
-            return contextPath + "//images/placeholder.jpg";
->>>>>>> Stashed changes
         }
         if (imageUrl.startsWith("http")) {
             return imageUrl;
