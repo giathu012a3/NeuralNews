@@ -61,8 +61,9 @@ public class ArticleDao {
     }
 
     // ── Lấy tất cả bài viết (Admin dùng) ───────────────────────────────────
-    public List<Article> getAllArticles(int limit, int offset) {
-        String sql = """
+    // ── Lấy tất cả bài viết có filter (Admin dùng) ──────────────────────────
+    public List<Article> getAllArticlesFiltered(int limit, int offset, String keyword, String status, Integer categoryId) {
+        StringBuilder sql = new StringBuilder("""
                     SELECT a.id, a.title, a.content, a.summary, a.image_url,
                            a.author_id, a.category_id, a.status, a.views, a.likes_count,
                            a.sentiment_label, a.source_score, a.popularity_score,
@@ -73,18 +74,34 @@ public class ArticleDao {
                     LEFT JOIN categories c ON a.category_id = c.id
                     LEFT JOIN users u ON a.author_id = u.id
                     WHERE a.status != 'DRAFT'
-                    ORDER BY a.created_at DESC
-                    LIMIT ? OFFSET ?
-                """;
+                """);
+        List<Object> params = new ArrayList<>();
+        
+        if (keyword != null && !keyword.isBlank()) {
+            sql.append(" AND (a.title LIKE ? OR u.full_name LIKE ? OR CAST(a.id AS CHAR) LIKE ?)");
+            String k = "%" + keyword.trim() + "%";
+            params.add(k); params.add(k); params.add(k);
+        }
+        if (status != null && !status.isBlank()) {
+            sql.append(" AND a.status = ?");
+            params.add(status.trim());
+        }
+        if (categoryId != null && categoryId > 0) {
+            sql.append(" AND a.category_id = ?");
+            params.add(categoryId);
+        }
+
+        sql.append(" ORDER BY a.created_at DESC LIMIT ? OFFSET ?");
+        params.add(limit);
+        params.add(offset);
+
         List<Article> list = new ArrayList<>();
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, limit);
-            ps.setInt(2, offset);
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            for (int i = 0; i < params.size(); i++) ps.setObject(i + 1, params.get(i));
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 Article a = mapArticle(rs);
-                // Extra fields from join
                 try { a.setAuthorName(rs.getString("author_name")); } catch(Exception e) {}
                 list.add(a);
             }
@@ -92,15 +109,39 @@ public class ArticleDao {
         return list;
     }
 
+    public List<Article> getAllArticles(int limit, int offset) {
+        return getAllArticlesFiltered(limit, offset, null, null, null);
+    }
+
     // ── Đếm tổng số bài viết (Admin dùng) ───────────────────────────────
-    public int getTotalArticleCount() {
-        String sql = "SELECT COUNT(*) FROM articles WHERE status != 'DRAFT'";
+    public int getTotalArticleCount(String keyword, String status, Integer categoryId) {
+        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM articles a WHERE a.status != 'DRAFT'");
+        List<Object> params = new ArrayList<>();
+        
+        if (keyword != null && !keyword.isBlank()) {
+            sql.append(" AND a.title LIKE ?");
+            params.add("%" + keyword.trim() + "%");
+        }
+        if (status != null && !status.isBlank()) {
+            sql.append(" AND a.status = ?");
+            params.add(status.trim());
+        }
+        if (categoryId != null && categoryId > 0) {
+            sql.append(" AND a.category_id = ?");
+            params.add(categoryId);
+        }
+
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            for (int i = 0; i < params.size(); i++) ps.setObject(i + 1, params.get(i));
+            ResultSet rs = ps.executeQuery();
             if (rs.next()) return rs.getInt(1);
         } catch (Exception e) { e.printStackTrace(); }
         return 0;
+    }
+
+    public int getTotalArticleCount() {
+        return getTotalArticleCount(null, null, null);
     }
 
     // ── Lấy bài viết của một tác giả (Staff dùng) ──────────────────────────
