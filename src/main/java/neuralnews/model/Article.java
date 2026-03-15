@@ -27,6 +27,13 @@ public class Article {
     private String statusBadgeClass;
     private String statusDotClass;
     private String formattedViews;
+    private String readingTime;
+    private String engagementRate;
+    private String sentimentBadgeClass;
+    private String sentimentDotClass;
+    private String sentimentText;
+    private String trendIcon;
+    private String trendClass;
 
     public Article() {
     }
@@ -91,7 +98,11 @@ public class Article {
      */
     public String getDisplayImageUrl(String contextPath) {
         if (imageUrl == null || imageUrl.isBlank()) {
+<<<<<<< Updated upstream
             return contextPath + "/uploads/images/placeholder.jpg";
+=======
+            return contextPath + "//images/placeholder.jpg";
+>>>>>>> Stashed changes
         }
         if (imageUrl.startsWith("http")) {
             return imageUrl;
@@ -228,4 +239,30 @@ public class Article {
     public void setFormattedViews(String formattedViews) {
         this.formattedViews = formattedViews;
     }
+
+    public String getReadingTime() {
+        return readingTime;
+    }
+
+    public void setReadingTime(String readingTime) {
+        this.readingTime = readingTime;
+    }
+
+    public String getEngagementRate() { return engagementRate; }
+    public void setEngagementRate(String engagementRate) { this.engagementRate = engagementRate; }
+
+    public String getSentimentBadgeClass() { return sentimentBadgeClass; }
+    public void setSentimentBadgeClass(String sentimentBadgeClass) { this.sentimentBadgeClass = sentimentBadgeClass; }
+
+    public String getSentimentDotClass() { return sentimentDotClass; }
+    public void setSentimentDotClass(String sentimentDotClass) { this.sentimentDotClass = sentimentDotClass; }
+
+    public String getSentimentText() { return sentimentText; }
+    public void setSentimentText(String sentimentText) { this.sentimentText = sentimentText; }
+
+    public String getTrendIcon() { return trendIcon; }
+    public void setTrendIcon(String trendIcon) { this.trendIcon = trendIcon; }
+
+    public String getTrendClass() { return trendClass; }
+    public void setTrendClass(String trendClass) { this.trendClass = trendClass; }
 }

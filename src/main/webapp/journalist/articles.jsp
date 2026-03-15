@@ -94,47 +94,68 @@
                             <span id="notifDot" class="absolute top-2 right-2 size-2 bg-red-500 rounded-full border-2 border-white dark:border-slate-900"></span>
                         </button>
                         <div id="notifDropdown"
-                             class="hidden absolute right-0 mt-2 w-80 bg-white dark:bg-slate-900 border border-slate-200 dark:border-border-dark rounded-xl shadow-xl z-50 overflow-hidden">
+                             class="hidden absolute right-0 top-12 w-80 bg-white dark:bg-slate-900 border border-slate-200 dark:border-border-dark rounded-xl shadow-xl z-50 overflow-hidden">
                             <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100 dark:border-border-dark">
-                                <span class="text-sm font-bold text-slate-800 dark:text-white">Thông báo</span>
-                                <button onclick="markAllRead()" class="text-[11px] text-primary hover:underline font-semibold">Đánh dấu tất cả đã đọc</button>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-sm font-bold text-slate-800 dark:text-white">Thông báo</span>
+                                    <span id="notifCount" class="bg-primary/10 text-primary text-[10px] font-bold px-1.5 py-0.5 rounded-full">2</span>
+                                </div>
+                                <button onclick="markAllRead()" class="text-[11px] text-primary hover:underline font-semibold">Đánh dấu đã đọc</button>
                             </div>
-                            <div class="max-h-72 overflow-y-auto divide-y divide-slate-100 dark:divide-border-dark">
-                                <div class="notif-item flex items-start gap-3 px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer bg-primary/5">
+                            <ul class="max-h-80 overflow-y-auto divide-y divide-slate-100 dark:divide-border-dark">
+                                <li class="notif-item unread flex items-start gap-3 px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors" data-id="a_notif_1" onclick="markOneRead(this)">
                                     <div class="size-8 rounded-full bg-emerald-100 dark:bg-emerald-500/10 flex items-center justify-center shrink-0 mt-0.5">
                                         <span class="material-symbols-outlined text-emerald-500 text-sm">check_circle</span>
                                     </div>
-                                    <div>
+                                    <div class="flex-1 min-w-0">
                                         <p class="text-xs font-semibold text-slate-800 dark:text-white">Bài viết được duyệt</p>
                                         <p class="text-[11px] text-slate-500 mt-0.5">Bài "Sự bùng nổ của AI..." đã được xuất bản.</p>
                                         <p class="text-[10px] text-slate-400 mt-1">2 giờ trước</p>
                                     </div>
-                                </div>
-                                <div class="notif-item flex items-start gap-3 px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer bg-primary/5">
+                                    <span class="unread-dot size-2 bg-primary rounded-full shrink-0 mt-2"></span>
+                                </li>
+                                <li class="notif-item unread flex items-start gap-3 px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors" data-id="a_notif_2" onclick="markOneRead(this)">
                                     <div class="size-8 rounded-full bg-red-100 dark:bg-red-500/10 flex items-center justify-center shrink-0 mt-0.5">
                                         <span class="material-symbols-outlined text-red-500 text-sm">cancel</span>
                                     </div>
-                                    <div>
+                                    <div class="flex-1 min-w-0">
                                         <p class="text-xs font-semibold text-slate-800 dark:text-white">Bài viết bị từ chối</p>
                                         <p class="text-[11px] text-slate-500 mt-0.5">Vui lòng chỉnh sửa và gửi lại.</p>
                                         <p class="text-[10px] text-slate-400 mt-1">5 giờ trước</p>
                                     </div>
-                                </div>
-                                <div class="notif-item flex items-start gap-3 px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer">
+                                    <span class="unread-dot size-2 bg-primary rounded-full shrink-0 mt-2"></span>
+                                </li>
+                                <li class="notif-item flex items-start gap-3 px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors" data-id="a_notif_3" onclick="markOneRead(this)">
                                     <div class="size-8 rounded-full bg-blue-100 dark:bg-blue-500/10 flex items-center justify-center shrink-0 mt-0.5">
                                         <span class="material-symbols-outlined text-blue-500 text-sm">comment</span>
                                     </div>
-                                    <div>
+                                    <div class="flex-1 min-w-0">
                                         <p class="text-xs font-semibold text-slate-800 dark:text-white">Bình luận mới</p>
                                         <p class="text-[11px] text-slate-500 mt-0.5">Có 3 bình luận mới trên bài viết của bạn.</p>
                                         <p class="text-[10px] text-slate-400 mt-1">1 ngày trước</p>
                                     </div>
-                                </div>
-                            </div>
-                            <div class="px-4 py-2.5 border-t border-slate-100 dark:border-border-dark text-center">
-                                <a href="${pageContext.request.contextPath}/journalist/comments"
-                                   class="text-xs text-primary font-semibold hover:underline">Xem tất cả thông báo</a>
-                            </div>
+                                </li>
+                                <li class="notif-item flex items-start gap-3 px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors" data-id="a_notif_4" onclick="markOneRead(this)">
+                                    <div class="size-8 rounded-full bg-amber-100 dark:bg-amber-500/10 flex items-center justify-center shrink-0 mt-0.5">
+                                        <span class="material-symbols-outlined text-amber-500 text-sm">star</span>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-xs font-semibold text-slate-800 dark:text-white">Bài viết nổi bật</p>
+                                        <p class="text-[11px] text-slate-500 mt-0.5">Bài của bạn được chọn vào Top tuần.</p>
+                                        <p class="text-[10px] text-slate-400 mt-1">2 ngày trước</p>
+                                    </div>
+                                </li>
+                                <li class="notif-item flex items-start gap-3 px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors" data-id="a_notif_5" onclick="markOneRead(this)">
+                                    <div class="size-8 rounded-full bg-violet-100 dark:bg-violet-500/10 flex items-center justify-center shrink-0 mt-0.5">
+                                        <span class="material-symbols-outlined text-violet-500 text-sm">bar_chart</span>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-xs font-semibold text-slate-800 dark:text-white">Lượt xem tăng mạnh</p>
+                                        <p class="text-[11px] text-slate-500 mt-0.5">Bài viết đạt 10,000 lượt xem hôm nay.</p>
+                                        <p class="text-[10px] text-slate-400 mt-1">3 ngày trước</p>
+                                    </div>
+                                </li>
+                            </ul>
                         </div>
                     </div>
 
@@ -276,9 +297,10 @@
                                         <td class="table-cell">
                                             <div class="flex items-center gap-3">
                                                 <div class="size-12 rounded-lg bg-slate-200 dark:bg-slate-800 overflow-hidden shrink-0">
+                                                    <% String imgUrl = a.getDisplayImageUrl(request.getContextPath()); %>
                                                     <img alt="<%= a.getTitle() %>"
                                                         class="size-full object-cover opacity-80"
-                                                        src="<%= a.getImageUrl() != null ? a.getImageUrl() : "" %>" />
+                                                        src="<%= imgUrl %>" />
                                                 </div>
                                                 <div class="min-w-0">
                                                     <p class="font-bold text-slate-900 dark:text-white truncate">
@@ -331,7 +353,7 @@
                                                 <% } %>
 
                                                 <%-- Nút Xem: luôn hiển thị --%>
-                                                <a href="${pageContext.request.contextPath}/user/article.jsp?id=<%= a.getId() %>"
+                                                <a href="${pageContext.request.contextPath}/user/article?id=<%= a.getId() %>"
                                                     class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-400 hover:text-slate-200 transition-colors"
                                                     title="Xem bài viết">
                                                     <span class="material-symbols-outlined text-xl">visibility</span>
@@ -347,12 +369,12 @@
                                                 </a>
                                                 <% } %>
 
-                                                <%-- Nút Xóa: chỉ hiện khi REJECTED --%>
-                                                <% if (isRejected) { %>
+                                                <%-- Nút Xóa: hiện khi DRAFT hoặc REJECTED --%>
+                                                <% if (isRejected || "DRAFT".equals(st)) { %>
                                                 <a href="${pageContext.request.contextPath}/journalist/articles?action=delete&id=<%= a.getId() %>&page=<%= currentPage %>&<%= filterQS %>"
                                                     class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-400 hover:text-red-500 transition-colors"
                                                     title="Xóa bài viết"
-                                                    onclick="return confirm('Bài viết bị từ chối. Bạn có chắc muốn xóa?')">
+                                                    onclick="return confirm('Bạn có chắc muốn xóa bài viết này? Hành động không thể hoàn tác.')">
                                                     <span class="material-symbols-outlined text-xl">delete</span>
                                                 </a>
                                                 <% } %>
@@ -465,24 +487,75 @@
             document.getElementById('filterForm').submit();
         });
 
-        // ── Thông báo dropdown ────────────────────────────────────────────
+        // ── Thông báo dropdown ────────────────────────────────────────
+        var NOTIF_KEY_A = 'articles_read_notifs';
+
+        function getReadSetA() {
+            try { return JSON.parse(localStorage.getItem(NOTIF_KEY_A) || '[]'); } catch(e) { return []; }
+        }
+        function saveReadSetA(arr) {
+            try { localStorage.setItem(NOTIF_KEY_A, JSON.stringify(arr)); } catch(e) {}
+        }
+
+        // Áp dụng trạng thái đã đọc khi load trang
+        (function applyReadState() {
+            var readIds = getReadSetA();
+            document.querySelectorAll('.notif-item[data-id]').forEach(function(el) {
+                if (readIds.indexOf(el.dataset.id) !== -1) {
+                    el.classList.remove('unread');
+                    var dot = el.querySelector('.unread-dot');
+                    if (dot) dot.remove();
+                }
+            });
+            updateNotifBadge();
+        })();
+
         function toggleNotif() {
             document.getElementById('notifDropdown').classList.toggle('hidden');
         }
 
+        function updateNotifBadge() {
+            var count = document.querySelectorAll('.notif-item.unread').length;
+            var dot   = document.getElementById('notifDot');
+            var badge = document.getElementById('notifCount');
+            if (count > 0) {
+                dot.classList.remove('hidden');
+                badge.textContent = count;
+                badge.classList.remove('hidden');
+            } else {
+                dot.classList.add('hidden');
+                badge.classList.add('hidden');
+            }
+        }
+
+        function markOneRead(el) {
+            if (el.classList.contains('unread')) {
+                el.classList.remove('unread');
+                var dot = el.querySelector('.unread-dot');
+                if (dot) dot.remove();
+                var readIds = getReadSetA();
+                if (el.dataset.id && readIds.indexOf(el.dataset.id) === -1) {
+                    readIds.push(el.dataset.id);
+                    saveReadSetA(readIds);
+                }
+                updateNotifBadge();
+            }
+        }
+
         function markAllRead() {
-            document.querySelectorAll('.notif-item').forEach(el => el.classList.remove('bg-primary/5'));
-            document.getElementById('notifDot').classList.add('hidden');
+            document.querySelectorAll('.notif-item.unread').forEach(function(el) {
+                markOneRead(el);
+            });
         }
 
         document.addEventListener('click', function (e) {
-            const wrapper = document.getElementById('notifWrapper');
+            var wrapper = document.getElementById('notifWrapper');
             if (wrapper && !wrapper.contains(e.target)) {
                 document.getElementById('notifDropdown').classList.add('hidden');
             }
         });
 
-        // ── Dark / Light mode ─────────────────────────────────────────────
+                // ── Dark / Light mode ─────────────────────────────────────────────
         const html      = document.documentElement;
         const themeIcon = document.getElementById('themeIcon');
 
