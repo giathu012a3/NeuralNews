@@ -46,8 +46,17 @@ const AdminContent = {
         e.preventDefault();
         const ids = [...document.querySelectorAll('.article-checkbox:checked')].filter(cb => cb.dataset.status === 'PENDING').map(cb => cb.value);
         if (!ids.length) return Toast.error('Chọn ít nhất một bài viết "Chờ duyệt"!');
-        if (confirm(`Duyệt ${ids.length} bài đã chọn?`)) 
-            this._doAction('action=bulk_approve&' + ids.map(id => `articleIds[]=${id}`).join('&'));
+        
+        App.confirm({
+            title: 'Duyệt hàng loạt',
+            message: `Bạn có chắc chắn muốn phê duyệt ${ids.length} bài viết đã chọn không?`,
+            confirmText: 'Duyệt tất cả',
+            cancelText: 'Hủy',
+            type: 'primary'
+        }).then(confirm => {
+            if (confirm) 
+                this._doAction('action=bulk_approve&' + ids.map(id => `articleIds[]=${id}`).join('&'));
+        });
     },
 
     resetFilters: function() {

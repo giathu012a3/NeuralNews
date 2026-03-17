@@ -8,6 +8,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import com.google.gson.Gson;
 import neuralnews.dao.ArticleDao;
 import neuralnews.model.Article;
@@ -107,6 +108,9 @@ public class AdminContentController extends HttpServlet {
 
         boolean success = false;
 
+        HttpSession session = request.getSession();
+        Long reviewerId = (Long) session.getAttribute("userId");
+
         String message = "";
         if ("bulk_approve".equals(action)) {
             String[] ids = request.getParameterValues("articleIds[]");
@@ -117,7 +121,7 @@ public class AdminContentController extends HttpServlet {
                     int count = 0;
                     for (String idStr : ids) {
                         long id = Long.parseLong(idStr);
-                        if(dao.updateArticleStatus(id, "PUBLISHED")) count++;
+                        if(dao.updateArticleStatus(id, "PUBLISHED", reviewerId)) count++;
                     }
                     success = true;
                     message = "Đã duyệt thành công " + count + " bài viết";
@@ -134,15 +138,15 @@ public class AdminContentController extends HttpServlet {
                 long articleId = Long.parseLong(articleIdStr);
                 switch (action) {
                     case "approve":
-                        success = dao.updateArticleStatus(articleId, "PUBLISHED");
+                        success = dao.updateArticleStatus(articleId, "PUBLISHED", reviewerId);
                         message = success ? "Phê duyệt bài viết thành công" : "Không thể phê duyệt bài viết";
                         break;
                     case "reject":
-                        success = dao.updateArticleStatus(articleId, "REJECTED");
+                        success = dao.updateArticleStatus(articleId, "REJECTED", reviewerId);
                         message = success ? "Đã từ chối bài viết" : "Thao tác thất bại";
                         break;
                     case "archive":
-                        success = dao.updateArticleStatus(articleId, "ARCHIVED");
+                        success = dao.updateArticleStatus(articleId, "ARCHIVED", reviewerId);
                         message = success ? "Đã đưa bài viết vào kho lưu trữ" : "Lỗi khi lưu trữ";
                         break;
                     default:

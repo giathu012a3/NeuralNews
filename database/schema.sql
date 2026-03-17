@@ -29,6 +29,7 @@ CREATE TABLE `articles` (
   `summary` text,
   `image_url` varchar(500) DEFAULT NULL,
   `author_id` bigint DEFAULT NULL,
+  `approved_by` bigint DEFAULT NULL,
   `category_id` int DEFAULT NULL,
   `status` enum('DRAFT','PENDING','PUBLISHED','ARCHIVED','REJECTED') DEFAULT 'DRAFT',
   `views` int DEFAULT '0',

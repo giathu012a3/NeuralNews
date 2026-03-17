@@ -10,6 +10,7 @@ public class Article {
     private String summary;
     private String imageUrl;
     private long authorId;
+    private Long approvedBy;
     private int categoryId;
     private String status;
     private int views;
@@ -27,6 +28,7 @@ public class Article {
     private String statusBadgeClass;
     private String statusDotClass;
     private String formattedViews;
+    private String reviewerName;
 
     public Article() {
     }
@@ -107,6 +109,14 @@ public class Article {
 
     public void setAuthorId(long authorId) {
         this.authorId = authorId;
+    }
+
+    public Long getApprovedBy() {
+        return approvedBy;
+    }
+
+    public void setApprovedBy(Long approvedBy) {
+        this.approvedBy = approvedBy;
     }
 
     public int getCategoryId() {
@@ -227,5 +237,13 @@ public class Article {
 
     public void setFormattedViews(String formattedViews) {
         this.formattedViews = formattedViews;
+    }
+
+    public String getReviewerName() {
+        return reviewerName;
+    }
+
+    public void setReviewerName(String reviewerName) {
+        this.reviewerName = reviewerName;
     }
 }

@@ -10,7 +10,7 @@
                     class="${param.activePage == 'dashboard' ? 'sidebar-active' : 'text-slate-400 hover:text-white hover:bg-slate-800'} flex items-center gap-3 px-4 py-3 rounded-lg transition-all"
                     href="${pageContext.request.contextPath}/admin/home.jsp"> <span
                         class="material-icons text-[20px]">dashboard</span> <span class="font-medium">Bảng điều
-                        khiển</span> </a> <a href="${pageContext.request.contextPath}/admin/users.jsp"
+                        khiển</span> </a> <a href="${pageContext.request.contextPath}/admin/users"
                     class="${param.activePage == 'users' ? 'sidebar-active' : 'text-slate-400 hover:text-white hover:bg-slate-800'} flex items-center gap-3 px-4 py-3 rounded-lg transition-all">
                     <span class="material-icons text-[20px]">people</span> <span class="font-medium">Quản lý Người
                         dùng</span> </a> <a href="${pageContext.request.contextPath}/admin/permissions.jsp"

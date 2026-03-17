@@ -27,7 +27,7 @@
                     <th class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Tác giả</th>
                     <th class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">Trạng thái</th>
                     <th class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">Thống kê</th>
-                    <th class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Chất lượng AI</th>
+                    <th class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Người duyệt</th>
                     <th class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-right">Thao tác</th>
                 </tr>
             </thead>
@@ -63,7 +63,11 @@
                                     <div class="flex items-center justify-center gap-2 text-[11px]"><span class="material-icons text-sm">visibility</span>${a.formattedViews}</div>
                                 </td>
                                 <td class="px-6 py-4">
-                                    <div class="flex items-center gap-2"><div class="w-1.5 h-1.5 rounded-full bg-green-500"></div><span class="text-sm font-bold text-slate-800 dark:text-white">92%</span></div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-sm font-medium text-slate-600 dark:text-slate-400">
+                                            ${not empty a.reviewerName ? a.reviewerName : (a.status == 'PUBLISHED' ? 'Hệ thống AI' : '—')}
+                                        </span>
+                                    </div>
                                 </td>
                                 <td class="px-6 py-4 text-right">
                                     <div class="flex justify-end gap-1">

@@ -27,7 +27,11 @@
                 <div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 flex flex-wrap items-end gap-4">
                     <div class="flex-1 min-w-[200px]">
                         <label class="text-[10px] font-bold text-slate-400 uppercase mb-1 block">Tìm kiếm bài viết</label>
-                        <input id="searchInput" class="w-full text-sm border-slate-200 dark:border-slate-600 dark:bg-slate-900 rounded-lg focus:ring-primary" placeholder="Tiêu đề, Tác giả, hoặc ID..." type="text" />
+                        <div class="relative flex items-center group">
+                            <span class="material-icons absolute left-3 text-slate-400 group-focus-within:text-primary transition-colors">search</span>
+                            <input id="searchInput" class="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-600 rounded-lg text-sm focus:ring-2 focus:ring-primary shadow-inner transition-all" 
+                                placeholder="Tiêu đề, Tác giả, hoặc ID..." type="text" />
+                        </div>
                     </div>
                     <div class="w-48">
                         <label class="text-[10px] font-bold text-slate-400 uppercase mb-1 block">Danh mục</label>

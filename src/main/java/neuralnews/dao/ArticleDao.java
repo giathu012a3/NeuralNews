@@ -65,14 +65,16 @@ public class ArticleDao {
     public List<Article> getAllArticlesFiltered(int limit, int offset, String keyword, String status, Integer categoryId) {
         StringBuilder sql = new StringBuilder("""
                     SELECT a.id, a.title, a.content, a.summary, a.image_url,
-                           a.author_id, a.category_id, a.status, a.views, a.likes_count,
+                           a.author_id, a.approved_by, a.category_id, a.status, a.views, a.likes_count,
                            a.sentiment_label, a.source_score, a.popularity_score,
                            a.published_at, a.created_at,
                            c.name AS category_name,
-                           u.full_name AS author_name
+                           u.full_name AS author_name,
+                           u2.full_name AS reviewer_name
                     FROM articles a
                     LEFT JOIN categories c ON a.category_id = c.id
                     LEFT JOIN users u ON a.author_id = u.id
+                    LEFT JOIN users u2 ON a.approved_by = u2.id
                     WHERE a.status != 'DRAFT'
                 """);
         List<Object> params = new ArrayList<>();
@@ -103,6 +105,7 @@ public class ArticleDao {
             while (rs.next()) {
                 Article a = mapArticle(rs);
                 try { a.setAuthorName(rs.getString("author_name")); } catch(Exception e) {}
+                try { a.setReviewerName(rs.getString("reviewer_name")); } catch(Exception e) {}
                 list.add(a);
             }
         } catch (Exception e) { e.printStackTrace(); }
@@ -305,11 +308,17 @@ public class ArticleDao {
 
     // ── Cập nhật status (Admin) ──────────────────────────────────────────
     public boolean updateArticleStatus(long articleId, String status) {
-        String sql = "UPDATE articles SET status = ? WHERE id = ?";
+        return updateArticleStatus(articleId, status, null);
+    }
+
+    public boolean updateArticleStatus(long articleId, String status, Long approvedBy) {
+        String sql = "UPDATE articles SET status = ?, approved_by = ? WHERE id = ?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, status);
-            ps.setLong(2, articleId);
+            if (approvedBy != null) ps.setLong(2, approvedBy);
+            else ps.setNull(2, java.sql.Types.BIGINT);
+            ps.setLong(3, articleId);
             return ps.executeUpdate() > 0;
         } catch (Exception e) { e.printStackTrace(); return false; }
     }
@@ -378,6 +387,8 @@ public class ArticleDao {
         a.setSummary(rs.getString("summary"));
         a.setImageUrl(rs.getString("image_url"));
         a.setAuthorId(rs.getLong("author_id"));
+        long ab = rs.getLong("approved_by");
+        a.setApprovedBy(rs.wasNull() ? null : ab);
         a.setCategoryId(rs.getInt("category_id"));
         a.setStatus(rs.getString("status"));
         a.setViews(rs.getInt("views"));
