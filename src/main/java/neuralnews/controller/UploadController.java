@@ -10,6 +10,10 @@ import jakarta.servlet.http.Part;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.UUID;
 
 @WebServlet("/api/upload")
@@ -19,6 +23,33 @@ import java.util.UUID;
     maxRequestSize = 1024 * 1024 * 50   // 50MB
 )
 public class UploadController extends HttpServlet {
+
+    private Path resolveProjectUploadsDir() {
+        // Ưu tiên cấu hình bằng env/JVM (không cần sửa DB)
+        String env = System.getenv("NEURALNEWS_UPLOAD_DIR");
+        if (env != null && !env.isBlank()) return Paths.get(env.trim());
+
+        String sys = System.getProperty("neuralnews.upload.dir");
+        if (sys != null && !sys.isBlank()) return Paths.get(sys.trim());
+
+        // Context-param trong web.xml (nếu muốn cấu hình qua server)
+        try {
+            String ctx = getServletContext().getInitParameter("NEURALNEWS_UPLOAD_DIR");
+            if (ctx != null && !ctx.isBlank()) return Paths.get(ctx.trim());
+        } catch (Exception ignored) {}
+
+        // Mặc định dùng 1 folder "ai mở cũng thấy" (không phụ thuộc đường dẫn project):
+        //   Windows: C:/Users/<user>/NeuralNews/uploads/images
+        //   macOS/Linux: /Users/<user>/NeuralNews/uploads/images (hoặc /home/<user>/...)
+        try {
+            String home = System.getProperty("user.home");
+            if (home != null && !home.isBlank()) {
+                return Paths.get(home, "NeuralNews", "uploads", "images");
+            }
+        } catch (Exception ignored) {}
+
+        return null; // fallback: chỉ lưu ở deployed dir
+    }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -41,23 +72,52 @@ public class UploadController extends HttpServlet {
             // Tạo tên file ngẫu nhiên để tránh trùng
             String newFileName = UUID.randomUUID().toString() + extension;
             
-            // Đường dẫn lưu trữ vật lý
-            String uploadPath = getServletContext().getRealPath("/") + "uploads" + File.separator + "images";
-            File uploadDir = new File(uploadPath);
-            if (!uploadDir.exists()) {
-                uploadDir.mkdirs();
-            }
+            // 1) Lưu vào thư mục deploy (để URL /uploads/... truy cập được ngay)
+            String deployedUploadPath = getServletContext().getRealPath("/") + "uploads" + File.separator + "images";
+            File deployedDir = new File(deployedUploadPath);
+            if (!deployedDir.exists()) deployedDir.mkdirs();
 
-            String filePath = uploadPath + File.separator + newFileName;
-            filePart.write(filePath);
+            Path deployedFile = Paths.get(deployedUploadPath, newFileName);
+            filePart.write(deployedFile.toString());
+
+            // 2) (Tuỳ chọn) copy thêm về đúng folder trong project: src/main/webapp/uploads/images
+            // để bạn nhìn thấy file ngay trong repo.
+            boolean projectCopied = false;
+            String projectDirUsed = null;
+            Path projectDir = resolveProjectUploadsDir();
+            if (projectDir != null) {
+                try {
+                    Files.createDirectories(projectDir);
+                    Path projectFile = projectDir.resolve(newFileName).normalize();
+                    if (!projectFile.equals(deployedFile)) {
+                        Files.copy(deployedFile, projectFile, StandardCopyOption.REPLACE_EXISTING);
+                    }
+                    projectCopied = true;
+                    projectDirUsed = projectDir.toAbsolutePath().normalize().toString();
+                } catch (Exception ignored) {
+                    // Nếu không copy được (quyền/đường dẫn), vẫn OK vì file đã nằm ở deploy dir.
+                }
+            }
 
             // Trả về đường dẫn tương đối để lưu vào DB
             String relativePath = "uploads/images/" + newFileName;
-            response.getWriter().write("{\"success\": true, \"url\": \"" + relativePath + "\"}");
+            String deployedDirUsed = deployedDir.getAbsolutePath();
+            response.getWriter().write("{"
+                    + "\"success\": true,"
+                    + "\"url\": \"" + relativePath + "\","
+                    + "\"deployedDir\": \"" + escapeJson(deployedDirUsed) + "\","
+                    + "\"projectCopied\": " + projectCopied + ","
+                    + "\"projectDir\": " + (projectDirUsed != null ? "\"" + escapeJson(projectDirUsed) + "\"" : "null")
+                    + "}");
 
         } catch (Exception e) {
             e.printStackTrace();
             response.getWriter().write("{\"success\": false, \"message\": \"" + e.getMessage() + "\"}");
         }
+    }
+
+    private String escapeJson(String s) {
+        if (s == null) return "";
+        return s.replace("\\", "\\\\").replace("\"", "\\\"");
     }
 }

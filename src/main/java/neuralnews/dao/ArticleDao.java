@@ -65,7 +65,7 @@ public class ArticleDao {
     public List<Article> getAllArticlesFiltered(int limit, int offset, String keyword, String status, Integer categoryId) {
         StringBuilder sql = new StringBuilder("""
                     SELECT a.id, a.title, a.content, a.summary, a.image_url,
-                           a.author_id, a.approved_by, a.category_id, a.status, a.views, a.likes_count,
+                           a.author_id, a.approved_by, a.category_id, a.status, a.views, a.likes_count, a.dislikes_count,
                            a.sentiment_label, a.source_score, a.popularity_score,
                            a.published_at, a.created_at,
                            c.name AS category_name,
@@ -181,7 +181,7 @@ public class ArticleDao {
                                                       int offset, int limit) {
         StringBuilder sql = new StringBuilder("""
             SELECT a.id, a.title, a.content, a.summary, a.image_url,
-                   a.author_id, a.category_id, a.status, a.views, a.likes_count,
+                   a.author_id, a.category_id, a.status, a.views, a.likes_count, a.dislikes_count,
                    a.sentiment_label, a.source_score, a.popularity_score,
                    a.published_at, a.created_at,
                    c.name AS category_name
@@ -393,6 +393,7 @@ public class ArticleDao {
         a.setStatus(rs.getString("status"));
         a.setViews(rs.getInt("views"));
         a.setLikesCount(rs.getInt("likes_count"));
+        try { a.setDislikesCount(rs.getInt("dislikes_count")); } catch (Exception ignored) {}
         a.setSentimentLabel(rs.getString("sentiment_label"));
         a.setSourceScore(rs.getDouble("source_score"));
         a.setPopularityScore(rs.getDouble("popularity_score"));

@@ -87,7 +87,18 @@ public class CreateArticleController extends HttpServlet {
         article.setTitle(title.trim());
         article.setContent(content != null ? content : "");
         article.setSummary(summary != null ? summary.trim() : "");
-        article.setImageUrl(imageUrl != null ? imageUrl.trim() : "");
+        String normalizedImageUrl = imageUrl != null ? imageUrl.trim() : "";
+        // Nếu client gửi full path có contextPath (vd: /NeuralNews/uploads/..)
+        // thì strip để DB luôn lưu relative (uploads/..) hoặc URL tuyệt đối (http..)
+        String ctx = request.getContextPath();
+        if (!normalizedImageUrl.isEmpty() && !normalizedImageUrl.startsWith("http")) {
+            if (normalizedImageUrl.startsWith(ctx + "/")) {
+                normalizedImageUrl = normalizedImageUrl.substring(ctx.length() + 1);
+            } else if (normalizedImageUrl.startsWith("/")) {
+                normalizedImageUrl = normalizedImageUrl.substring(1);
+            }
+        }
+        article.setImageUrl(normalizedImageUrl);
         article.setAuthorId(user.getId());
         article.setStatus(status);
         try {

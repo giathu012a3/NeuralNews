@@ -9,12 +9,14 @@ import java.util.List;
 
 public class CommentDao {
 
-    /** Đếm tổng comment gốc thuộc bài viết của author */
+    // ─────────────────────────────────────────────────────────────────────────
+    // COUNT
+    // ─────────────────────────────────────────────────────────────────────────
+
     public int countCommentsByAuthor(long authorId) {
         return countCommentsByAuthor(authorId, null);
     }
 
-    /** Đếm tổng comment gốc thuộc bài viết của author (có keyword) */
     public int countCommentsByAuthor(long authorId, String keyword) {
         boolean hasKeyword = keyword != null && !keyword.trim().isEmpty();
         String sql = "SELECT COUNT(*) FROM comments c"
@@ -33,16 +35,20 @@ public class CommentDao {
             }
             ResultSet rs = ps.executeQuery();
             if (rs.next()) return rs.getInt(1);
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return 0;
     }
 
-    /** Lấy comment gốc có phân trang + sort (latest = mới nhất, oldest = cũ nhất) */
+    // ─────────────────────────────────────────────────────────────────────────
+    // GET LIST (phân trang + sort + keyword)
+    // ─────────────────────────────────────────────────────────────────────────
+
     public List<Comment> getCommentsByAuthor(long authorId, int offset, int limit, String sort) {
         return getCommentsByAuthor(authorId, offset, limit, sort, null);
     }
 
-    /** Lấy comment gốc có phân trang + sort + keyword search */
     public List<Comment> getCommentsByAuthor(long authorId, int offset, int limit, String sort, String keyword) {
         boolean hasKeyword = keyword != null && !keyword.trim().isEmpty();
         String orderBy = "oldest".equals(sort) ? "c.created_at ASC" : "c.created_at DESC";
@@ -71,11 +77,16 @@ public class CommentDao {
             ps.setInt(idx, offset);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) list.add(mapRow(rs));
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return list;
     }
 
-    /** Lấy các reply của một comment cha */
+    // ─────────────────────────────────────────────────────────────────────────
+    // GET REPLIES
+    // ─────────────────────────────────────────────────────────────────────────
+
     public List<Comment> getReplies(long parentId) {
         String sql = "SELECT c.id, c.content, c.status, c.created_at, c.parent_id,"
                    + " u.id AS user_id, u.full_name AS user_name,"
@@ -91,11 +102,16 @@ public class CommentDao {
             ps.setLong(1, parentId);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) list.add(mapRow(rs));
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return list;
     }
 
-    /** Thêm reply */
+    // ─────────────────────────────────────────────────────────────────────────
+    // ADD REPLY
+    // ─────────────────────────────────────────────────────────────────────────
+
     public boolean addReply(long articleId, long userId, long parentId, String content) {
         String sql = "INSERT INTO comments (content, article_id, user_id, parent_id, status) VALUES (?, ?, ?, ?, 'NEUTRAL')";
         try (Connection conn = DBConnection.getConnection();
@@ -105,20 +121,28 @@ public class CommentDao {
             ps.setLong(3, userId);
             ps.setLong(4, parentId);
             return ps.executeUpdate() > 0;
-        } catch (Exception e) { e.printStackTrace(); return false; }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
-    /** Xóa comment */
+    // ─────────────────────────────────────────────────────────────────────────
+    // DELETE / UPDATE STATUS
+    // ─────────────────────────────────────────────────────────────────────────
+
     public boolean deleteComment(long commentId) {
         String sql = "DELETE FROM comments WHERE id = ?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setLong(1, commentId);
             return ps.executeUpdate() > 0;
-        } catch (Exception e) { e.printStackTrace(); return false; }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
-    /** Cập nhật status */
     public boolean updateStatus(long commentId, String status) {
         String sql = "UPDATE comments SET status = ? WHERE id = ?";
         try (Connection conn = DBConnection.getConnection();
@@ -126,8 +150,15 @@ public class CommentDao {
             ps.setString(1, status);
             ps.setLong(2, commentId);
             return ps.executeUpdate() > 0;
-        } catch (Exception e) { e.printStackTrace(); return false; }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // HELPER
+    // ─────────────────────────────────────────────────────────────────────────
 
     private Comment mapRow(ResultSet rs) throws SQLException {
         Comment c = new Comment();

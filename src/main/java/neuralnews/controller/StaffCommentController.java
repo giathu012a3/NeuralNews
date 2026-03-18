@@ -18,61 +18,88 @@ public class StaffCommentController extends HttpServlet {
 
     private static final int PAGE_SIZE = 10;
 
+    // ─────────────────────────────────────────────────────────────────────────
+    // GET — hiển thị danh sách bình luận (có hỗ trợ search, sort, phân trang)
+    // ─────────────────────────────────────────────────────────────────────────
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+        // Kiểm tra đăng nhập
         HttpSession session = request.getSession(false);
         User user = (session != null) ? (User) session.getAttribute("currentUser") : null;
-        if (user == null) { response.sendRedirect(request.getContextPath() + "/auth/login.jsp"); return; }
+        if (user == null) {
+            response.sendRedirect(request.getContextPath() + "/auth/login.jsp");
+            return;
+        }
 
-        // ── Sort ─────────────────────────────────────────────────────────
+        // ── Sort ─────────────────────────────────────────────────────────────
         String sort = request.getParameter("sort");
         if (!"oldest".equals(sort)) sort = "latest";
 
-        // ── Keyword search ───────────────────────────────────────────────
+        // ── Keyword search ───────────────────────────────────────────────────
         String keyword = request.getParameter("keyword");
         if (keyword != null && keyword.trim().isEmpty()) keyword = null;
 
-        // ── Phân trang ───────────────────────────────────────────────────
+        // ── Phân trang ───────────────────────────────────────────────────────
         int page = 1;
-        try { page = Math.max(1, Integer.parseInt(request.getParameter("page"))); } catch (Exception ignored) {}
+        try {
+            page = Math.max(1, Integer.parseInt(request.getParameter("page")));
+        } catch (Exception ignored) {}
 
-        CommentDao dao     = new CommentDao();
-        int total          = dao.countCommentsByAuthor(user.getId(), keyword);
-        int totalPages     = Math.max(1, (int) Math.ceil((double) total / PAGE_SIZE));
+        // ── Query DB ─────────────────────────────────────────────────────────
+        CommentDao dao    = new CommentDao();
+        int total         = dao.countCommentsByAuthor(user.getId(), keyword);
+        int totalPages    = Math.max(1, (int) Math.ceil((double) total / PAGE_SIZE));
         if (page > totalPages) page = totalPages;
 
-        List<Comment> comments = dao.getCommentsByAuthor(user.getId(), (page - 1) * PAGE_SIZE, PAGE_SIZE, sort, keyword);
+        List<Comment> comments = dao.getCommentsByAuthor(
+                user.getId(), (page - 1) * PAGE_SIZE, PAGE_SIZE, sort, keyword);
 
+        // ── Trang trí mỗi comment (status, time, avatar, replies) ────────────
         for (Comment c : comments) {
-            setStatusStyle(c); setFormattedTime(c); setUserAvatar(c);
+            setStatusStyle(c);
+            setFormattedTime(c);
+            setUserAvatar(c);
             List<Comment> replies = dao.getReplies(c.getId());
-            for (Comment r : replies) { setStatusStyle(r); setFormattedTime(r); setUserAvatar(r); }
+            for (Comment r : replies) {
+                setStatusStyle(r);
+                setFormattedTime(r);
+                setUserAvatar(r);
+            }
             c.setReplies(replies);
         }
 
+        // ── Set attributes cho JSP ───────────────────────────────────────────
         request.setAttribute("comments",      comments);
         request.setAttribute("totalComments", total);
         request.setAttribute("currentPage",   page);
         request.setAttribute("totalPages",    totalPages);
         request.setAttribute("sort",          sort);
         request.setAttribute("keyword",       keyword != null ? keyword : "");
+
         request.getRequestDispatcher("/journalist/comments.jsp").forward(request, response);
     }
 
+    // ─────────────────────────────────────────────────────────────────────────
+    // POST — xử lý action: spam, hide, delete, restore, reply
+    // ─────────────────────────────────────────────────────────────────────────
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
         HttpSession session = request.getSession(false);
         User user = (session != null) ? (User) session.getAttribute("currentUser") : null;
-        if (user == null) { response.sendRedirect(request.getContextPath() + "/auth/login.jsp"); return; }
+        if (user == null) {
+            response.sendRedirect(request.getContextPath() + "/auth/login.jsp");
+            return;
+        }
 
-        String action  = request.getParameter("action");
-        String idParam = request.getParameter("commentId");
-        String page    = request.getParameter("page");
-        String sort    = request.getParameter("sort");
+        String action   = request.getParameter("action");
+        String idParam  = request.getParameter("commentId");
+        String page     = request.getParameter("page");
+        String sort     = request.getParameter("sort");
+        String keyword  = request.getParameter("keyword");
         if (sort == null) sort = "latest";
 
         if (idParam != null && action != null) {
@@ -92,16 +119,38 @@ public class StaffCommentController extends HttpServlet {
             }
         }
 
-        String redirect = request.getContextPath() + "/journalist/comments?sort=" + sort;
-        if (page != null) redirect += "&page=" + page;
-        response.sendRedirect(redirect);
+        // Redirect về lại trang, giữ nguyên sort + page + keyword
+        StringBuilder redirect = new StringBuilder(request.getContextPath() + "/journalist/comments");
+        redirect.append("?sort=").append(sort);
+        if (page != null && !page.isEmpty())    redirect.append("&page=").append(page);
+        if (keyword != null && !keyword.isEmpty()) redirect.append("&keyword=").append(
+                java.net.URLEncoder.encode(keyword, "UTF-8"));
+
+        response.sendRedirect(redirect.toString());
     }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // HELPERS
+    // ─────────────────────────────────────────────────────────────────────────
 
     private void setStatusStyle(Comment c) {
         switch (c.getStatus() == null ? "" : c.getStatus()) {
-            case "SPAM"   -> { c.setStatusLabel("Spam");     c.setStatusBadgeClass("bg-red-100 text-red-700 dark:bg-red-500/10 dark:text-red-400 ring-red-500/20");         c.setStatusDotClass("bg-red-500"); }
-            case "HIDDEN" -> { c.setStatusLabel("Đã ẩn");   c.setStatusBadgeClass("bg-slate-100 text-slate-600 dark:bg-slate-500/10 dark:text-slate-400 ring-slate-500/20"); c.setStatusDotClass("bg-slate-400"); }
-            default       -> { c.setStatusLabel("Bình thường"); c.setStatusBadgeClass("bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400 ring-emerald-500/20"); c.setStatusDotClass("bg-emerald-500"); }
+            case "SPAM"   -> {
+                // Với nhà báo, hiển thị mềm hơn: "Đã báo cáo"
+                c.setStatusLabel("Đã báo cáo");
+                c.setStatusBadgeClass("bg-red-100 text-red-700 dark:bg-red-500/10 dark:text-red-400 ring-red-500/20");
+                c.setStatusDotClass("bg-red-500");
+            }
+            case "HIDDEN" -> {
+                c.setStatusLabel("Đã ẩn");
+                c.setStatusBadgeClass("bg-slate-100 text-slate-600 dark:bg-slate-500/10 dark:text-slate-400 ring-slate-500/20");
+                c.setStatusDotClass("bg-slate-400");
+            }
+            default -> {
+                c.setStatusLabel("Bình thường");
+                c.setStatusBadgeClass("bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400 ring-emerald-500/20");
+                c.setStatusDotClass("bg-emerald-500");
+            }
         }
     }
 
@@ -109,20 +158,24 @@ public class StaffCommentController extends HttpServlet {
         if (c.getCreatedAt() == null) { c.setFormattedTime("Không rõ"); return; }
         Duration diff = Duration.between(c.getCreatedAt().toInstant(), Instant.now());
         long m = diff.toMinutes(), h = diff.toHours(), d = diff.toDays();
-        if (m < 1) c.setFormattedTime("Vừa xong");
+        if      (m < 1)  c.setFormattedTime("Vừa xong");
         else if (m < 60) c.setFormattedTime(m + " phút trước");
         else if (h < 24) c.setFormattedTime(h + " giờ trước");
         else if (d < 30) c.setFormattedTime(d + " ngày trước");
-        else c.setFormattedTime(d / 30 + " tháng trước");
+        else             c.setFormattedTime(d / 30 + " tháng trước");
     }
 
     private void setUserAvatar(Comment c) {
         String name = c.getUserName();
-        if (name == null || name.isBlank()) { c.setUserAvatar("?"); c.setUserAvatarBgClass("bg-slate-100 dark:bg-slate-800 text-slate-600"); return; }
+        if (name == null || name.isBlank()) {
+            c.setUserAvatar("?");
+            c.setUserAvatarBgClass("bg-slate-100 dark:bg-slate-800 text-slate-600");
+            return;
+        }
         String[] parts = name.trim().split("\\s+");
         String initials = parts.length >= 2
-            ? ("" + parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase()
-            : name.substring(0, Math.min(2, name.length())).toUpperCase();
+                ? ("" + parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase()
+                : name.substring(0, Math.min(2, name.length())).toUpperCase();
         c.setUserAvatar(initials);
         String[] colors = {
             "bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400",

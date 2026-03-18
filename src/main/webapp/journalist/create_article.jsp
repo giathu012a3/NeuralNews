@@ -5,314 +5,546 @@
 <%@ page import="neuralnews.model.Category" %>
 
 <%
-    // Nếu vào thẳng JSP mà chưa qua controller thì forward
     List<Category> categories = (List<Category>) request.getAttribute("categories");
     if (categories == null) {
         request.getRequestDispatcher("/journalist/create-article").forward(request, response);
         return;
     }
     User currentUser = (User) request.getAttribute("currentUser");
-    Article article  = (Article) request.getAttribute("article"); // null nếu tạo mới
+    Article article  = (Article) request.getAttribute("article");
 
     String savedMsg  = request.getParameter("saved");
     String errorMsg  = request.getParameter("error");
 
-    // Helper: lấy giá trị an toàn
     String artTitle   = article != null && article.getTitle()    != null ? article.getTitle()    : "";
     String artContent = article != null && article.getContent()  != null ? article.getContent()  : "";
     String artSummary = article != null && article.getSummary()  != null ? article.getSummary()  : "";
     String artImage   = article != null && article.getImageUrl() != null ? article.getImageUrl() : "";
     int    artCatId   = article != null ? article.getCategoryId() : 0;
     long   artId      = article != null ? article.getId()         : 0;
+    String contextPath = request.getContextPath();
+    String artImageDisplay = artImage;
+    if (artImageDisplay != null && !artImageDisplay.isBlank() && !artImageDisplay.startsWith("http")) {
+        if (!artImageDisplay.startsWith(contextPath + "/")) {
+            if (artImageDisplay.startsWith("/")) artImageDisplay = contextPath + artImageDisplay;
+            else artImageDisplay = contextPath + "/" + artImageDisplay;
+        }
+    }
 %>
 
 <!DOCTYPE html>
 <html class="dark" lang="vi">
 <head>
     <jsp:include page="components/head.jsp" />
-    <title>Trình soạn thảo AI - <%= artId > 0 ? "Chỉnh sửa bài viết" : "Tạo bài viết mới" %></title>
+    <title><%= artId > 0 ? "Chỉnh sửa bài viết" : "Tạo bài viết mới" %></title>
     <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.4/tinymce.min.js"></script>
     <style>
         body { font-family: "Work Sans", sans-serif; }
-        .editor-container::-webkit-scrollbar { width: 6px; }
-        .editor-container::-webkit-scrollbar-thumb { background-color: rgba(156,163,175,0.2); border-radius:10px; }
-        .ai-badge { font-size:10px; padding:2px 8px; border-radius:9999px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; }
-        #contentEditor { min-height: 400px; outline: none; }
-        #contentEditor:empty:before { content: attr(data-placeholder); color: #4b5563; }
+
+        /* Scrollbar */
+        .editor-container::-webkit-scrollbar { width: 5px; }
+        .editor-container::-webkit-scrollbar-thumb { background: rgba(99,102,241,.3); border-radius: 10px; }
+        .editor-container::-webkit-scrollbar-track { background: transparent; }
+
+        /* ── TinyMCE: no border, no shadow ── */
+        .tox-tinymce {
+            border: none !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+            background: transparent !important;
+        }
+        .tox .tox-edit-area {
+            background: transparent !important;
+            border: none !important;
+        }
+        .tox .tox-edit-area__iframe { background: transparent !important; }
+        .tox .tox-editor-header {
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+        }
+        /* Toolbar cố định trên cùng, full width */
+        .tox .tox-editor-header {
+            position: fixed !important;
+            top: 56px !important;
+            left: 288px !important;
+            right: 0 !important;
+            width: auto !important;
+            z-index: 9999 !important;
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            padding: 0 !important;
+            transition: left .3s ease, top .3s ease !important;
+        }
+        /* Khi focus mode: toolbar full width, sát top */
+        body.focus-mode .tox .tox-editor-header {
+            left: 0 !important;
+            top: 0 !important;
+        }
+        /* Menubar */
+        .tox .tox-menubar {
+            background: rgba(8,13,20,0.97) !important;
+            backdrop-filter: blur(16px) !important;
+            -webkit-backdrop-filter: blur(16px) !important;
+            border-bottom: 1px solid rgba(255,255,255,.05) !important;
+            padding: 2px 16px !important;
+        }
+        .tox .tox-mbtn { color: #94a3b8 !important; font-size: 11px !important; font-weight: 500 !important; border-radius: 6px !important; }
+        .tox .tox-mbtn:hover { background: rgba(99,102,241,.18) !important; color: #e2e8f0 !important; }
+        /* Toolbar rows */
+        .tox .tox-toolbar-overlord,
+        .tox .tox-toolbar__primary {
+            background: rgba(10,15,20,0.95) !important;
+            backdrop-filter: blur(16px) !important;
+            -webkit-backdrop-filter: blur(16px) !important;
+            border-bottom: 1px solid rgba(99,102,241,.25) !important;
+            border-radius: 0 !important;
+            padding: 4px 16px !important;
+            margin: 0 !important;
+            width: 100% !important;
+            box-shadow: 0 4px 24px rgba(0,0,0,.4) !important;
+        }
+        .tox .tox-tbtn { border-radius: 6px !important; color: #94a3b8 !important; transition: background .15s, color .15s !important; }
+        .tox .tox-tbtn:hover { background: rgba(99,102,241,.18) !important; color: #e2e8f0 !important; }
+        .tox .tox-tbtn--enabled, .tox .tox-tbtn--active { background: rgba(99,102,241,.28) !important; color: #a5b4fc !important; }
+        .tox .tox-tbtn svg { fill: currentColor !important; }
+        .tox .tox-tbtn__select-label { color: #94a3b8 !important; font-size: 11px !important; }
+        .tox .tox-tbtn__select-chevron svg { fill: #64748b !important; }
+        .tox .tox-toolbar__group:not(:last-of-type) { border-right: 1px solid rgba(255,255,255,.08) !important; }
+        /* Statusbar */
+        .tox .tox-statusbar { background: transparent !important; border: none !important; color: #334155 !important; font-size: 10px !important; }
+
+        /* ── Light theme override ── */
+        html:not(.dark) .tox .tox-menubar {
+            background: #f1f5f9 !important;
+            border-bottom: 1px solid #e2e8f0 !important;
+        }
+        html:not(.dark) .tox .tox-mbtn { color: #475569 !important; }
+        html:not(.dark) .tox .tox-mbtn:hover { background: rgba(99,102,241,.12) !important; color: #1e293b !important; }
+        html:not(.dark) .tox .tox-toolbar-overlord,
+        html:not(.dark) .tox .tox-toolbar__primary {
+            background: #f8fafc !important;
+            backdrop-filter: none !important;
+            border-bottom: 1px solid #e2e8f0 !important;
+            box-shadow: 0 2px 8px rgba(0,0,0,.08) !important;
+        }
+        html:not(.dark) .tox .tox-tbtn { color: #475569 !important; }
+        html:not(.dark) .tox .tox-tbtn:hover { background: rgba(99,102,241,.1) !important; color: #1e293b !important; }
+        html:not(.dark) .tox .tox-tbtn--enabled,
+        html:not(.dark) .tox .tox-tbtn--active { background: rgba(99,102,241,.15) !important; color: #4f46e5 !important; }
+        html:not(.dark) .tox .tox-tbtn svg { fill: currentColor !important; }
+        html:not(.dark) .tox .tox-tbtn__select-label { color: #475569 !important; }
+        html:not(.dark) .tox .tox-toolbar__group:not(:last-of-type) { border-right: 1px solid #e2e8f0 !important; }
+        html:not(.dark) .tox .tox-statusbar { color: #94a3b8 !important; }
+        /* Dropdowns */
+        .tox .tox-collection--list, .tox .tox-menu, .tox-tinymce-aux, .tox .tox-pop, .tox .tox-dialog-wrap { z-index: 99999 !important; }
+        .tox.tox-tinymce-aux { z-index: 99999 !important; }
+        .tox .tox-collection--list .tox-collection__group { max-height: 60vh !important; overflow-y: auto !important; }
+
+        /* Sidebar input focus */
+        .s-input:focus {
+            border-color: rgba(99,102,241,.5) !important;
+            box-shadow: 0 0 0 3px rgba(99,102,241,.12) !important;
+            outline: none !important;
+        }
+
+        /* Select danh mục — đồng bộ theme tối */
+        #categorySelect { color-scheme: dark; }
+        #categorySelect option { background-color: #1e293b; color: #e2e8f0; }
+
+        /* Lightbox */
+        #lightbox {
+            display: none; position: fixed; inset: 0; z-index: 9999999;
+            background: rgba(0,0,0,.92); backdrop-filter: blur(6px);
+            align-items: center; justify-content: center;
+        }
+        #lightbox.open { display: flex; }
+        #lightbox img {
+            max-width: 90vw; max-height: 88vh;
+            border-radius: 12px;
+            box-shadow: 0 32px 80px rgba(0,0,0,.8);
+            object-fit: contain;
+        }
+        #previewModal {
+            display: none;
+            position: fixed; inset: 0; z-index: 999999;
+            background: rgba(0,0,0,.75);
+            backdrop-filter: blur(4px);
+        }
+        #previewModal.open { display: flex; align-items: center; justify-content: center; }
+        #previewBox {
+            background: #0f172a;
+            border: 1px solid rgba(99,102,241,.3);
+            border-radius: 16px;
+            width: 90vw; max-width: 860px;
+            max-height: 88vh;
+            display: flex; flex-direction: column;
+            box-shadow: 0 24px 64px rgba(0,0,0,.6);
+            overflow: hidden;
+        }
+        #previewContent {
+            flex: 1; overflow-y: auto; padding: 48px 56px;
+            font-family: "Work Sans", sans-serif;
+            color: #cbd5e1; line-height: 1.9; font-size: 16px;
+        }
+        #previewContent h1,#previewContent h2,#previewContent h3 { color: #f1f5f9; margin: 1.4em 0 .6em; }
+        #previewContent p { margin-bottom: 1em; }
+        #previewContent::-webkit-scrollbar { width: 5px; }
+        #previewContent::-webkit-scrollbar-thumb { background: rgba(99,102,241,.3); border-radius: 10px; }
     </style>
 </head>
 
 <body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen overflow-hidden">
 <div class="flex h-screen">
 
-    <%-- ── AI Sidebar ──────────────────────────────────────────────── --%>
-    <aside class="w-72 bg-white dark:bg-surface-dark border-r border-slate-200 dark:border-border-dark flex flex-col shrink-0">
-        <div class="p-5 border-b border-slate-200 dark:border-border-dark flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <div class="bg-primary size-8 rounded flex items-center justify-center text-white">
-                    <span class="material-symbols-outlined text-xl">auto_fix_high</span>
+    <%-- ── Sidebar ─────────────────────────────────────────────── --%>
+    <aside id="sidebarPanel" class="w-72 bg-white dark:bg-surface-dark border-r border-slate-200 dark:border-border-dark flex flex-col shrink-0" style="transition: width .3s ease, opacity .3s ease;">
+
+        <%-- Header --%>
+        <div class="px-4 py-3.5 border-b border-slate-200 dark:border-border-dark flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+                <div class="size-8 rounded-lg bg-indigo-600 flex items-center justify-center shadow shadow-indigo-500/40 shrink-0">
+                    <span class="material-symbols-outlined text-white" style="font-size:17px">edit_note</span>
                 </div>
-                <h2 class="text-sm font-bold tracking-tight">TRỢ LÝ AI</h2>
+                <div>
+                    <p class="text-[11px] font-bold tracking-widest text-slate-700 dark:text-slate-100 uppercase leading-none">
+                        <%= artId > 0 ? "Chỉnh Sửa" : "Tạo Bài Viết" %>
+                    </p>
+                    <p class="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5 leading-none">
+                        <%= artId > 0 ? "Cập nhật nội dung" : "Bài viết mới" %>
+                    </p>
+                </div>
             </div>
-            <button class="text-slate-400 hover:text-white transition-colors">
-                <span class="material-symbols-outlined text-xl">keyboard_double_arrow_left</span>
+            <button onclick="toggleFocusMode()" title="Thu gọn sidebar"
+                    class="size-7 rounded-md text-slate-400 hover:text-slate-200 hover:bg-white/[0.06] transition-all flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined" style="font-size:18px">keyboard_double_arrow_left</span>
             </button>
         </div>
-        <div class="flex-1 overflow-y-auto py-6 px-4 space-y-8">
+
+        <%-- Body --%>
+        <div class="flex-1 overflow-y-auto py-5 px-4 space-y-5">
 
             <%-- Danh mục --%>
             <section>
-                <h3 class="text-[11px] font-bold uppercase tracking-[0.1em] text-slate-500 mb-3">Danh mục</h3>
-                <select id="categorySelect" name="categoryId"
-                        class="w-full bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-border-dark rounded-lg px-3 py-2 text-xs text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-primary outline-none">
-                    <option value="">-- Chọn danh mục --</option>
-                    <% for (Category cat : categories) { %>
-                    <option value="<%= cat.getId() %>" <%= cat.getId() == artCatId ? "selected" : "" %>>
-                        <%= cat.getName() %>
-                    </option>
-                    <% } %>
-                </select>
+                <label class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500 mb-1.5">
+                    <span class="material-symbols-outlined" style="font-size:13px">folder_open</span>
+                    Danh mục
+                </label>
+                <div class="relative">
+                    <select id="categorySelect"
+                            class="s-input w-full appearance-none bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-border-dark rounded-lg pl-3 pr-8 py-2.5 text-xs text-slate-800 dark:text-slate-200 transition-all cursor-pointer outline-none">
+                        <option value="">-- Chọn danh mục --</option>
+                        <% for (Category cat : categories) { %>
+                        <option value="<%= cat.getId() %>" <%= cat.getId() == artCatId ? "selected" : "" %>>
+                            <%= cat.getName() %>
+                        </option>
+                        <% } %>
+                    </select>
+                    <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" style="font-size:16px">expand_more</span>
+                </div>
             </section>
 
             <%-- Ảnh đại diện --%>
             <section>
-                <h3 class="text-[11px] font-bold uppercase tracking-[0.1em] text-slate-500 mb-3">Ảnh đại diện</h3>
-                <div class="space-y-3">
-                    <%-- Preview --%>
-                    <div id="imagePreview" 
-                         class="w-full h-32 rounded-lg bg-slate-100 dark:bg-white/5 border border-dashed border-slate-300 dark:border-border-dark flex items-center justify-center overflow-hidden">
-                        <% if (artImage != null && !artImage.isBlank()) { 
-                            // Reuse Article display logic here
-                            String displayUrl = artImage.startsWith("http") ? artImage : request.getContextPath() + "/" + artImage;
-                        %>
-                            <img src="<%= displayUrl %>" class="w-full h-full object-cover" />
-                        <% } else { %>
-                            <span class="material-symbols-outlined text-slate-400">image</span>
-                        <% } %>
+                <label class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500 mb-1.5">
+                    <span class="material-symbols-outlined" style="font-size:13px">image</span>
+                    Ảnh đại diện
+                </label>
+
+                <%-- Upload zone --%>
+                <div id="uploadZone"
+                     onclick="document.getElementById('fileInput').click()"
+                     ondragover="event.preventDefault();this.classList.add('!border-indigo-500')"
+                     ondragleave="this.classList.remove('!border-indigo-500')"
+                     ondrop="handleDrop(event)"
+                     class="w-full border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg p-4 flex flex-col items-center gap-1.5 cursor-pointer hover:border-indigo-500 transition-all group">
+                    <span class="material-symbols-outlined text-slate-400 group-hover:text-indigo-400 transition-colors" style="font-size:26px">cloud_upload</span>
+                    <p class="text-[11px] text-slate-400 text-center leading-relaxed">
+                        Kéo thả hoặc <span class="text-indigo-400 font-semibold">chọn ảnh</span>
+                    </p>
+                    <p class="text-[10px] text-slate-500">JPG, PNG, WEBP · Tối đa 10MB</p>
+                </div>
+                <input id="fileInput" type="file" accept="image/*" class="hidden" onchange="uploadImage(this)" />
+
+                <%-- Progress --%>
+                <div id="uploadProgress" class="hidden mt-2 space-y-1">
+                    <span class="text-[10px] text-slate-400" id="uploadStatus">Đang tải lên...</span>
+                    <div class="w-full bg-slate-200 dark:bg-white/[0.06] rounded-full h-1">
+                        <div id="uploadBar" class="bg-indigo-500 h-1 rounded-full transition-all duration-300" style="width:0%"></div>
                     </div>
-                    
-                    <div class="flex gap-2">
-                        <input id="imageUrlInput" type="text" placeholder="URL hoặc đường dẫn ảnh..."
-                               value="<%= artImage %>"
-                               class="flex-1 bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-border-dark rounded-lg px-3 py-2 text-[10px] text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-primary outline-none" />
-                        <button type="button" onclick="document.getElementById('fileInput').click()"
-                                class="bg-primary/20 text-primary hover:bg-primary/30 p-2 rounded-lg transition-colors">
-                            <span class="material-symbols-outlined text-sm">upload</span>
-                        </button>
+                </div>
+
+                <%-- Input ẩn để giữ path ảnh (không cho nhập URL thủ công nữa) --%>
+                <input id="imageUrlInput" type="hidden"
+                       value="<%= artImage %>"/>
+
+                <%-- Preview --%>
+                <div id="imgPreviewBox" class="mt-2 rounded-lg overflow-hidden border border-slate-200 dark:border-border-dark relative group/img <%= artImage.isEmpty() ? "hidden" : "" %>">
+                    <img id="imgPreviewEl" src="<%= artImageDisplay %>" alt="Preview"
+                         onclick="openLightbox(this.src)"
+                         class="w-full h-28 object-cover cursor-zoom-in"
+                         onerror="document.getElementById('imgPreviewBox').classList.add('hidden')" />
+                    <div class="absolute inset-0 bg-black/0 group-hover/img:bg-black/20 transition-all pointer-events-none flex items-center justify-center">
+                        <span class="material-symbols-outlined text-white opacity-0 group-hover/img:opacity-100 transition-all" style="font-size:22px">zoom_in</span>
                     </div>
-                    <input type="file" id="fileInput" accept="image/*" class="hidden" onchange="uploadImage(this)" />
-                    <p class="text-[10px] text-slate-500 italic">* Tải ảnh lên hoặc dán link Unsplash</p>
+                    <button onclick="removeImage()" title="Xóa ảnh"
+                            class="absolute top-1.5 right-1.5 size-6 bg-black/60 hover:bg-red-600 rounded-full flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-all">
+                        <span class="material-symbols-outlined text-white" style="font-size:14px">close</span>
+                    </button>
                 </div>
             </section>
+
+            <div class="border-t border-slate-100 dark:border-border-dark"></div>
 
             <%-- Tóm tắt --%>
             <section>
-                <h3 class="text-[11px] font-bold uppercase tracking-[0.1em] text-slate-500 mb-3">Tóm tắt bài viết</h3>
-                <textarea id="summaryInput" rows="4" placeholder="Nhập tóm tắt ngắn gọn..."
-                          class="w-full bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-border-dark rounded-lg px-3 py-2 text-xs text-slate-800 dark:text-slate-200 resize-none focus:ring-2 focus:ring-primary outline-none"><%= artSummary %></textarea>
+                <label class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500 mb-1.5">
+                    <span class="material-symbols-outlined" style="font-size:13px">short_text</span>
+                    Tóm tắt bài viết
+                </label>
+                <textarea id="summaryInput" rows="5" maxlength="300"
+                          placeholder="Nhập tóm tắt ngắn gọn về nội dung bài viết..."
+                          oninput="document.getElementById('sumCount').textContent=this.value.length"
+                          class="s-input w-full bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-border-dark rounded-lg px-3 py-2.5 text-xs text-slate-800 dark:text-slate-200 resize-none transition-all leading-relaxed"><%= artSummary %></textarea>
+                <p class="text-[10px] text-slate-500 mt-1 text-right">
+                    <span id="sumCount"><%= artSummary.length() %></span>&nbsp;/&nbsp;300
+                </p>
             </section>
 
-            <%-- SEO --%>
-            <section>
-                <div class="flex items-center justify-between mb-4 px-1">
-                    <h3 class="text-[11px] font-bold uppercase tracking-[0.1em] text-slate-500">Trình tối ưu SEO</h3>
-                    <span class="ai-badge bg-emerald-500/10 text-emerald-500">Điểm: 84</span>
-                </div>
-                <div class="space-y-4 px-1">
-                    <div>
-                        <div class="flex items-center justify-between text-[11px] mb-2">
-                            <span class="text-slate-400">Mật độ Từ khóa</span>
-                            <span class="text-emerald-500 font-bold uppercase">Tối ưu</span>
-                        </div>
-                        <div class="w-full bg-slate-200 dark:bg-slate-800 h-1 rounded-full">
-                            <div class="bg-emerald-500 h-1 rounded-full w-[84%]"></div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <%-- Phân tích giọng văn --%>
-            <section>
-                <div class="flex items-center justify-between mb-4 px-1">
-                    <h3 class="text-[11px] font-bold uppercase tracking-[0.1em] text-slate-500">Phân tích Giọng văn</h3>
-                    <span class="ai-badge bg-primary/10 text-primary">Cân bằng</span>
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div class="p-3 bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-border-dark rounded-lg flex flex-col items-center text-center">
-                        <span class="text-primary text-lg font-bold">72%</span>
-                        <span class="text-[9px] text-slate-500 uppercase font-bold tracking-tighter">Chuyên nghiệp</span>
-                    </div>
-                    <div class="p-3 bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-border-dark rounded-lg flex flex-col items-center text-center">
-                        <span class="text-amber-500 text-lg font-bold">18%</span>
-                        <span class="text-[9px] text-slate-500 uppercase font-bold tracking-tighter">Khẩn cấp</span>
-                    </div>
-                </div>
-            </section>
-        </div>
-        <div class="p-4 border-t border-slate-200 dark:border-border-dark">
-            <button class="w-full flex items-center justify-center gap-2 py-2 text-xs font-bold text-slate-500 hover:text-primary transition-colors uppercase tracking-widest">
-                <span class="material-symbols-outlined text-lg">settings_suggest</span>
-                Cấu hình Trợ lý
-            </button>
         </div>
     </aside>
 
-    <%-- ── Main Editor ─────────────────────────────────────────────── --%>
-    <main class="flex-1 flex flex-col relative bg-white dark:bg-[#0a0f14]">
+    <%-- ── Main Editor ─────────────────────────────────────────── --%>
+    <main class="flex-1 flex flex-col relative bg-white dark:bg-[#0a0f14] overflow-hidden">
 
         <%-- Header --%>
-        <header class="h-16 bg-white dark:bg-surface-dark border-b border-slate-200 dark:border-border-dark flex items-center justify-between px-6 shrink-0 z-30">
-            <div class="flex items-center gap-6">
+        <header class="h-14 bg-white dark:bg-surface-dark border-b border-slate-200 dark:border-border-dark flex items-center justify-between px-6 shrink-0 z-30">
+            <div class="flex items-center gap-5">
                 <a class="flex items-center gap-2 text-slate-400 hover:text-white transition-colors group"
                    href="${pageContext.request.contextPath}/journalist/articles">
                     <span class="material-symbols-outlined text-xl transition-transform group-hover:-translate-x-1">arrow_back</span>
-                    <span class="text-sm font-semibold uppercase tracking-wider">Quay lại Bảng điều khiển</span>
+                    <span class="text-xs font-semibold uppercase tracking-wider">Quay lại Bảng điều khiển</span>
                 </a>
-                <div class="h-6 w-px bg-slate-200 dark:bg-border-dark"></div>
+                <div class="h-5 w-px bg-slate-200 dark:bg-border-dark"></div>
                 <div class="flex items-center gap-2">
                     <% if ("true".equals(savedMsg)) { %>
-                    <span class="size-2 bg-emerald-500 rounded-full"></span>
-                    <span class="text-[11px] font-medium text-emerald-500 uppercase tracking-widest">Đã lưu bản nháp!</span>
+                    <span class="size-1.5 bg-emerald-500 rounded-full"></span>
+                    <span class="text-[10px] font-semibold text-emerald-500 uppercase tracking-widest">Đã lưu bản nháp!</span>
                     <% } else if (errorMsg != null) { %>
-                    <span class="size-2 bg-red-500 rounded-full"></span>
-                    <span class="text-[11px] font-medium text-red-500 uppercase tracking-widest">Lỗi: <%= errorMsg %></span>
+                    <span class="size-1.5 bg-red-500 rounded-full"></span>
+                    <span class="text-[10px] font-semibold text-red-400 uppercase tracking-widest">Lỗi: <%= errorMsg %></span>
                     <% } else { %>
-                    <span class="size-2 bg-emerald-500 rounded-full animate-pulse"></span>
-                    <span class="text-[11px] font-medium text-slate-500 uppercase tracking-widest">
+                    <span class="size-1.5 bg-indigo-500 rounded-full animate-pulse"></span>
+                    <span class="text-[10px] font-semibold text-slate-500 uppercase tracking-widest">
                         <%= artId > 0 ? "Chỉnh sửa bài viết" : "Bài viết mới" %>
                     </span>
                     <% } %>
                 </div>
             </div>
-            <div class="flex items-center gap-3">
-                <%-- Nút Lưu nháp --%>
+            <div class="flex items-center gap-2">
+                <%-- Lưu nháp --%>
                 <button type="button" onclick="submitForm('draft')"
-                        class="px-4 py-2 text-xs font-bold text-slate-600 dark:text-slate-300 border border-transparent hover:border-slate-700 rounded transition-all uppercase tracking-widest">
-                    Lưu Bản nháp
+                        class="px-4 py-1.5 text-[11px] font-bold text-slate-400 border border-slate-200 dark:border-border-dark hover:border-indigo-500/50 hover:text-slate-200 rounded-lg transition-all uppercase tracking-widest">
+                    Lưu Bản Nháp
                 </button>
-                <%-- Nút Xem trước --%>
-                <% if (artId > 0) { %>
-                <a href="${pageContext.request.contextPath}/user/article.jsp?id=<%= artId %>"
-                   target="_blank"
-                   class="px-4 py-2 text-xs font-bold text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-border-dark hover:bg-slate-100 dark:hover:bg-slate-800 rounded transition-all flex items-center gap-2 uppercase tracking-widest">
-                    <span class="material-symbols-outlined text-lg">visibility</span>
+                <%-- Xem trước — luôn hiển thị, dùng modal --%>
+                <button type="button" onclick="openPreview()"
+                        class="px-4 py-1.5 text-[11px] font-bold text-slate-400 border border-slate-200 dark:border-border-dark hover:border-indigo-500/50 hover:text-slate-200 rounded-lg transition-all flex items-center gap-1.5 uppercase tracking-widest">
+                    <span class="material-symbols-outlined" style="font-size:15px">visibility</span>
                     Xem trước
-                </a>
-                <% } %>
-                <%-- Nút Xuất bản --%>
+                </button>
+                <%-- Gửi --%>
                 <button type="button" onclick="submitForm('submit')"
-                        class="px-6 py-2 bg-primary hover:bg-blue-600 text-white text-xs font-bold rounded transition-all uppercase tracking-widest shadow-lg shadow-primary/20">
+                        class="px-5 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-bold rounded-lg transition-all uppercase tracking-widest shadow shadow-indigo-600/30">
                     Gửi để Đánh giá
                 </button>
             </div>
         </header>
 
-        <%-- Hidden form gửi lên controller --%>
+        <%-- Hidden form --%>
         <form id="articleForm" method="post" action="${pageContext.request.contextPath}/journalist/create-article" style="display:none">
-            <input type="hidden" name="articleId"  id="f_articleId"  value="<%= artId > 0 ? artId : "" %>" />
-            <input type="hidden" name="title"       id="f_title" />
-            <input type="hidden" name="content"     id="f_content" />
-            <input type="hidden" name="summary"     id="f_summary" />
-            <input type="hidden" name="imageUrl"    id="f_imageUrl" />
-            <input type="hidden" name="categoryId"  id="f_categoryId" />
-            <input type="hidden" name="action"      id="f_action" />
+            <input type="hidden" name="articleId"  id="f_articleId" value="<%= artId > 0 ? artId : "" %>" />
+            <input type="hidden" name="title"      id="f_title" />
+            <input type="hidden" name="content"    id="f_content" />
+            <input type="hidden" name="summary"    id="f_summary" />
+            <input type="hidden" name="imageUrl"   id="f_imageUrl" />
+            <input type="hidden" name="categoryId" id="f_categoryId" />
+            <input type="hidden" name="action"     id="f_action" />
         </form>
 
-        <%-- Editor content --%>
-        <div class="flex-1 overflow-y-auto editor-container p-8 lg:p-16">
-            <div class="max-w-4xl mx-auto space-y-10">
+        <%-- Scroll area — padding-top để tránh toolbar cố định --%>
+        <div class="flex-1 overflow-y-auto editor-container px-8 py-10 lg:px-20 lg:py-12" style="padding-top: 130px;">
+            <div class="max-w-3xl mx-auto space-y-8">
 
                 <%-- Tiêu đề --%>
                 <input id="titleInput"
-                       class="w-full bg-transparent border-none focus:ring-0 text-5xl font-bold placeholder-slate-700 dark:text-white leading-tight outline-none"
+                       class="w-full bg-transparent border-none focus:ring-0 text-4xl lg:text-5xl font-bold placeholder-slate-700 dark:text-white leading-tight outline-none"
                        placeholder="Nhập tiêu đề bài viết..."
                        type="text"
                        value="<%= artTitle %>" />
 
-                <%-- Meta --%>
-                <div class="flex items-center gap-6 py-4 border-y border-slate-200 dark:border-border-dark">
-                    <div class="flex items-center gap-3">
-                        <div class="size-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-sm">
-                            <%= currentUser != null ? currentUser.getFullName().substring(0,1).toUpperCase() : "?" %>
-                        </div>
-                        <div class="flex flex-col">
-                            <span class="text-xs font-bold text-slate-300"><%= currentUser != null ? currentUser.getFullName() : "" %></span>
-                            <span class="text-[10px] text-slate-500 uppercase tracking-tighter">Biên tập viên</span>
-                        </div>
+                <%-- Author --%>
+                <div class="flex items-center gap-3 py-3 border-y border-slate-100 dark:border-border-dark">
+                    <div class="size-8 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-400 font-bold text-sm ring-1 ring-indigo-500/25 shrink-0">
+                        <%= currentUser != null ? currentUser.getFullName().substring(0,1).toUpperCase() : "?" %>
+                    </div>
+                    <div>
+                        <p class="text-xs font-semibold text-slate-300"><%= currentUser != null ? currentUser.getFullName() : "" %></p>
+                        <p class="text-[10px] text-slate-500 uppercase tracking-wider">Biên tập viên</p>
                     </div>
                 </div>
 
-                <%-- Content editable --%>
-                <div id="contentEditor"
-                     contenteditable="true"
-                     data-placeholder="Bắt đầu viết bài của bạn ở đây..."
-                     class="prose prose-slate dark:prose-invert max-w-none text-xl leading-[1.8] text-slate-600 dark:text-slate-300 font-light focus:outline-none min-h-[400px]"><%=
-                    artContent.isBlank() ? "" : artContent
-                %></div>
+                <%-- TinyMCE --%>
+                <textarea id="contentEditor" name="content"><%= artContent.isBlank() ? "" : artContent.replace("<", "\u003C") %></textarea>
 
             </div>
         </div>
 
-        <%-- Floating toolbar --%>
-        <div class="absolute bottom-10 left-1/2 -translate-x-1/2 flex items-center gap-1.5 p-2.5 bg-white dark:bg-surface-dark border border-slate-200 dark:border-border-dark rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] backdrop-blur-xl z-40">
-            <div class="flex items-center gap-0.5 border-r border-slate-200 dark:border-border-dark pr-2">
-                <button type="button" onclick="document.execCommand('bold')"
-                        class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-600 dark:text-slate-300 transition-colors">
-                    <span class="material-symbols-outlined text-xl">format_bold</span>
-                </button>
-                <button type="button" onclick="document.execCommand('italic')"
-                        class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-600 dark:text-slate-300 transition-colors">
-                    <span class="material-symbols-outlined text-xl">format_italic</span>
-                </button>
-                <button type="button" onclick="document.execCommand('underline')"
-                        class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-600 dark:text-slate-300 transition-colors">
-                    <span class="material-symbols-outlined text-xl">format_underlined</span>
-                </button>
-            </div>
-            <div class="flex items-center gap-0.5 border-r border-slate-200 dark:border-border-dark pr-2">
-                <button type="button" onclick="document.execCommand('insertUnorderedList')"
-                        class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-600 dark:text-slate-300 transition-colors">
-                    <span class="material-symbols-outlined text-xl">format_list_bulleted</span>
-                </button>
-                <button type="button" onclick="insertLink()"
-                        class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-600 dark:text-slate-300 transition-colors">
-                    <span class="material-symbols-outlined text-xl">link</span>
-                </button>
-                <button type="button" onclick="insertImage()"
-                        class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-600 dark:text-slate-300 transition-colors">
-                    <span class="material-symbols-outlined text-xl">image</span>
-                </button>
-            </div>
-            <button type="button"
-                    class="flex items-center gap-3 px-5 py-2.5 bg-primary hover:bg-blue-600 text-white rounded-lg font-bold transition-all text-[11px] uppercase tracking-widest group ml-2">
-                <span class="material-symbols-outlined text-lg group-hover:rotate-12 transition-transform">bolt</span>
-                Hỏi Trợ lý
+        <%-- Float buttons --%>
+        <div id="floatBtns" class="fixed flex flex-col gap-3" style="right: 20px; z-index: 999999; top: 250px; transition: top .3s ease;">
+            <button id="btnFullscreen" onclick="toggleFocusMode()" title="Chế độ tập trung"
+                    class="size-10 bg-white dark:bg-surface-dark border border-slate-200 dark:border-border-dark rounded-full shadow-lg flex items-center justify-center hover:border-indigo-500/60 transition-all group">
+                <span id="iconFullscreen" class="material-symbols-outlined text-slate-400 group-hover:text-indigo-400 transition-colors" style="font-size:18px">fullscreen</span>
             </button>
-        </div>
-
-        <%-- Floating buttons --%>
-        <div class="absolute top-24 right-8 flex flex-col gap-4">
-            <button class="size-12 bg-white dark:bg-surface-dark border border-slate-200 dark:border-border-dark rounded-full shadow-xl flex items-center justify-center hover:border-primary transition-colors group" title="Chế độ Không phân tâm">
-                <span class="material-symbols-outlined text-slate-500 group-hover:text-primary">fullscreen</span>
-            </button>
-            <button class="size-12 bg-white dark:bg-surface-dark border border-slate-200 dark:border-border-dark rounded-full shadow-xl flex items-center justify-center hover:border-primary transition-colors group" title="Chuyển đổi Giao diện">
-                <span class="material-symbols-outlined text-slate-500 group-hover:text-primary">contrast</span>
+            <button id="btnTheme" onclick="toggleTheme()" title="Sáng / Tối"
+                    class="size-10 bg-white dark:bg-surface-dark border border-slate-200 dark:border-border-dark rounded-full shadow-lg flex items-center justify-center hover:border-indigo-500/60 transition-all group">
+                <span id="iconTheme" class="material-symbols-outlined text-slate-400 group-hover:text-indigo-400 transition-colors" style="font-size:18px">light_mode</span>
             </button>
         </div>
 
     </main>
 </div>
 
+<%-- ── Lightbox ─────────────────────────────────────────────────────── --%>
+<div id="lightbox" onclick="closeLightbox()">
+    <img id="lightboxImg" src="" alt="Xem ảnh" />
+    <button onclick="closeLightbox()" style="position:fixed;top:20px;right:24px;z-index:10000000;"
+            class="size-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-all">
+        <span class="material-symbols-outlined text-white" style="font-size:20px">close</span>
+    </button>
+</div>
+
+<%-- ── Preview Modal ─────────────────────────────────────────────── --%>
+<div id="previewModal">
+    <div id="previewBox">
+        <%-- Modal header --%>
+        <div class="flex items-center justify-between px-6 py-4 border-b border-slate-700/60 shrink-0">
+            <div class="flex items-center gap-2.5">
+                <span class="material-symbols-outlined text-indigo-400" style="font-size:18px">visibility</span>
+                <span class="text-sm font-bold text-slate-200 uppercase tracking-widest">Xem trước bài viết</span>
+            </div>
+            <button onclick="closePreview()"
+                    class="size-8 rounded-lg text-slate-400 hover:text-white hover:bg-white/[0.08] transition-all flex items-center justify-center">
+                <span class="material-symbols-outlined" style="font-size:20px">close</span>
+            </button>
+        </div>
+        <%-- Ảnh đại diện preview --%>
+        <div id="previewHero" class="hidden shrink-0">
+            <img id="previewHeroImg" src="" alt="" class="w-full h-52 object-cover" />
+        </div>
+        <%-- Nội dung --%>
+        <div id="previewContent">
+            <h1 id="previewTitle" class="text-3xl font-bold text-slate-100 mb-6 leading-tight"></h1>
+            <div class="flex items-center gap-3 pb-6 mb-6 border-b border-slate-700/50">
+                <div class="size-8 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-400 font-bold text-sm ring-1 ring-indigo-500/25 shrink-0">
+                    <%= currentUser != null ? currentUser.getFullName().substring(0,1).toUpperCase() : "?" %>
+                </div>
+                <div>
+                    <p class="text-xs font-semibold text-slate-300"><%= currentUser != null ? currentUser.getFullName() : "" %></p>
+                    <p class="text-[10px] text-slate-500 uppercase tracking-wider">Biên tập viên</p>
+                </div>
+            </div>
+            <div id="previewBody"></div>
+        </div>
+    </div>
+</div>
+
 <script>
-    function submitForm(action) {
-        const title = document.getElementById('titleInput').value.trim();
-        if (!title) {
-            alert('Vui lòng nhập tiêu đề bài viết!');
-            document.getElementById('titleInput').focus();
-            return;
+    var _isDark = true;
+
+    // ── TinyMCE ───────────────────────────────────────────────────────────────
+    function initTinyMCE(darkMode) {
+        if (typeof tinymce === 'undefined') return;
+        tinymce.remove('#contentEditor');
+        tinymce.init({
+            selector: '#contentEditor',
+            plugins: [
+                'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'anchor',
+                'searchreplace', 'visualblocks', 'code', 'fullscreen',
+                'insertdatetime', 'media', 'table', 'wordcount', 'emoticons',
+                'codesample', 'hr', 'nonbreaking', 'pagebreak'
+            ],
+            toolbar1:
+                'undo redo | blocks fontfamily fontsize | ' +
+                'bold italic underline strikethrough | forecolor backcolor | ' +
+                'alignleft aligncenter alignright alignjustify',
+            toolbar2:
+                'bullist numlist outdent indent | ' +
+                'link image media table | blockquote codesample code | ' +
+                'charmap emoticons insertdatetime | hr pagebreak | ' +
+                'searchreplace visualblocks | removeformat | fullscreen',
+            toolbar_location: 'top',
+            toolbar_mode: 'wrap',
+            menubar: 'file edit view insert format tools table',
+            skin: darkMode ? 'oxide-dark' : 'oxide',
+            content_css: darkMode ? 'dark' : 'default',
+            height: 480,
+            min_height: 380,
+            resize: true,
+            branding: false,
+            promotion: false,
+            fontsize_formats: '10pt 11pt 12pt 14pt 16pt 18pt 20pt 24pt 28pt 36pt 48pt',
+            font_family_formats:
+                'Mặc định=inherit;Work Sans="Work Sans",sans-serif;' +
+                'Arial=arial,helvetica,sans-serif;Times New Roman=times new roman,times,serif;' +
+                'Georgia=georgia,palatino,serif;Courier New=courier new,courier,monospace;' +
+                'Verdana=verdana,geneva,sans-serif;',
+            block_formats: 'Đoạn văn=p; Tiêu đề 1=h1; Tiêu đề 2=h2; Tiêu đề 3=h3; Trích dẫn=blockquote; Code=pre',
+            content_style: darkMode
+                ? 'body{font-family:"Work Sans",sans-serif;font-size:16px;color:#cbd5e1;background:#0a0f14;line-height:1.9;padding:24px 36px;}'
+                : 'body{font-family:"Work Sans",sans-serif;font-size:16px;color:#1e293b;background:#fff;line-height:1.9;padding:24px 36px;}',
+            setup: function(ed) {
+                ed.on('init', function() {
+                    var aux = document.querySelector('.tox-tinymce-aux');
+                    if (aux) aux.style.zIndex = '99999';
+                });
+                ed.on('OpenWindow', function() {
+                    var aux = document.querySelector('.tox-tinymce-aux');
+                    if (aux) aux.style.zIndex = '99999';
+                });
+            }
+        });
+    }
+
+    // ── Bootstrap ─────────────────────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', function() {
+        var iconTheme = document.getElementById('iconTheme');
+        var saved = localStorage.getItem('editor_theme');
+        if (saved === 'light') {
+            document.documentElement.classList.remove('dark');
+            _isDark = false;
+            if (iconTheme) iconTheme.textContent = 'dark_mode';
+        } else {
+            document.documentElement.classList.add('dark');
+            _isDark = true;
+            if (iconTheme) iconTheme.textContent = 'light_mode';
         }
+        initTinyMCE(_isDark);
+        var sum = document.getElementById('summaryInput');
+        if (sum) document.getElementById('sumCount').textContent = sum.value.length;
+    });
+
+    // ── Submit ────────────────────────────────────────────────────────────────
+    function submitForm(action) {
+        var title = document.getElementById('titleInput').value.trim();
+        if (!title) { alert('Vui lòng nhập tiêu đề bài viết!'); document.getElementById('titleInput').focus(); return; }
+        var content = (tinymce && tinymce.get('contentEditor'))
+            ? tinymce.get('contentEditor').getContent()
+            : document.getElementById('contentEditor').value;
         document.getElementById('f_title').value      = title;
-        document.getElementById('f_content').value    = document.getElementById('contentEditor').innerHTML;
+        document.getElementById('f_content').value    = content;
         document.getElementById('f_summary').value    = document.getElementById('summaryInput').value;
         document.getElementById('f_imageUrl').value   = document.getElementById('imageUrlInput').value;
         document.getElementById('f_categoryId').value = document.getElementById('categorySelect').value;
@@ -320,59 +552,198 @@
         document.getElementById('articleForm').submit();
     }
 
-    function insertLink() {
-        const url = prompt('Nhập URL:');
-        if (url) document.execCommand('createLink', false, url);
+    // ── Image preview (sidebar) ───────────────────────────────────────────────
+    function toDisplayUrl(url) {
+        var u = (url || '').trim();
+        if (u === '') return '';
+        if (/^https?:\/\//i.test(u)) return u;
+        if (u.indexOf('${pageContext.request.contextPath}/') === 0) return u;
+        if (u.charAt(0) === '/') return '${pageContext.request.contextPath}' + u;
+        return '${pageContext.request.contextPath}/' + u;
     }
 
-    function insertImage() {
-        const url = prompt('Nhập URL ảnh:');
-        if (url) document.execCommand('insertImage', false, url);
-    }
-    function uploadImage(input) {
-        if (!input.files || !input.files[0]) return;
-        
-        const formData = new FormData();
-        formData.append('image', input.files[0]);
-        
-        const preview = document.getElementById('imagePreview');
-        const urlInput = document.getElementById('imageUrlInput');
-        
-        // Show loading
-        preview.innerHTML = '<div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>';
-        
-        fetch('${pageContext.request.contextPath}/api/upload', {
-            method: 'POST',
-            body: formData
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) {
-                urlInput.value = data.url;
-                preview.innerHTML = `<img src="${pageContext.request.contextPath}/${data.url}" class="w-full h-full object-cover" />`;
-            } else {
-                alert('Tải ảnh thất bại: ' + data.message);
-                preview.innerHTML = '<span class="material-symbols-outlined text-red-500">error</span>';
-            }
-        })
-        .catch(err => {
-            console.error(err);
-            alert('Lỗi hệ thống khi tải ảnh!');
-            preview.innerHTML = '<span class="material-symbols-outlined text-red-500">error</span>';
-        });
-    }
-
-    // Cập nhật preview khi nhập link thủ công
-    document.getElementById('imageUrlInput').addEventListener('change', function() {
-        const url = this.value;
-        const preview = document.getElementById('imagePreview');
-        if (url) {
-            const displayUrl = url.startsWith('http') ? url : '${pageContext.request.contextPath}/' + url;
-            preview.innerHTML = `<img src="${displayUrl}" class="w-full h-full object-cover" />`;
+    function handleImgPreview(url) {
+        var box = document.getElementById('imgPreviewBox');
+        var img = document.getElementById('imgPreviewEl');
+        var u = (url || '').trim();
+        if (u !== '') {
+            img.src = toDisplayUrl(u);
+            box.classList.remove('hidden');
+            img.onerror = function() { box.classList.add('hidden'); };
         } else {
-            preview.innerHTML = '<span class="material-symbols-outlined text-slate-400">image</span>';
+            box.classList.add('hidden');
+        }
+    }
+
+    // ── Preview modal ─────────────────────────────────────────────────────────
+    function openPreview() {
+        var title   = document.getElementById('titleInput').value || '(Chưa có tiêu đề)';
+        var content = (tinymce && tinymce.get('contentEditor'))
+            ? tinymce.get('contentEditor').getContent()
+            : '';
+        var imgUrl  = document.getElementById('imageUrlInput').value;
+
+        document.getElementById('previewTitle').textContent = title;
+        document.getElementById('previewBody').innerHTML    = content || '<p style="color:#475569">Chưa có nội dung.</p>';
+
+        var hero    = document.getElementById('previewHero');
+        var heroImg = document.getElementById('previewHeroImg');
+        if (imgUrl && imgUrl.trim() !== '') {
+            heroImg.src = toDisplayUrl(imgUrl);
+            hero.classList.remove('hidden');
+        } else {
+            hero.classList.add('hidden');
+        }
+        document.getElementById('previewModal').classList.add('open');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closePreview() {
+        document.getElementById('previewModal').classList.remove('open');
+        document.body.style.overflow = '';
+    }
+
+    // Đóng modal khi click ngoài
+    document.getElementById('previewModal').addEventListener('click', function(e) {
+        if (e.target === this) closePreview();
+    });
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            if (document.getElementById('lightbox').classList.contains('open')) closeLightbox();
+            else if (document.getElementById('previewModal').classList.contains('open')) closePreview();
+            else if (focusMode) toggleFocusMode();
         }
     });
+
+    // ── Theme ─────────────────────────────────────────────────────────────────
+    function toggleTheme() {
+        var iconTheme = document.getElementById('iconTheme');
+        if (document.documentElement.classList.contains('dark')) {
+            document.documentElement.classList.remove('dark');
+            localStorage.setItem('editor_theme', 'light');
+            iconTheme.textContent = 'dark_mode';
+            _isDark = false;
+        } else {
+            document.documentElement.classList.add('dark');
+            localStorage.setItem('editor_theme', 'dark');
+            iconTheme.textContent = 'light_mode';
+            _isDark = true;
+        }
+        initTinyMCE(_isDark);
+    }
+
+    // ── Focus mode ────────────────────────────────────────────────────────────
+    var focusMode = false;
+    var FLOAT_TOP_NORMAL = '250px';
+    var FLOAT_TOP_FOCUS  = '200px';
+
+    function toggleFocusMode() {
+        focusMode = !focusMode;
+        var sidebar  = document.getElementById('sidebarPanel');
+        var hdr      = document.querySelector('header');
+        var floatB   = document.getElementById('floatBtns');
+        var iconFS   = document.getElementById('iconFullscreen');
+        var dur      = 'all .3s ease';
+        if (focusMode) {
+            document.body.classList.add('focus-mode');
+            sidebar.style.cssText = 'transition:' + dur + ';width:0;min-width:0;overflow:hidden;opacity:0';
+            hdr.style.cssText     = 'transition:' + dur + ';height:0;overflow:hidden;opacity:0;padding:0';
+            floatB.style.top      = FLOAT_TOP_FOCUS;
+            iconFS.textContent    = 'fullscreen_exit';
+        } else {
+            document.body.classList.remove('focus-mode');
+            sidebar.style.cssText = 'transition:' + dur;
+            setTimeout(function(){ sidebar.style.cssText = ''; }, 320);
+            hdr.style.cssText = 'transition:' + dur;
+            setTimeout(function(){ hdr.style.cssText = ''; }, 320);
+            floatB.style.top   = FLOAT_TOP_NORMAL;
+            iconFS.textContent = 'fullscreen';
+        }
+    }
+
+    function openLightbox(src) {
+        document.getElementById('lightboxImg').src = src;
+        document.getElementById('lightbox').classList.add('open');
+        document.body.style.overflow = 'hidden';
+    }
+    function closeLightbox() {
+        document.getElementById('lightbox').classList.remove('open');
+        document.body.style.overflow = '';
+    }
+
+    // ── Image upload ──────────────────────────────────────────────────────────
+    function uploadImage(input) {
+        var file = input.files[0];
+        if (!file) return;
+        if (file.size > 10 * 1024 * 1024) { alert('Ảnh quá lớn! Tối đa 10MB.'); return; }
+        var formData = new FormData();
+        formData.append('image', file);
+        var progress = document.getElementById('uploadProgress');
+        var bar      = document.getElementById('uploadBar');
+        var status   = document.getElementById('uploadStatus');
+        bar.className = 'bg-indigo-500 h-1 rounded-full transition-all duration-300';
+        progress.classList.remove('hidden');
+        bar.style.width = '0%';
+        status.textContent = 'Đang tải lên...';
+        var pct = 0;
+        var timer = setInterval(function() { pct = Math.min(pct + 12, 85); bar.style.width = pct + '%'; }, 80);
+        fetch('${pageContext.request.contextPath}/api/upload', { method: 'POST', body: formData })
+        .then(function(res) {
+            // Server có thể trả HTML lỗi/redirect => tránh res.json() làm throw
+            return res.text().then(function(t) {
+                var data = null;
+                try { data = JSON.parse(t); } catch (e) {}
+                if (!res.ok) {
+                    var msg = (data && data.message) ? data.message : (t || ('HTTP ' + res.status));
+                    throw new Error(msg);
+                }
+                if (!data) throw new Error('Phản hồi không hợp lệ từ server');
+                return data;
+            });
+        })
+        .then(function(data) {
+            clearInterval(timer);
+            bar.style.width = '100%';
+            if (data.success && data.url) {
+                status.textContent = '✓ Tải lên thành công!' + (data.projectCopied ? '' : ' (đã lưu trên server)');
+                // Lưu vào input dạng relative để tránh bị nhân đôi contextPath khi render nơi khác
+                document.getElementById('imageUrlInput').value = data.url;
+                handleImgPreview(data.url);
+                if (!data.projectCopied && data.deployedDir) {
+                    console.log('[Upload] saved to deployedDir:', data.deployedDir, 'projectDir:', data.projectDir);
+                }
+                setTimeout(function() { progress.classList.add('hidden'); }, 1800);
+            } else {
+                status.textContent = 'Lỗi: ' + (data.message || 'Không thể tải lên');
+                bar.className = 'bg-red-500 h-1 rounded-full';
+            }
+        })
+        .catch(function(err) {
+            clearInterval(timer);
+            status.textContent = 'Lỗi: ' + (err && err.message ? err.message : 'Không thể tải lên');
+            bar.className = 'bg-red-500 h-1 rounded-full';
+        });
+        input.value = '';
+    }
+
+    function handleDrop(e) {
+        e.preventDefault();
+        document.getElementById('uploadZone').classList.remove('!border-indigo-500');
+        var file = e.dataTransfer.files[0];
+        if (file && file.type.startsWith('image/')) {
+            var dt = new DataTransfer();
+            dt.items.add(file);
+            var inp = document.getElementById('fileInput');
+            inp.files = dt.files;
+            uploadImage(inp);
+        }
+    }
+
+    function removeImage() {
+        document.getElementById('imageUrlInput').value = '';
+        document.getElementById('imgPreviewBox').classList.add('hidden');
+        document.getElementById('imgPreviewEl').src = '';
+    }
 </script>
 </body>
 </html>

@@ -15,6 +15,7 @@ public class Article {
     private String status;
     private int views;
     private int likesCount;
+    private int dislikesCount;
     private String sentimentLabel;
     private double sourceScore;
     private double popularityScore;
@@ -29,6 +30,13 @@ public class Article {
     private String statusDotClass;
     private String formattedViews;
     private String reviewerName;
+    private String readingTime;
+    private String engagementRate;
+    private String sentimentBadgeClass;
+    private String sentimentDotClass;
+    private String sentimentText;
+    private String trendIcon;
+    private String trendClass;
 
     public Article() {
     }
@@ -143,13 +151,11 @@ public class Article {
         this.views = views;
     }
 
-    public int getLikesCount() {
-        return likesCount;
-    }
+    public int getLikesCount() { return likesCount; }
+    public void setLikesCount(int likesCount) { this.likesCount = likesCount; }
 
-    public void setLikesCount(int likesCount) {
-        this.likesCount = likesCount;
-    }
+    public int getDislikesCount() { return dislikesCount; }
+    public void setDislikesCount(int dislikesCount) { this.dislikesCount = dislikesCount; }
 
     public String getSentimentLabel() {
         return sentimentLabel;
@@ -246,4 +252,30 @@ public class Article {
     public void setReviewerName(String reviewerName) {
         this.reviewerName = reviewerName;
     }
+
+    public String getReadingTime() {
+        return readingTime;
+    }
+
+    public void setReadingTime(String readingTime) {
+        this.readingTime = readingTime;
+    }
+
+    public String getEngagementRate() { return engagementRate; }
+    public void setEngagementRate(String engagementRate) { this.engagementRate = engagementRate; }
+
+    public String getSentimentBadgeClass() { return sentimentBadgeClass; }
+    public void setSentimentBadgeClass(String sentimentBadgeClass) { this.sentimentBadgeClass = sentimentBadgeClass; }
+
+    public String getSentimentDotClass() { return sentimentDotClass; }
+    public void setSentimentDotClass(String sentimentDotClass) { this.sentimentDotClass = sentimentDotClass; }
+
+    public String getSentimentText() { return sentimentText; }
+    public void setSentimentText(String sentimentText) { this.sentimentText = sentimentText; }
+
+    public String getTrendIcon() { return trendIcon; }
+    public void setTrendIcon(String trendIcon) { this.trendIcon = trendIcon; }
+
+    public String getTrendClass() { return trendClass; }
+    public void setTrendClass(String trendClass) { this.trendClass = trendClass; }
 }

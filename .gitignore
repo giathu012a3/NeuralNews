@@ -55,6 +55,10 @@ out/
 Thumbs.db
 Desktop.ini
 
+# Uploads (commit images, ignore OS junk)
+src/main/webapp/uploads/images/**/Thumbs.db
+src/main/webapp/uploads/images/**/.DS_Store
+
 # Gradle
 .gradle
 build/
