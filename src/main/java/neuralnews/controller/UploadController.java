@@ -18,37 +18,31 @@ import java.util.UUID;
 
 @WebServlet("/api/upload")
 @MultipartConfig(
-    fileSizeThreshold = 1024 * 1024 * 2, // 2MB
-    maxFileSize = 1024 * 1024 * 10,      // 10MB
-    maxRequestSize = 1024 * 1024 * 50   // 50MB
+    fileSizeThreshold = 1024 * 1024 * 2,
+    maxFileSize = 1024 * 1024 * 10,
+    maxRequestSize = 1024 * 1024 * 50
 )
 public class UploadController extends HttpServlet {
 
     private Path resolveProjectUploadsDir() {
-        // 0) Ưu tiên ổ A (Project hiện tại của bạn) để bạn thấy file ngay lập tức
         try {
             Path customPath = Paths.get("A:", "NeuralNews", "src", "main", "webapp", "uploads", "images");
-            if (Files.exists(customPath.getParent().getParent())) { // Kiểm tra xem NeuralNews/src có tồn tại ko
+            if (Files.exists(customPath.getParent().getParent())) {
                 return customPath;
             }
         } catch (Exception ignored) {}
 
-        // 1) Ưu tiên cấu hình bằng env/JVM (cho production)
         String env = System.getenv("NEURALNEWS_UPLOAD_DIR");
         if (env != null && !env.isBlank()) return Paths.get(env.trim());
 
         String sys = System.getProperty("neuralnews.upload.dir");
         if (sys != null && !sys.isBlank()) return Paths.get(sys.trim());
 
-        // Context-param trong web.xml (nếu muốn cấu hình qua server)
         try {
             String ctx = getServletContext().getInitParameter("NEURALNEWS_UPLOAD_DIR");
             if (ctx != null && !ctx.isBlank()) return Paths.get(ctx.trim());
         } catch (Exception ignored) {}
 
-        // Mặc định dùng 1 folder "ai mở cũng thấy" (không phụ thuộc đường dẫn project):
-        //   Windows: C:/Users/<user>/NeuralNews/uploads/images
-        //   macOS/Linux: /Users/<user>/NeuralNews/uploads/images (hoặc /home/<user>/...)
         try {
             String home = System.getProperty("user.home");
             if (home != null && !home.isBlank()) {
@@ -56,7 +50,7 @@ public class UploadController extends HttpServlet {
             }
         } catch (Exception ignored) {}
 
-        return null; // fallback: chỉ lưu ở deployed dir
+        return null;
     }
 
     @Override
@@ -82,10 +76,8 @@ public class UploadController extends HttpServlet {
                 extension = fileName.substring(fileName.lastIndexOf("."));
             }
             
-            // Tạo tên file ngẫu nhiên để tránh trùng
             String newFileName = UUID.randomUUID().toString() + extension;
             
-            // 1) Lưu vào thư mục deploy (để URL /uploads/... truy cập được ngay)
             String deployedUploadPath = getServletContext().getRealPath("/") + "uploads" + File.separator + "images";
             File deployedDir = new File(deployedUploadPath);
             if (!deployedDir.exists()) deployedDir.mkdirs();
@@ -93,8 +85,6 @@ public class UploadController extends HttpServlet {
             Path deployedFile = Paths.get(deployedUploadPath, newFileName);
             filePart.write(deployedFile.toString());
 
-            // 2) (Tuỳ chọn) copy thêm về đúng folder trong project: src/main/webapp/uploads/images
-            // để bạn nhìn thấy file ngay trong repo.
             boolean projectCopied = false;
             String projectDirUsed = null;
             Path projectDir = resolveProjectUploadsDir();
@@ -108,12 +98,9 @@ public class UploadController extends HttpServlet {
                     projectCopied = true;
                     projectDirUsed = projectDir.toAbsolutePath().normalize().toString();
                 } catch (Exception ignored) {
-                    // Nếu không copy được (quyền/đường dẫn), vẫn OK vì file đã nằm ở deploy dir.
                 }
             }
 
-            // Trả về đường dẫn tương đối để lưu vào DB, 
-            // và trường "location" cho TinyMCE (đường dẫn tuyệt đối từ root)
             String relativePath = "uploads/images/" + newFileName;
             String contextPath  = request.getContextPath();
             String location     = (contextPath.endsWith("/") ? contextPath : contextPath + "/") + relativePath;
@@ -139,3 +126,4 @@ public class UploadController extends HttpServlet {
         return s.replace("\\", "\\\\").replace("\"", "\\\"");
     }
 }
+
