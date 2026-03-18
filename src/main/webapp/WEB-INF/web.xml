@@ -4,6 +4,17 @@
          xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd"
          version="6.0">
     <display-name>AI News</display-name>
+    
+    <!-- Optional: nơi copy ảnh upload về (folder local).
+         Nếu không set, hệ thống vẫn lưu ảnh vào thư mục deploy của Tomcat để hiển thị bình thường.
+         Ví dụ (Windows):
+           C:\Users\Tien-IT\Desktop\NeuralNews\src\main\webapp\uploads\images
+    -->
+    <context-param>
+        <param-name>NEURALNEWS_UPLOAD_DIR</param-name>
+        <param-value></param-value>
+    </context-param>
+
     <welcome-file-list>
     	<welcome-file>index.jsp</welcome-file>
 	</welcome-file-list>

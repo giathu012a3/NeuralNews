@@ -14,6 +14,7 @@ public class Article {
     private String status;
     private int views;
     private int likesCount;
+    private int dislikesCount;
     private String sentimentLabel;
     private double sourceScore;
     private double popularityScore;
@@ -140,13 +141,11 @@ public class Article {
         this.views = views;
     }
 
-    public int getLikesCount() {
-        return likesCount;
-    }
+    public int getLikesCount() { return likesCount; }
+    public void setLikesCount(int likesCount) { this.likesCount = likesCount; }
 
-    public void setLikesCount(int likesCount) {
-        this.likesCount = likesCount;
-    }
+    public int getDislikesCount() { return dislikesCount; }
+    public void setDislikesCount(int dislikesCount) { this.dislikesCount = dislikesCount; }
 
     public String getSentimentLabel() {
         return sentimentLabel;

@@ -369,8 +369,8 @@
                                                 </a>
                                                 <% } %>
 
-                                                <%-- Nút Xóa: hiện khi DRAFT hoặc REJECTED --%>
-                                                <% if (isRejected || "DRAFT".equals(st)) { %>
+                                                <%-- Nút Xóa: hiện khi DRAFT / REJECTED / PENDING --%>
+                                                <% if (isRejected || "DRAFT".equals(st) || "PENDING".equals(st)) { %>
                                                 <a href="${pageContext.request.contextPath}/journalist/articles?action=delete&id=<%= a.getId() %>&page=<%= currentPage %>&<%= filterQS %>"
                                                     class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-400 hover:text-red-500 transition-colors"
                                                     title="Xóa bài viết"
@@ -555,28 +555,31 @@
             }
         });
 
-                // ── Dark / Light mode ─────────────────────────────────────────────
+        // ── Dark / Light mode ─────────────────────────────────────────────
+        // Đồng bộ với các trang journalist khác qua localStorage('editor_theme')
         const html      = document.documentElement;
         const themeIcon = document.getElementById('themeIcon');
 
-        // Áp dụng theme đã lưu ngay khi load
-        if (localStorage.getItem('theme') === 'light') {
+        // Áp dụng theme đã lưu ngay khi load (hỗ trợ key cũ 'theme')
+        const savedTheme = localStorage.getItem('editor_theme') || localStorage.getItem('theme') || 'dark';
+        if (savedTheme === 'light') {
             html.classList.remove('dark');
-            themeIcon.textContent = 'dark_mode';
+            if (themeIcon) themeIcon.textContent = 'dark_mode';
         } else {
             html.classList.add('dark');
-            themeIcon.textContent = 'light_mode';
+            if (themeIcon) themeIcon.textContent = 'light_mode';
         }
 
         function toggleTheme() {
-            if (html.classList.contains('dark')) {
+            const next = html.classList.contains('dark') ? 'light' : 'dark';
+            localStorage.setItem('editor_theme', next);
+            localStorage.setItem('theme', next); // giữ tương thích key cũ
+            if (next === 'light') {
                 html.classList.remove('dark');
-                localStorage.setItem('theme', 'light');
-                themeIcon.textContent = 'dark_mode';
+                if (themeIcon) themeIcon.textContent = 'dark_mode';
             } else {
                 html.classList.add('dark');
-                localStorage.setItem('theme', 'dark');
-                themeIcon.textContent = 'light_mode';
+                if (themeIcon) themeIcon.textContent = 'light_mode';
             }
         }
     </script>

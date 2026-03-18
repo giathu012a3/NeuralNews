@@ -22,6 +22,14 @@
     String artImage   = article != null && article.getImageUrl() != null ? article.getImageUrl() : "";
     int    artCatId   = article != null ? article.getCategoryId() : 0;
     long   artId      = article != null ? article.getId()         : 0;
+    String contextPath = request.getContextPath();
+    String artImageDisplay = artImage;
+    if (artImageDisplay != null && !artImageDisplay.isBlank() && !artImageDisplay.startsWith("http")) {
+        if (!artImageDisplay.startsWith(contextPath + "/")) {
+            if (artImageDisplay.startsWith("/")) artImageDisplay = contextPath + artImageDisplay;
+            else artImageDisplay = contextPath + "/" + artImageDisplay;
+        }
+    }
 %>
 
 <!DOCTYPE html>
@@ -268,23 +276,13 @@
                     </div>
                 </div>
 
-                <%-- Hoặc URL --%>
-                <div class="flex items-center gap-2 mt-2.5">
-                    <div class="flex-1 h-px bg-slate-200 dark:bg-border-dark"></div>
-                    <span class="text-[10px] text-slate-400">hoặc nhập URL</span>
-                    <div class="flex-1 h-px bg-slate-200 dark:bg-border-dark"></div>
-                </div>
-                <div class="relative mt-2">
-                    <span class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" style="font-size:14px">link</span>
-                    <input id="imageUrlInput" type="text" placeholder="https://..."
-                           value="<%= artImage %>"
-                           oninput="handleImgPreview(this.value)"
-                           class="s-input w-full bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-border-dark rounded-lg pl-8 pr-3 py-2 text-xs text-slate-800 dark:text-slate-200 transition-all" />
-                </div>
+                <%-- Input ẩn để giữ path ảnh (không cho nhập URL thủ công nữa) --%>
+                <input id="imageUrlInput" type="hidden"
+                       value="<%= artImage %>"/>
 
                 <%-- Preview --%>
                 <div id="imgPreviewBox" class="mt-2 rounded-lg overflow-hidden border border-slate-200 dark:border-border-dark relative group/img <%= artImage.isEmpty() ? "hidden" : "" %>">
-                    <img id="imgPreviewEl" src="<%= artImage %>" alt="Preview"
+                    <img id="imgPreviewEl" src="<%= artImageDisplay %>" alt="Preview"
                          onclick="openLightbox(this.src)"
                          class="w-full h-28 object-cover cursor-zoom-in"
                          onerror="document.getElementById('imgPreviewBox').classList.add('hidden')" />
@@ -555,11 +553,21 @@
     }
 
     // ── Image preview (sidebar) ───────────────────────────────────────────────
+    function toDisplayUrl(url) {
+        var u = (url || '').trim();
+        if (u === '') return '';
+        if (/^https?:\/\//i.test(u)) return u;
+        if (u.indexOf('${pageContext.request.contextPath}/') === 0) return u;
+        if (u.charAt(0) === '/') return '${pageContext.request.contextPath}' + u;
+        return '${pageContext.request.contextPath}/' + u;
+    }
+
     function handleImgPreview(url) {
         var box = document.getElementById('imgPreviewBox');
         var img = document.getElementById('imgPreviewEl');
-        if (url && url.trim() !== '') {
-            img.src = url;
+        var u = (url || '').trim();
+        if (u !== '') {
+            img.src = toDisplayUrl(u);
             box.classList.remove('hidden');
             img.onerror = function() { box.classList.add('hidden'); };
         } else {
@@ -581,7 +589,7 @@
         var hero    = document.getElementById('previewHero');
         var heroImg = document.getElementById('previewHeroImg');
         if (imgUrl && imgUrl.trim() !== '') {
-            heroImg.src = imgUrl;
+            heroImg.src = toDisplayUrl(imgUrl);
             hero.classList.remove('hidden');
         } else {
             hero.classList.add('hidden');
@@ -680,24 +688,39 @@
         var pct = 0;
         var timer = setInterval(function() { pct = Math.min(pct + 12, 85); bar.style.width = pct + '%'; }, 80);
         fetch('${pageContext.request.contextPath}/api/upload', { method: 'POST', body: formData })
-        .then(function(res) { return res.json(); })
+        .then(function(res) {
+            // Server có thể trả HTML lỗi/redirect => tránh res.json() làm throw
+            return res.text().then(function(t) {
+                var data = null;
+                try { data = JSON.parse(t); } catch (e) {}
+                if (!res.ok) {
+                    var msg = (data && data.message) ? data.message : (t || ('HTTP ' + res.status));
+                    throw new Error(msg);
+                }
+                if (!data) throw new Error('Phản hồi không hợp lệ từ server');
+                return data;
+            });
+        })
         .then(function(data) {
             clearInterval(timer);
             bar.style.width = '100%';
             if (data.success && data.url) {
-                status.textContent = '✓ Tải lên thành công!';
-                var fullUrl = '${pageContext.request.contextPath}/' + data.url;
-                document.getElementById('imageUrlInput').value = fullUrl;
-                handleImgPreview(fullUrl);
+                status.textContent = '✓ Tải lên thành công!' + (data.projectCopied ? '' : ' (đã lưu trên server)');
+                // Lưu vào input dạng relative để tránh bị nhân đôi contextPath khi render nơi khác
+                document.getElementById('imageUrlInput').value = data.url;
+                handleImgPreview(data.url);
+                if (!data.projectCopied && data.deployedDir) {
+                    console.log('[Upload] saved to deployedDir:', data.deployedDir, 'projectDir:', data.projectDir);
+                }
                 setTimeout(function() { progress.classList.add('hidden'); }, 1800);
             } else {
                 status.textContent = 'Lỗi: ' + (data.message || 'Không thể tải lên');
                 bar.className = 'bg-red-500 h-1 rounded-full';
             }
         })
-        .catch(function() {
+        .catch(function(err) {
             clearInterval(timer);
-            status.textContent = 'Lỗi kết nối!';
+            status.textContent = 'Lỗi: ' + (err && err.message ? err.message : 'Không thể tải lên');
             bar.className = 'bg-red-500 h-1 rounded-full';
         });
         input.value = '';

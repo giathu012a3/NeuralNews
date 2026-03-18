@@ -136,7 +136,8 @@ public class StaffCommentController extends HttpServlet {
     private void setStatusStyle(Comment c) {
         switch (c.getStatus() == null ? "" : c.getStatus()) {
             case "SPAM"   -> {
-                c.setStatusLabel("Spam");
+                // Với nhà báo, hiển thị mềm hơn: "Đã báo cáo"
+                c.setStatusLabel("Đã báo cáo");
                 c.setStatusBadgeClass("bg-red-100 text-red-700 dark:bg-red-500/10 dark:text-red-400 ring-red-500/20");
                 c.setStatusDotClass("bg-red-500");
             }

@@ -4,28 +4,54 @@
 <%@ page import="neuralnews.model.User" %>
 
 <%
-    // Nếu vào thẳng JSP → forward sang servlet
     List<Article> topArticles = (List<Article>) request.getAttribute("topArticles");
     if (topArticles == null) {
         request.getRequestDispatcher("/journalist/home").forward(request, response);
         return;
     }
 
-    User currentUser    = (User) request.getSession(false).getAttribute("currentUser");
-    String totalViews   = (String)  request.getAttribute("totalViews");
-    int totalPublished  = (Integer) request.getAttribute("totalPublished");
-    int totalDraft      = (Integer) request.getAttribute("totalDraft");
-    int totalComments   = (Integer) request.getAttribute("totalComments");
-    int[] viewsChart    = (int[])   request.getAttribute("viewsChart");
-    int   maxChart      = (Integer) request.getAttribute("maxChart");
-    String contextPath  = request.getContextPath();
+    User   currentUser   = (User)    request.getSession(false).getAttribute("currentUser");
+    String totalViews    = (String)  request.getAttribute("totalViews");
+    int    totalPublished = (Integer) request.getAttribute("totalPublished");
+    int    totalDraft    = (Integer) request.getAttribute("totalDraft");
+    int    totalComments = (Integer) request.getAttribute("totalComments");
+    String contextPath   = request.getContextPath();
 
-    // Tính ngày nhãn biểu đồ
-    java.time.LocalDate today = java.time.LocalDate.now();
-    java.time.format.DateTimeFormatter labelFmt = java.time.format.DateTimeFormatter.ofPattern("dd/MM");
-    String dateLabel0  = today.minusDays(14).format(labelFmt);
-    String dateLabel7  = today.minusDays(7).format(labelFmt);
-    String dateLabel14 = today.format(labelFmt);
+    // Views theo period
+    String views1d  = (String) request.getAttribute("views1d");
+    String views7d  = (String) request.getAttribute("views7d");
+    String views30d = (String) request.getAttribute("views30d");
+
+    // Stats 3 card theo period
+    int published1d  = request.getAttribute("published1d")  != null ? (Integer) request.getAttribute("published1d")  : 0;
+    int published7d  = request.getAttribute("published7d")  != null ? (Integer) request.getAttribute("published7d")  : 0;
+    int published30d = request.getAttribute("published30d") != null ? (Integer) request.getAttribute("published30d") : 0;
+    int draft1d      = request.getAttribute("draft1d")      != null ? (Integer) request.getAttribute("draft1d")      : 0;
+    int draft7d      = request.getAttribute("draft7d")      != null ? (Integer) request.getAttribute("draft7d")      : 0;
+    int draft30d     = request.getAttribute("draft30d")     != null ? (Integer) request.getAttribute("draft30d")     : 0;
+    int comments1d   = request.getAttribute("comments1d")   != null ? (Integer) request.getAttribute("comments1d")   : 0;
+    int comments7d   = request.getAttribute("comments7d")   != null ? (Integer) request.getAttribute("comments7d")   : 0;
+    int comments30d  = request.getAttribute("comments30d")  != null ? (Integer) request.getAttribute("comments30d")  : 0;
+
+    // Chart data dạng JSON string — Controller đã chuẩn bị sẵn
+    String chartJson1d  = (String) request.getAttribute("chartJson1d");
+    String chartJson7d  = (String) request.getAttribute("chartJson7d");
+    String chartJson30d = (String) request.getAttribute("chartJson30d");
+    String chartJsonAll = (String) request.getAttribute("chartJsonAll");
+
+    // Full label arrays cho từng cột
+    String labelJson1d  = (String) request.getAttribute("labelJson1d");
+    String labelJson7d  = (String) request.getAttribute("labelJson7d");
+    String labelJson30d = (String) request.getAttribute("labelJson30d");
+    String labelJsonAll = (String) request.getAttribute("labelJsonAll");
+    if (chartJson1d  == null) chartJson1d  = "[]";
+    if (chartJson7d  == null) chartJson7d  = "[]";
+    if (chartJson30d == null) chartJson30d = "[]";
+    if (chartJsonAll == null) chartJsonAll = "[]";
+    if (labelJson1d  == null) labelJson1d  = "[]";
+    if (labelJson7d  == null) labelJson7d  = "[]";
+    if (labelJson30d == null) labelJson30d = "[]";
+    if (labelJsonAll == null) labelJsonAll = "[]";
 %>
 <!DOCTYPE html>
 <html class="dark" lang="vi">
@@ -167,6 +193,31 @@
         <div class="flex-1 overflow-y-auto">
             <div class="p-8 max-w-7xl mx-auto space-y-8">
 
+                <%-- ══ PERIOD FILTER ══ --%>
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                        <p class="text-xs text-slate-400 mt-0.5" id="periodLabel">Tất cả thời gian</p>
+                    </div>
+                    <div class="flex items-center bg-slate-100 dark:bg-slate-800 rounded-xl p-1 gap-0.5">
+                        <button onclick="setPeriod('1d')" id="pbtn-1d"
+                                class="stat-period-btn px-3 py-1.5 text-[11px] font-bold rounded-lg transition-all text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-white">
+                            1 Ngày
+                        </button>
+                        <button onclick="setPeriod('7d')" id="pbtn-7d"
+                                class="stat-period-btn px-3 py-1.5 text-[11px] font-bold rounded-lg transition-all text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-white">
+                            7 Ngày
+                        </button>
+                        <button onclick="setPeriod('30d')" id="pbtn-30d"
+                                class="stat-period-btn px-3 py-1.5 text-[11px] font-bold rounded-lg transition-all text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-white">
+                            30 Ngày
+                        </button>
+                        <button onclick="setPeriod('all')" id="pbtn-all"
+                                class="stat-period-btn px-4 py-1.5 text-[11px] font-bold rounded-lg transition-all bg-white dark:bg-slate-700 text-primary shadow-sm">
+                            Tất cả
+                        </button>
+                    </div>
+                </div>
+
                 <%-- ══ STAT CARDS ══ --%>
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
 
@@ -176,11 +227,11 @@
                             <span class="p-2 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg material-symbols-outlined">visibility</span>
                             <span class="text-[11px] font-bold text-emerald-500 flex items-center gap-1">
                                 <span class="material-symbols-outlined text-xs">trending_up</span>
-                                Tổng cộng
+                                <span id="views-period-label">Tổng cộng</span>
                             </span>
                         </div>
                         <p class="text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase tracking-wider">Tổng lượt xem</p>
-                        <h3 class="text-3xl font-bold mt-1 tracking-tight"><%= totalViews %></h3>
+                        <h3 class="text-3xl font-bold mt-1 tracking-tight" id="stat-views"><%= totalViews %></h3>
                     </div>
 
                     <%-- Bài đã xuất bản --%>
@@ -193,7 +244,7 @@
                             </span>
                         </div>
                         <p class="text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase tracking-wider">Bài viết xuất bản</p>
-                        <h3 class="text-3xl font-bold mt-1 tracking-tight"><%= totalPublished %></h3>
+                        <h3 class="text-3xl font-bold mt-1 tracking-tight" id="stat-published"><%= totalPublished %></h3>
                     </div>
 
                     <%-- Bản nháp --%>
@@ -206,7 +257,7 @@
                             </span>
                         </div>
                         <p class="text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase tracking-wider">Đang soạn thảo</p>
-                        <h3 class="text-3xl font-bold mt-1 tracking-tight"><%= totalDraft %></h3>
+                        <h3 class="text-3xl font-bold mt-1 tracking-tight" id="stat-draft"><%= totalDraft %></h3>
                     </div>
 
                     <%-- Bình luận --%>
@@ -219,16 +270,16 @@
                             </span>
                         </div>
                         <p class="text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase tracking-wider">Tổng bình luận</p>
-                        <h3 class="text-3xl font-bold mt-1 tracking-tight"><%= totalComments %></h3>
+                        <h3 class="text-3xl font-bold mt-1 tracking-tight" id="stat-comments"><%= totalComments %></h3>
                     </div>
                 </div>
 
                 <%-- ══ CHART: XU HƯỚNG LƯỢT XEM ══ --%>
                 <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-border-dark rounded-xl p-6">
-                    <div class="flex items-center justify-between mb-6">
+                    <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
                         <div>
                             <h4 class="text-base font-bold">Xu hướng lượt xem</h4>
-                            <p class="text-xs text-slate-500 mt-0.5">Tổng views bài viết trong 15 ngày gần nhất</p>
+                            <p class="text-xs text-slate-500 mt-0.5" id="chartSubtitle">Lượt xem trong 15 ngày gần nhất</p>
                         </div>
                         <a href="<%= contextPath %>/journalist/articles"
                            class="text-xs font-semibold text-primary hover:underline flex items-center gap-1">
@@ -236,29 +287,96 @@
                             Xem tất cả bài viết
                         </a>
                     </div>
-                    <div class="h-[220px] w-full flex items-end gap-1.5 px-1">
-                        <%
-                        for (int i = 0; i < 15; i++) {
-                            int v = viewsChart[i];
-                            int heightPct = maxChart > 0 ? Math.max(4, (int)(v * 100.0 / maxChart)) : 4;
-                            String opacity = (i == 14) ? "bg-primary" : (heightPct > 60 ? "bg-primary/60" : "bg-primary/25");
-                            String vFormatted;
-                            if (v >= 1000) vFormatted = String.format("%.1fk", v/1000.0);
-                            else vFormatted = String.valueOf(v);
-                        %>
-                        <div class="chart-bar" style="height:100%">
-                            <div class="bar-tooltip"><%= vFormatted %> lượt xem</div>
-                            <div class="<%= opacity %> rounded-t-sm w-full transition-all hover:opacity-100"
-                                 style="height: <%= heightPct %>%"></div>
-                        </div>
-                        <% } %>
-                    </div>
-                    <div class="flex justify-between mt-3 px-1 text-[10px] text-slate-400 font-medium">
-                        <span><%= dateLabel0 %></span>
-                        <span><%= dateLabel7 %></span>
-                        <span><%= dateLabel14 %></span>
-                    </div>
+                    <div class="h-[220px] w-full flex items-end gap-1 px-1" id="chartBars"></div>
+                    <%-- Nhãn dưới mỗi cột --%>
+                    <div class="w-full flex gap-1 px-1 mt-1" id="chartXLabels" style="overflow:hidden;"></div>
                 </div>
+
+                <script>
+                    var CHART_DATA = {
+                        '1d':  <%= chartJson1d  %>,
+                        '7d':  <%= chartJson7d  %>,
+                        '30d': <%= chartJson30d %>,
+                        'all': <%= chartJsonAll %>
+                    };
+                    var LABEL_DATA = {
+                        '1d':  <%= labelJson1d  %>,
+                        '7d':  <%= labelJson7d  %>,
+                        '30d': <%= labelJson30d %>,
+                        'all': <%= labelJsonAll %>
+                    };
+                    var VIEWS_DATA = {
+                        '1d':  '<%= views1d  %>',
+                        '7d':  '<%= views7d  %>',
+                        '30d': '<%= views30d %>',
+                        'all': '<%= totalViews %>'
+                    };
+                    var CHART_META = {
+                        '1d':  { subtitle:'Lượt xem trong 24 giờ qua', period:'1 ngày qua' },
+                        '7d':  { subtitle:'Lượt xem trong 7 ngày gần nhất', period:'7 ngày qua' },
+                        '30d': { subtitle:'Lượt xem trong 30 ngày gần nhất', period:'30 ngày qua' },
+                        'all': { subtitle:'Views theo tháng publish', period:'Tất cả thời gian' }
+                    };
+                    var STATS_DATA = {
+                        '1d':  { published: <%= published1d %>,  draft: <%= draft1d %>,  comments: <%= comments1d %>  },
+                        '7d':  { published: <%= published7d %>,  draft: <%= draft7d %>,  comments: <%= comments7d %>  },
+                        '30d': { published: <%= published30d %>, draft: <%= draft30d %>, comments: <%= comments30d %> },
+                        'all': { published: <%= totalPublished %>, draft: <%= totalDraft %>, comments: <%= totalComments %> }
+                    };
+
+                    function setPeriod(p) {
+                        document.querySelectorAll('.stat-period-btn').forEach(function(b) {
+                            b.classList.remove('bg-white','text-primary','shadow-sm');
+                            b.classList.add('text-slate-500','dark:text-slate-400');
+                        });
+                        var btn = document.getElementById('pbtn-' + p);
+                        if (btn) {
+                            btn.classList.add('bg-white','text-primary','shadow-sm');
+                            btn.classList.remove('text-slate-500','dark:text-slate-400');
+                        }
+                        var meta  = CHART_META[p];
+                        var stats = STATS_DATA[p];
+                        document.getElementById('periodLabel').textContent        = meta.period;
+                        document.getElementById('chartSubtitle').textContent      = meta.subtitle;
+                        document.getElementById('stat-views').textContent         = VIEWS_DATA[p];
+                        document.getElementById('views-period-label').textContent = meta.period;
+                        document.getElementById('stat-published').textContent     = stats.published;
+                        document.getElementById('stat-draft').textContent         = stats.draft;
+                        document.getElementById('stat-comments').textContent      = stats.comments;
+                        renderChart(CHART_DATA[p], LABEL_DATA[p]);
+                    }
+
+                    function renderChart(data, labels) {
+                        var max       = Math.max.apply(null, data) || 1;
+                        var n         = data.length;
+                        // Hiện nhãn thưa dần khi có nhiều cột
+                        var showEvery = n >= 28 ? 5 : n >= 14 ? 2 : 1;
+
+                        var barsHtml   = '';
+                        var labelsHtml = '';
+                        data.forEach(function(v, i) {
+                            var pct    = Math.max(4, Math.round(v * 100 / max));
+                            var isLast = i === n - 1;
+                            var cls    = isLast ? 'bg-primary' : (pct > 60 ? 'bg-primary/60' : 'bg-primary/25');
+                            var tip    = (v >= 1000 ? (v/1000).toFixed(1)+'k' : String(v)) + ' lượt xem';
+                            var xLbl   = (labels && labels[i]) ? labels[i] : '';
+
+                            barsHtml += '<div class="chart-bar" style="height:100%;flex:1">'
+                                      + '<div class="bar-tooltip">' + xLbl + ': ' + tip + '</div>'
+                                      + '<div class="' + cls + ' rounded-t-sm w-full transition-all hover:opacity-100" style="height:' + pct + '%"></div>'
+                                      + '</div>';
+
+                            var show = (i % showEvery === 0) || isLast;
+                            labelsHtml += '<div style="flex:1;text-align:center;font-size:9px;color:#64748b;white-space:nowrap;overflow:hidden;">'
+                                        + (show ? xLbl : '') + '</div>';
+                        });
+
+                        document.getElementById('chartBars').innerHTML    = barsHtml;
+                        document.getElementById('chartXLabels').innerHTML = labelsHtml;
+                    }
+
+                    document.addEventListener('DOMContentLoaded', function() { setPeriod('all'); });
+                </script>
 
                 <%-- ══ TABLE: BÀI VIẾT HIỆU SUẤT CAO ══ --%>
                 <div class="space-y-4">

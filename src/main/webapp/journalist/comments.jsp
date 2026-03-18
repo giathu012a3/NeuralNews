@@ -252,8 +252,8 @@
                         boolean isSpam   = "SPAM".equals(c.getStatus());
                         boolean isHidden = "HIDDEN".equals(c.getStatus());
                         String cardClass = (isSpam || isHidden)
-                            ? "bg-slate-50/80 dark:bg-slate-900/40 rounded-xl border border-dashed border-red-200 dark:border-red-900/30 overflow-hidden opacity-90"
-                            : "bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-border-dark shadow-sm hover:shadow-md transition-shadow overflow-hidden";
+                            ? "bg-slate-50/80 dark:bg-slate-900/40 rounded-xl border border-dashed border-red-200 dark:border-red-900/30 opacity-90"
+                            : "bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-border-dark shadow-sm hover:shadow-md transition-shadow";
                 %>
                     <div class="<%= cardClass %>">
                         <div class="p-5">
@@ -345,43 +345,66 @@
                                         </button>
                                     </form>
                                 <% } else { %>
-                                    <%-- Phản hồi --%>
+                                    <%-- Chỉ giữ Phản hồi, bỏ nút Spam / Ẩn vì đã có Báo cáo --%>
                                     <button onclick="toggleReply('reply-<%= c.getId() %>')"
                                             class="flex items-center gap-1.5 text-slate-500 hover:text-primary
                                                    transition-colors text-[11px] font-bold uppercase tracking-wider">
                                         <span class="material-symbols-outlined text-lg">reply</span> Phản hồi
                                     </button>
-                                    <%-- Spam --%>
-                                    <form method="post" action="<%= contextPath %>/journalist/comments" style="display:inline">
-                                        <input type="hidden" name="action"    value="spam"/>
-                                        <input type="hidden" name="commentId" value="<%= c.getId() %>"/>
-                                        <input type="hidden" name="page"      value="<%= currentPage %>"/>
-                                        <input type="hidden" name="sort"      value="<%= sort %>"/>
-                                        <% if (hasKeyword) { %><input type="hidden" name="keyword" value="<%= keyword %>"/><% } %>
-                                        <button type="submit"
-                                                class="flex items-center gap-1.5 text-slate-500 hover:text-orange-500
-                                                       transition-colors text-[11px] font-bold uppercase tracking-wider">
-                                            <span class="material-symbols-outlined text-lg">block</span> Spam
-                                        </button>
-                                    </form>
-                                    <%-- Ẩn --%>
-                                    <form method="post" action="<%= contextPath %>/journalist/comments" style="display:inline">
-                                        <input type="hidden" name="action"    value="hide"/>
-                                        <input type="hidden" name="commentId" value="<%= c.getId() %>"/>
-                                        <input type="hidden" name="page"      value="<%= currentPage %>"/>
-                                        <input type="hidden" name="sort"      value="<%= sort %>"/>
-                                        <% if (hasKeyword) { %><input type="hidden" name="keyword" value="<%= keyword %>"/><% } %>
-                                        <button type="submit"
-                                                class="flex items-center gap-1.5 text-slate-500 hover:text-slate-900
-                                                       dark:hover:text-white transition-colors text-[11px] font-bold uppercase tracking-wider">
-                                            <span class="material-symbols-outlined text-lg">visibility_off</span> Ẩn
-                                        </button>
-                                    </form>
                                 <% } %>
                                 </div>
-                                <button class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
-                                    <span class="material-symbols-outlined">more_horiz</span>
-                                </button>
+                                <div class="relative">
+                                    <button type="button"
+                                            onclick="toggleReportMenu('report-<%= c.getId() %>')"
+                                            class="flex items-center gap-1.5 text-slate-400 hover:text-red-500 transition-colors text-[11px] font-semibold uppercase tracking-wider">
+                                        <span class="material-symbols-outlined text-lg">flag</span>
+                                        <span>Báo cáo</span>
+                                    </button>
+                                    <div id="report-<%= c.getId() %>"
+                                         class="hidden absolute right-0 top-8 w-56 bg-white dark:bg-slate-900 border border-slate-200 dark:border-border-dark rounded-xl shadow-xl z-40">
+                                        <div class="px-3 py-2 border-b border-slate-100 dark:border-border-dark">
+                                            <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Báo cáo bình luận</p>
+                                        </div>
+                                        <div class="py-1">
+                                            <form method="post" action="<%= contextPath %>/journalist/comments">
+                                                <input type="hidden" name="action"    value="spam"/>
+                                                <input type="hidden" name="commentId" value="<%= c.getId() %>"/>
+                                                <input type="hidden" name="page"      value="<%= currentPage %>"/>
+                                                <input type="hidden" name="sort"      value="<%= sort %>"/>
+                                                <% if (hasKeyword) { %><input type="hidden" name="keyword" value="<%= keyword %>"/><% } %>
+                                                <button type="submit"
+                                                        name="reason" value="OFFENSIVE"
+                                                        class="w-full text-left px-3 py-2 text-xs text-slate-600 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800">
+                                                    Ngôn từ xúc phạm / công kích cá nhân
+                                                </button>
+                                            </form>
+                                            <form method="post" action="<%= contextPath %>/journalist/comments">
+                                                <input type="hidden" name="action"    value="spam"/>
+                                                <input type="hidden" name="commentId" value="<%= c.getId() %>"/>
+                                                <input type="hidden" name="page"      value="<%= currentPage %>"/>
+                                                <input type="hidden" name="sort"      value="<%= sort %>"/>
+                                                <% if (hasKeyword) { %><input type="hidden" name="keyword" value="<%= keyword %>"/><% } %>
+                                                <button type="submit"
+                                                        name="reason" value="ADS"
+                                                        class="w-full text-left px-3 py-2 text-xs text-slate-600 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800">
+                                                    Spam / Quảng cáo
+                                                </button>
+                                            </form>
+                                            <form method="post" action="<%= contextPath %>/journalist/comments">
+                                                <input type="hidden" name="action"    value="spam"/>
+                                                <input type="hidden" name="commentId" value="<%= c.getId() %>"/>
+                                                <input type="hidden" name="page"      value="<%= currentPage %>"/>
+                                                <input type="hidden" name="sort"      value="<%= sort %>"/>
+                                                <% if (hasKeyword) { %><input type="hidden" name="keyword" value="<%= keyword %>"/><% } %>
+                                                <button type="submit"
+                                                        name="reason" value="OFFTOPIC"
+                                                        class="w-full text-left px-3 py-2 text-xs text-slate-600 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800">
+                                                    Lạc chủ đề / Không liên quan bài viết
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
                             <%-- Reply form --%>
@@ -632,6 +655,24 @@ document.getElementById('markAllRead').addEventListener('click', function() {
     document.querySelectorAll('.notif-item.unread').forEach(function(item) {
         markRead(item);
     });
+});
+
+// ── Báo cáo bình luận: toggle menu ─────────────────────────────────────
+function toggleReportMenu(id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    var isHidden = el.classList.contains('hidden');
+    document.querySelectorAll('[id^="report-"]').forEach(function(m) {
+        if (m !== el) m.classList.add('hidden');
+    });
+    if (isHidden) el.classList.remove('hidden'); else el.classList.add('hidden');
+}
+
+document.addEventListener('click', function(e) {
+    var inside = e.target.closest('[id^="report-"]') || e.target.closest('button[onclick^="toggleReportMenu"]');
+    if (!inside) {
+        document.querySelectorAll('[id^="report-"]').forEach(function(m) { m.classList.add('hidden'); });
+    }
 });
 
 // ── Highlight keyword ────────────────────────────────────────────────────────
