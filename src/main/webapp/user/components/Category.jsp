@@ -12,5 +12,5 @@
 					           	</a>
 					        <% } %>
 					    <% } else { %>
-					        <span>Chưa có danh mục</span>
+					        <span class="text-xs text-slate-400 italic">Chưa có danh mục</span>
 					    <% } %>

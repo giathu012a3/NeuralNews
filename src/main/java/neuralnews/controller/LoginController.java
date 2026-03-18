@@ -51,10 +51,7 @@ public class LoginController extends HttpServlet {
 			response.sendRedirect(contextPath + "/auth/login.jsp?error=banned");
 			return;
 		}
-		if ("PENDING".equals(user.getStatus())) {
-			response.sendRedirect(contextPath + "/auth/login.jsp?error=pending");
-			return;
-		}
+		// We allow PENDING users to login now, so they can see their application status in profile.
 
 		// Save user info to session
 		HttpSession session = request.getSession();

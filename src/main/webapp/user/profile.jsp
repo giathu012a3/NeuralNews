@@ -17,6 +17,19 @@
         </style>
     </head>
 
+    <%@ page import="neuralnews.model.User" %>
+    <%
+        User currentUser = (User) session.getAttribute("currentUser");
+        if (currentUser == null) {
+            response.sendRedirect(request.getContextPath() + "/auth/login.jsp");
+            return;
+        }
+        String userRole = (String) session.getAttribute("userRole");
+        String status = currentUser.getStatus();
+        
+        String error = request.getParameter("error");
+        String success = request.getParameter("success");
+    %>
     <body
         class="bg-background-light dark:bg-background-dark text-text-main dark:text-white font-display antialiased overflow-x-hidden transition-colors duration-200">
         <div class="flex min-h-screen w-full flex-col">
@@ -202,11 +215,21 @@
                                     </ul>
                                 </div>
                                 <div class="shrink-0 flex flex-col items-center gap-4">
-                                    <button
-                                        class="w-full md:w-auto px-10 py-4 bg-white text-primary-dark font-black text-lg rounded-xl shadow-xl shadow-black/20 hover:bg-cyan-50 hover:text-primary hover:shadow-cyan-400/20 hover:scale-105 active:scale-95 transition-all duration-300">
-                                        Đăng ký ngay
-                                    </button>
-                                    <p class="text-xs text-blue-200/60 font-medium">Nộp đơn mất &lt; 5 phút</p>
+                                    <% if ("JOURNALIST".equals(userRole) || "ADMIN".equals(userRole)) { %>
+                                        <div class="px-8 py-4 bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 font-bold rounded-xl backdrop-blur-md">
+                                            Bạn đã là Nhà báo
+                                        </div>
+                                    <% } else if ("PENDING".equals(status)) { %>
+                                        <div class="px-8 py-4 bg-amber-500/20 border border-amber-500/30 text-amber-400 font-bold rounded-xl backdrop-blur-md">
+                                            Đang chờ phê duyệt...
+                                        </div>
+                                    <% } else { %>
+                                        <button onclick="document.getElementById('upgradeModal').classList.remove('hidden')"
+                                            class="w-full md:w-auto px-10 py-4 bg-white text-primary-dark font-black text-lg rounded-xl shadow-xl shadow-black/20 hover:bg-cyan-50 hover:text-primary hover:shadow-cyan-400/20 hover:scale-105 active:scale-95 transition-all duration-300">
+                                            Đăng ký ngay
+                                        </button>
+                                        <p class="text-xs text-blue-200/60 font-medium">Nộp đơn mất &lt; 5 phút</p>
+                                    <% } %>
                                 </div>
                             </div>
                         </div>
@@ -216,6 +239,46 @@
             <jsp:include page="components/footer.jsp" />
         </div>
 
-    </body>
+        <!-- Upgrade Journalist Modal -->
+    <div id="upgradeModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 hidden">
+        <div class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm" onclick="this.parentElement.classList.add('hidden')"></div>
+        <div class="bg-white dark:bg-slate-900 w-full max-w-lg rounded-2xl shadow-2xl relative overflow-hidden z-10 animate-in fade-in zoom-in duration-300">
+            <div class="bg-gradient-to-r from-slate-900 to-primary p-6 text-white text-center">
+                <h2 class="text-2xl font-black">Đăng ký Cộng tác viên</h2>
+                <p class="text-blue-100/70 text-sm mt-1">Cung cấp thông tin để chúng tôi xem xét hồ sơ của bạn</p>
+            </div>
+            <form action="${pageContext.request.contextPath}/JournalistUpgradeController" method="post" class="p-6 space-y-5">
+                <div class="space-y-1.5">
+                    <label class="text-xs font-bold text-slate-400 uppercase tracking-widest">Kinh nghiệm viết lách (năm)</label>
+                    <input type="number" name="experience" min="0" required
+                        class="w-full h-12 px-4 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary transition-all text-slate-900 dark:text-white"
+                        placeholder="Ví dụ: 3">
+                </div>
+                <div class="space-y-1.5">
+                    <label class="text-xs font-bold text-slate-400 uppercase tracking-widest">Giới thiệu ngắn / Link Portfolio</label>
+                    <textarea name="bio" required rows="4"
+                        class="w-full p-4 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary transition-all text-slate-900 dark:text-white resize-none"
+                        placeholder="Mô tả các lĩnh vực bạn am hiểu hoặc dán link bài viết tiêu biểu..."></textarea>
+                </div>
+                <div class="flex gap-4 pt-2">
+                    <button type="button" onclick="document.getElementById('upgradeModal').classList.add('hidden')"
+                        class="flex-1 h-12 text-sm font-bold text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors">Hủy</button>
+                    <button type="submit"
+                        class="flex-1 h-12 bg-primary text-white font-bold rounded-xl shadow-lg shadow-primary/20 hover:bg-primary-dark transition-all">Gửi yêu cầu</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            <% if ("applied".equals(success)) { %>
+                alert('Đơn đăng ký của bạn đã được gửi thành công! Vui lòng chờ quản trị viên phê duyệt.');
+            <% } else if ("server".equals(error)) { %>
+                alert('Có lỗi xảy ra khi gửi đơn. Vui lòng thử lại sau.');
+            <% } %>
+        });
+    </script>
+</body>
 
     </html>

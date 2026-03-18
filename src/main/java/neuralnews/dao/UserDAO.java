@@ -68,6 +68,30 @@ public class UserDAO {
 	}
 
 	/**
+	 * Tạo yêu cầu đăng ký nhà báo mới, mặc định role_id = 2 (JOURNALIST), status = 'PENDING'
+	 */
+	public boolean createJournalist(User user) {
+		String sql = "INSERT INTO users (email, password_hash, full_name, role_id, status, bio, experience_years) VALUES (?, ?, ?, 2, 'PENDING', ?, ?)";
+
+		try (Connection conn = DBConnection.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+			stmt.setString(1, user.getEmail());
+			String hashedPassword = org.mindrot.jbcrypt.BCrypt.hashpw(user.getPasswordHash(),
+					org.mindrot.jbcrypt.BCrypt.gensalt());
+			stmt.setString(2, hashedPassword);
+			stmt.setString(3, user.getFullName());
+			stmt.setString(4, user.getBio());
+			stmt.setInt(5, user.getExperienceYears());
+
+			int affectedRows = stmt.executeUpdate();
+			return affectedRows > 0;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
+
+	/**
 	 * Xác minh mật khẩu người dùng nhập với hash lưu trong DB bằng BCrypt.
 	 */
 	public boolean verifyPassword(String rawPassword, String storedHash) {
@@ -181,6 +205,23 @@ public class UserDAO {
 			 PreparedStatement ps = conn.prepareStatement(sql)) {
 			ps.setInt(1, roleId);
 			ps.setString(2, status);
+			ps.setLong(3, userId);
+			return ps.executeUpdate() > 0;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
+
+	/**
+	 * Nâng cấp người dùng hiện tại lên PENDING nhà báo (giữ nguyên role cho đến khi được duyệt).
+	 */
+	public boolean updateJournalistApplication(long userId, String bio, int experienceYears) {
+		String sql = "UPDATE users SET bio = ?, experience_years = ?, status = 'PENDING' WHERE id = ?";
+		try (Connection conn = DBConnection.getConnection(); 
+			 PreparedStatement ps = conn.prepareStatement(sql)) {
+			ps.setString(1, bio);
+			ps.setInt(2, experienceYears);
 			ps.setLong(3, userId);
 			return ps.executeUpdate() > 0;
 		} catch (SQLException e) {

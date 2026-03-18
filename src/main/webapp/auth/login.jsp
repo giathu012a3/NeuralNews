@@ -13,9 +13,7 @@
         <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&display=swap"
             rel="stylesheet" />
         <!-- Material Symbols -->
-        <link
-            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
-            rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
         <!-- Tailwind Configuration -->
         <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
         <script id="tailwind-config">
@@ -116,6 +114,13 @@
                                             <p class="text-sm font-medium">Đăng ký thành công! Hãy đăng nhập để tiếp
                                                 tục.</p>
                                         </div>
+                                        <% } else if ("journalist_pending".equals(success)) { %>
+                                        <div
+                                            class="flex items-center gap-3 p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-400">
+                                            <span
+                                                class="material-symbols-outlined text-[20px] flex-shrink-0">info</span>
+                                            <p class="text-sm font-medium">Đơn đăng ký của bạn đã được gửi thanh công! Vui lòng chờ quản trị viên phê duyệt trong vòng 24h.</p>
+                                        </div>
                                         <% } %>
 
                                             <!-- Form -->
@@ -179,6 +184,10 @@
                                                 <a class="text-primary font-semibold hover:underline"
                                                     href="${pageContext.request.contextPath}/auth/register.jsp">Đăng
                                                     ký</a>
+                                            </p>
+                                            <p class="text-center text-[#60758a] dark:text-[#9aa0a6] text-sm pt-2">
+                                                Hoặc <a class="text-primary font-semibold hover:underline"
+                                                    href="${pageContext.request.contextPath}/auth/register_journalist.jsp">Đăng ký làm nhà báo</a>
                                             </p>
                 </div>
             </div>
