@@ -34,6 +34,7 @@ CREATE TABLE `articles` (
   `status` enum('DRAFT','PENDING','PUBLISHED','ARCHIVED','REJECTED') DEFAULT 'DRAFT',
   `views` int DEFAULT '0',
   `likes_count` int DEFAULT '0',
+  `dislikes_count` int DEFAULT '0',
   `sentiment_label` varchar(50) DEFAULT NULL,
   `source_score` int DEFAULT NULL,
   `popularity_score` float DEFAULT '0',

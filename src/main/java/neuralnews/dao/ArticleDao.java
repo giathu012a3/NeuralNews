@@ -181,7 +181,7 @@ public class ArticleDao {
                                                       int offset, int limit) {
         StringBuilder sql = new StringBuilder("""
             SELECT a.id, a.title, a.content, a.summary, a.image_url,
-                   a.author_id, a.category_id, a.status, a.views, a.likes_count, a.dislikes_count,
+                   a.author_id, a.approved_by, a.category_id, a.status, a.views, a.likes_count, a.dislikes_count,
                    a.sentiment_label, a.source_score, a.popularity_score,
                    a.published_at, a.created_at,
                    c.name AS category_name
