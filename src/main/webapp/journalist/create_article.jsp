@@ -718,7 +718,7 @@
                 }
                 setTimeout(function() { progress.classList.add('hidden'); }, 1800);
             } else {
-                status.textContent = 'Lỗi: ' + (data.message || 'Không thể tải lên');
+                status.textContent = 'Lỗi: ' + (data.error || data.message || 'Không thể tải lên');
                 bar.className = 'bg-red-500 h-1 rounded-full';
             }
         })
