@@ -59,7 +59,12 @@ public class UploadController extends HttpServlet {
         try {
             Part filePart = request.getPart("image");
             if (filePart == null) {
-                response.getWriter().write("{\"success\": false, \"message\": \"No file uploaded\"}");
+                filePart = request.getPart("file");
+            }
+
+            if (filePart == null) {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.getWriter().write("{\"error\": \"No file uploaded\"}");
                 return;
             }
 
@@ -99,12 +104,17 @@ public class UploadController extends HttpServlet {
                 }
             }
 
-            // Trả về đường dẫn tương đối để lưu vào DB
+            // Trả về đường dẫn tương đối để lưu vào DB, 
+            // và trường "location" cho TinyMCE (đường dẫn tuyệt đối từ root)
             String relativePath = "uploads/images/" + newFileName;
+            String contextPath  = request.getContextPath();
+            String location     = (contextPath.endsWith("/") ? contextPath : contextPath + "/") + relativePath;
+
             String deployedDirUsed = deployedDir.getAbsolutePath();
             response.getWriter().write("{"
                     + "\"success\": true,"
                     + "\"url\": \"" + relativePath + "\","
+                    + "\"location\": \"" + location + "\","
                     + "\"deployedDir\": \"" + escapeJson(deployedDirUsed) + "\","
                     + "\"projectCopied\": " + projectCopied + ","
                     + "\"projectDir\": " + (projectDirUsed != null ? "\"" + escapeJson(projectDirUsed) + "\"" : "null")

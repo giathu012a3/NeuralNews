@@ -476,6 +476,10 @@
                 'insertdatetime', 'media', 'table', 'wordcount', 'emoticons',
                 'codesample', 'hr', 'nonbreaking', 'pagebreak'
             ],
+            images_upload_url: '${pageContext.request.contextPath}/api/upload',
+            automatic_uploads: true,
+            images_reuse_filename: false,
+            file_picker_types: 'image',
             toolbar1:
                 'undo redo | blocks fontfamily fontsize | ' +
                 'bold italic underline strikethrough | forecolor backcolor | ' +
