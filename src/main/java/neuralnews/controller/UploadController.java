@@ -25,7 +25,15 @@ import java.util.UUID;
 public class UploadController extends HttpServlet {
 
     private Path resolveProjectUploadsDir() {
-        // Ưu tiên cấu hình bằng env/JVM (không cần sửa DB)
+        // 0) Ưu tiên ổ A (Project hiện tại của bạn) để bạn thấy file ngay lập tức
+        try {
+            Path customPath = Paths.get("A:", "NeuralNews", "src", "main", "webapp", "uploads", "images");
+            if (Files.exists(customPath.getParent().getParent())) { // Kiểm tra xem NeuralNews/src có tồn tại ko
+                return customPath;
+            }
+        } catch (Exception ignored) {}
+
+        // 1) Ưu tiên cấu hình bằng env/JVM (cho production)
         String env = System.getenv("NEURALNEWS_UPLOAD_DIR");
         if (env != null && !env.isBlank()) return Paths.get(env.trim());
 
