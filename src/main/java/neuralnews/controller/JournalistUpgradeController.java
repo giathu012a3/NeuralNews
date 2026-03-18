@@ -52,6 +52,7 @@ public class JournalistUpgradeController extends HttpServlet {
             currentUser.setBio(bio.trim());
             currentUser.setExperienceYears(experience);
             session.setAttribute("currentUser", currentUser);
+            session.setAttribute("userStatus", "PENDING");
             
             response.sendRedirect(request.getContextPath() + "/user/profile.jsp?success=applied");
         } else {

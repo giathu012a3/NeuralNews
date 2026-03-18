@@ -1,4 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
     <!DOCTYPE html>
     <html class="dark" lang="en">
 
@@ -17,19 +18,10 @@
         </style>
     </head>
 
-    <%@ page import="neuralnews.model.User" %>
-    <%
-        User currentUser = (User) session.getAttribute("currentUser");
-        if (currentUser == null) {
-            response.sendRedirect(request.getContextPath() + "/auth/login.jsp");
-            return;
-        }
-        String userRole = (String) session.getAttribute("userRole");
-        String status = currentUser.getStatus();
-        
-        String error = request.getParameter("error");
-        String success = request.getParameter("success");
-    %>
+    <c:if test="${empty currentUser}">
+        <c:redirect url="/auth/login.jsp" />
+    </c:if>
+
     <body
         class="bg-background-light dark:bg-background-dark text-text-main dark:text-white font-display antialiased overflow-x-hidden transition-colors duration-200">
         <div class="flex min-h-screen w-full flex-col">
@@ -64,6 +56,42 @@
                             </button>
                         </div>
                         <div class="p-6 md:p-8 space-y-8">
+                            <%-- Hiển thị thông báo nếu đang PENDING --%>
+                            <c:if test="${userStatus == 'PENDING'}">
+                                <div class="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-4">
+                                    <div class="flex items-center gap-4">
+                                        <div class="size-12 rounded-full bg-amber-500/20 flex items-center justify-center text-amber-500">
+                                            <span class="material-symbols-outlined text-2xl animate-spin">sync</span>
+                                        </div>
+                                        <div>
+                                            <h3 class="font-bold text-slate-900 dark:text-white">Tài khoản Nhà báo đang chờ duyệt</h3>
+                                            <p class="text-sm text-slate-500 mt-1">Hồ sơ của bạn đã được gửi và đang trong quá trình xét duyệt bởi quản trị viên.</p>
+                                        </div>
+                                    </div>
+                                    <span class="px-4 py-2 bg-amber-500 text-white text-xs font-bold rounded-lg uppercase tracking-wider">Đang xử lý</span>
+                                </div>
+                            </c:if>
+
+                            <%-- Hiển thị thông báo nếu bị REJECTED --%>
+                            <c:if test="${userStatus == 'REJECTED'}">
+                                <div class="bg-red-500/10 border border-red-500/20 rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-4">
+                                    <div class="flex items-center gap-4">
+                                        <div class="size-12 rounded-full bg-red-500/20 flex items-center justify-center text-red-500">
+                                            <span class="material-symbols-outlined text-2xl">error_outline</span>
+                                        </div>
+                                        <div>
+                                            <h3 class="font-bold text-slate-900 dark:text-white">Yêu cầu Nhà báo bị từ chối</h3>
+                                            <p class="text-sm text-slate-500 mt-1">Hồ sơ của bạn chưa đáp ứng đủ tiêu chí. Đừng lo, bạn có thể nộp lại đơn bất cứ lúc nào!</p>
+                                        </div>
+                                    </div>
+                                    <button onclick="document.getElementById('upgradeModal').classList.remove('hidden')"
+                                            class="px-5 py-2.5 bg-red-500 hover:bg-red-600 text-white text-xs font-black rounded-xl shadow-lg shadow-red-500/20 transition-all uppercase tracking-wider">
+                                        Nộp đơn lại
+                                    </button>
+                                </div>
+                            </c:if>
+
+                            <div class="p-6 md:p-8 space-y-8">
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div
                                     class="p-5 bg-slate-50 dark:bg-background-dark/50 border border-slate-200 dark:border-border-dark rounded-xl flex items-center gap-4">
@@ -215,21 +243,25 @@
                                     </ul>
                                 </div>
                                 <div class="shrink-0 flex flex-col items-center gap-4">
-                                    <% if ("JOURNALIST".equals(userRole) || "ADMIN".equals(userRole)) { %>
-                                        <div class="px-8 py-4 bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 font-bold rounded-xl backdrop-blur-md">
-                                            Bạn đã là Nhà báo
-                                        </div>
-                                    <% } else if ("PENDING".equals(status)) { %>
-                                        <div class="px-8 py-4 bg-amber-500/20 border border-amber-500/30 text-amber-400 font-bold rounded-xl backdrop-blur-md">
-                                            Đang chờ phê duyệt...
-                                        </div>
-                                    <% } else { %>
-                                        <button onclick="document.getElementById('upgradeModal').classList.remove('hidden')"
-                                            class="w-full md:w-auto px-10 py-4 bg-white text-primary-dark font-black text-lg rounded-xl shadow-xl shadow-black/20 hover:bg-cyan-50 hover:text-primary hover:shadow-cyan-400/20 hover:scale-105 active:scale-95 transition-all duration-300">
-                                            Đăng ký ngay
-                                        </button>
-                                        <p class="text-xs text-blue-200/60 font-medium">Nộp đơn mất &lt; 5 phút</p>
-                                    <% } %>
+                                    <c:choose>
+                                        <c:when test="${userStatus == 'PENDING'}">
+                                            <div class="px-8 py-4 bg-amber-500/20 border border-amber-500/30 text-amber-400 font-bold rounded-xl backdrop-blur-md">
+                                                Đang chờ phê duyệt...
+                                            </div>
+                                        </c:when>
+                                        <c:when test="${userRole == 'JOURNALIST' || userRole == 'ADMIN'}">
+                                            <div class="px-8 py-4 bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 font-bold rounded-xl backdrop-blur-md">
+                                                Bạn đã là Nhà báo
+                                            </div>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <button onclick="document.getElementById('upgradeModal').classList.remove('hidden')"
+                                                class="w-full md:w-auto px-10 py-4 bg-white text-primary-dark font-black text-lg rounded-xl shadow-xl shadow-black/20 hover:bg-cyan-50 hover:text-primary hover:shadow-cyan-400/20 hover:scale-105 active:scale-95 transition-all duration-300">
+                                                Đăng ký ngay
+                                            </button>
+                                            <p class="text-xs text-blue-200/60 font-medium">Nộp đơn mất &lt; 5 phút</p>
+                                        </c:otherwise>
+                                    </c:choose>
                                 </div>
                             </div>
                         </div>
@@ -272,11 +304,12 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            <% if ("applied".equals(success)) { %>
+            <c:if test="${param.success == 'applied'}">
                 alert('Đơn đăng ký của bạn đã được gửi thành công! Vui lòng chờ quản trị viên phê duyệt.');
-            <% } else if ("server".equals(error)) { %>
+            </c:if>
+            <c:if test="${param.error == 'server'}">
                 alert('Có lỗi xảy ra khi gửi đơn. Vui lòng thử lại sau.');
-            <% } %>
+            </c:if>
         });
     </script>
 </body>

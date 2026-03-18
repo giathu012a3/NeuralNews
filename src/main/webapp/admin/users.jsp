@@ -122,7 +122,7 @@
                                             class="flex-1 py-2 bg-emerald-500 hover:bg-emerald-600 text-white text-[11px] font-bold rounded-xl transition-all shadow-lg shadow-emerald-500/20">
                                             Duyệt ngay
                                         </button>
-                                        <button onclick="AdminUser.approveUser(${pu.id}, 'delete')" 
+                                        <button onclick="AdminUser.approveUser(${pu.id}, 'reject')" 
                                             class="px-4 py-2 border border-slate-200 dark:border-slate-700 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all">
                                             <span class="material-icons text-sm">close</span>
                                         </button>
@@ -196,7 +196,7 @@
                                                     <button onclick="AdminUser.approveUser(${user.id}, 'approve')" class="p-2 text-emerald-500 hover:bg-emerald-50 rounded-lg transition-all" title="Phê duyệt">
                                                         <span class="material-icons text-[18px]">check_circle</span>
                                                     </button>
-                                                    <button onclick="AdminUser.approveUser(${user.id}, 'delete')" class="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-all" title="Từ chối">
+                                                    <button onclick="AdminUser.approveUser(${user.id}, 'reject')" class="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-all" title="Từ chối">
                                                         <span class="material-icons text-[18px]">cancel</span>
                                                     </button>
                                                 </c:if>

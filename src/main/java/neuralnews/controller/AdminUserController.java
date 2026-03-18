@@ -91,12 +91,16 @@ public class AdminUserController extends HttpServlet {
                 String message = "";
 
                 if ("approve".equals(action)) {
-                    // ID 2 là Role Journalist
+                    // Cấp quyền JOURNALIST (2) và đặt trạng thái ACTIVE
                     success = userDao.updateUserRoleAndStatus(userId, 2, "ACTIVE");
                     message = success ? "Người dùng đã được phê duyệt làm Nhà báo!" : "Lỗi khi phê duyệt.";
+                } else if ("reject".equals(action)) {
+                    // Từ chối: Đưa về quyền USER (1) và đặt trạng thái REJECTED để họ biết
+                    success = userDao.updateUserRoleAndStatus(userId, 1, "REJECTED");
+                    message = success ? "Đã từ chối đơn đăng ký. Người dùng sẽ nhận được thông báo." : "Lỗi khi thực hiện.";
                 } else if ("delete".equals(action)) {
                     success = userDao.deleteUser(userId);
-                    message = success ? "Người dùng đã được xóa!" : "Lỗi khi xóa.";
+                    message = success ? "Tài khoản người dùng đã được xóa hoàn toàn!" : "Lỗi khi xóa.";
                 }
 
                 // Trả về JSON cho đồng bộ với App.ajax.post
