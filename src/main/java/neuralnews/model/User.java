@@ -12,7 +12,7 @@ public class User {
 	private String passwordHash;
 	private String fullName;
 	private Role role; // Giờ chỉ cần 1 Role duy nhất
-	private String status; // 'ACTIVE', 'PENDING', 'BANNED', 'SUSPENDED'
+	private String status; // 'ACTIVE', 'PENDING', 'BANNED', 'SUSPENDED', 'REJECTED', 'DELETED'
 	private String avatarUrl;
 	private String bio;
 	private int experienceYears;

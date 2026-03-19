@@ -47,7 +47,7 @@ public class LoginController extends HttpServlet {
 		}
 
 		// Check account status
-		if ("BANNED".equals(user.getStatus()) || "SUSPENDED".equals(user.getStatus())) {
+		if ("BANNED".equals(user.getStatus()) || "SUSPENDED".equals(user.getStatus()) || "DELETED".equals(user.getStatus())) {
 			response.sendRedirect(contextPath + "/auth/login.jsp?error=banned");
 			return;
 		}

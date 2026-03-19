@@ -21,6 +21,10 @@
                     href="${pageContext.request.contextPath}/admin/content"> <span
                         class="material-icons text-[20px]">article</span> <span class="font-medium">Quản lý Nội
                         dung</span> </a> <a
+                    class="${param.activePage == 'categories' ? 'sidebar-active' : 'text-slate-400 hover:text-white hover:bg-slate-800'} flex items-center gap-3 px-4 py-3 rounded-lg transition-all"
+                    href="${pageContext.request.contextPath}/admin/categories"> <span
+                        class="material-icons text-[20px]">category</span> <span class="font-medium">Danh mục</span>
+                </a> <a
                     class="${param.activePage == 'violation' ? 'sidebar-active' : 'text-slate-400 hover:text-white hover:bg-slate-800'} flex items-center gap-3 px-4 py-3 rounded-lg transition-all"
                     href="${pageContext.request.contextPath}/admin/violation.jsp"> <span
                         class="material-icons text-[20px]">gavel</span> <span class="font-medium">Xử lý Vi phạm</span>

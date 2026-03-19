@@ -60,9 +60,15 @@ public class ArticleDao {
         return getById(id);
     }
 
-    // ── Lấy tất cả bài viết (Admin dùng) ───────────────────────────────────
     // ── Lấy tất cả bài viết có filter (Admin dùng) ──────────────────────────
-    public List<Article> getAllArticlesFiltered(int limit, int offset, String keyword, String status, Integer categoryId) {
+    public List<Article> getAllArticlesFiltered(int limit, int offset,
+            String keyword, String status, Integer categoryId,
+            String authorName, String sortBy, String sortDir) {
+        // Whitelist sort columns
+        java.util.Set<String> allowed = java.util.Set.of("a.created_at","a.views","a.title","a.status");
+        String col = allowed.contains(sortBy) ? sortBy : "a.created_at";
+        String dir = "ASC".equalsIgnoreCase(sortDir) ? "ASC" : "DESC";
+
         StringBuilder sql = new StringBuilder("""
                     SELECT a.id, a.title, a.content, a.summary, a.image_url,
                            a.author_id, a.approved_by, a.category_id, a.status, a.views, a.likes_count, a.dislikes_count,
@@ -78,7 +84,7 @@ public class ArticleDao {
                     WHERE a.status != 'DRAFT'
                 """);
         List<Object> params = new ArrayList<>();
-        
+
         if (keyword != null && !keyword.isBlank()) {
             sql.append(" AND (a.title LIKE ? OR u.full_name LIKE ? OR CAST(a.id AS CHAR) LIKE ?)");
             String k = "%" + keyword.trim() + "%";
@@ -92,8 +98,12 @@ public class ArticleDao {
             sql.append(" AND a.category_id = ?");
             params.add(categoryId);
         }
+        if (authorName != null && !authorName.isBlank()) {
+            sql.append(" AND u.full_name LIKE ?");
+            params.add("%" + authorName.trim() + "%");
+        }
 
-        sql.append(" ORDER BY a.created_at DESC LIMIT ? OFFSET ?");
+        sql.append(" ORDER BY " + col + " " + dir + " LIMIT ? OFFSET ?");
         params.add(limit);
         params.add(offset);
 
@@ -112,18 +122,25 @@ public class ArticleDao {
         return list;
     }
 
+    // Overload giữ tương thích ngược với code cũ
+    public List<Article> getAllArticlesFiltered(int limit, int offset, String keyword, String status, Integer categoryId) {
+        return getAllArticlesFiltered(limit, offset, keyword, status, categoryId, null, "a.created_at", "DESC");
+    }
+
     public List<Article> getAllArticles(int limit, int offset) {
         return getAllArticlesFiltered(limit, offset, null, null, null);
     }
 
     // ── Đếm tổng số bài viết (Admin dùng) ───────────────────────────────
-    public int getTotalArticleCount(String keyword, String status, Integer categoryId) {
-        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM articles a WHERE a.status != 'DRAFT'");
+    public int getTotalArticleCount(String keyword, String status, Integer categoryId, String authorName) {
+        StringBuilder sql = new StringBuilder(
+            "SELECT COUNT(*) FROM articles a LEFT JOIN users u ON a.author_id = u.id WHERE a.status != 'DRAFT'");
         List<Object> params = new ArrayList<>();
-        
+
         if (keyword != null && !keyword.isBlank()) {
-            sql.append(" AND a.title LIKE ?");
-            params.add("%" + keyword.trim() + "%");
+            sql.append(" AND (a.title LIKE ? OR u.full_name LIKE ?)");
+            String k = "%" + keyword.trim() + "%";
+            params.add(k); params.add(k);
         }
         if (status != null && !status.isBlank()) {
             sql.append(" AND a.status = ?");
@@ -132,6 +149,10 @@ public class ArticleDao {
         if (categoryId != null && categoryId > 0) {
             sql.append(" AND a.category_id = ?");
             params.add(categoryId);
+        }
+        if (authorName != null && !authorName.isBlank()) {
+            sql.append(" AND u.full_name LIKE ?");
+            params.add("%" + authorName.trim() + "%");
         }
 
         try (Connection conn = DBConnection.getConnection();
@@ -142,6 +163,11 @@ public class ArticleDao {
         } catch (Exception e) { e.printStackTrace(); }
         return 0;
     }
+
+    public int getTotalArticleCount(String keyword, String status, Integer categoryId) {
+        return getTotalArticleCount(keyword, status, categoryId, null);
+    }
+
 
     public int getTotalArticleCount() {
         return getTotalArticleCount(null, null, null);
@@ -295,6 +321,40 @@ public class ArticleDao {
         } catch (Exception e) { e.printStackTrace(); return false; }
     }
 
+    // ── Xóa bài viết (Admin – không cần check author) ────────────────────
+    public boolean deleteArticleById(long articleId) {
+        String sql = "DELETE FROM articles WHERE id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, articleId);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) { e.printStackTrace(); return false; }
+    }
+
+    // ── Đếm bài viết theo từng trạng thái (Admin stats bar) ──────────────
+    public java.util.Map<String, Integer> getArticleStatsByStatus() {
+        java.util.Map<String, Integer> map = new java.util.LinkedHashMap<>();
+        map.put("TOTAL", 0);
+        map.put("PENDING", 0);
+        map.put("PUBLISHED", 0);
+        map.put("REJECTED", 0);
+        map.put("ARCHIVED", 0);
+        String sql = "SELECT status, COUNT(*) AS cnt FROM articles WHERE status != 'DRAFT' GROUP BY status";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            int total = 0;
+            while (rs.next()) {
+                String st = rs.getString("status");
+                int cnt = rs.getInt("cnt");
+                map.put(st, cnt);
+                total += cnt;
+            }
+            map.put("TOTAL", total);
+        } catch (Exception e) { e.printStackTrace(); }
+        return map;
+    }
+
     // ── Xóa bài viết (Chỉ tác giả) ──────────────────────────────────────
     public boolean deleteArticle(long articleId, long authorId) {
         String sql = "DELETE FROM articles WHERE id = ? AND author_id = ?";
@@ -347,6 +407,79 @@ public class ArticleDao {
                 cat.setId(rs.getInt("id"));
                 cat.setName(rs.getString("name"));
                 list.add(cat);
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return list;
+    }
+
+    // ======================================================
+    // CAC HAM CHO TRANG PROFILE (USER)
+    // ======================================================
+
+    /**
+     * Đếm số bài viết user đã lưu (interactions loại SAVE).
+     */
+    public int countSavedByUser(long userId) {
+        String sql = "SELECT COUNT(*) FROM interactions WHERE user_id = ? AND interaction_type = 'SAVE'";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, userId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) return rs.getInt(1);
+        } catch (Exception e) { e.printStackTrace(); }
+        return 0;
+    }
+
+    /**
+     * Đếm số bài viết user đã đọc (interactions loại VIEW).
+     */
+    public int countReadByUser(long userId) {
+        String sql = "SELECT COUNT(*) FROM interactions WHERE user_id = ? AND interaction_type = 'VIEW'";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, userId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) return rs.getInt(1);
+        } catch (Exception e) { e.printStackTrace(); }
+        return 0;
+    }
+
+    /**
+     * Lấy bài viết mới trong các chủ đề user quan tâm, dùng cho thông báo profile.
+     * Trả về List<String[]> với mỗi phần tử: [message, timeAgo]
+     */
+    public List<String[]> getRecentArticlesForUser(long userId, int limit) {
+        List<String[]> list = new ArrayList<>();
+        String sql = """
+            SELECT DISTINCT a.title,
+                TIMESTAMPDIFF(HOUR, a.published_at, NOW()) AS hours_ago
+            FROM articles a
+            WHERE a.status = 'PUBLISHED'
+              AND a.category_id IN (
+                  SELECT DISTINCT a2.category_id
+                  FROM interactions i
+                  JOIN articles a2 ON i.article_id = a2.id
+                  WHERE i.user_id = ?
+              )
+              AND a.published_at >= DATE_SUB(NOW(), INTERVAL 3 DAY)
+            ORDER BY a.published_at DESC
+            LIMIT ?
+        """;
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, userId);
+            ps.setInt(2, limit);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                String title = rs.getString("title");
+                int hoursAgo = rs.getInt("hours_ago");
+                String timeAgo = hoursAgo < 1 ? "Vừa xong"
+                        : hoursAgo < 24 ? hoursAgo + " giờ trước"
+                        : (hoursAgo / 24) + " ngày trước";
+                list.add(new String[]{
+                        "AI đề xuất bài viết mới: \u201c" + title + "\u201d",
+                        timeAgo
+                });
             }
         } catch (Exception e) { e.printStackTrace(); }
         return list;

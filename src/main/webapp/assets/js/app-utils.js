@@ -145,6 +145,7 @@ const App = {
                 .then(html => {
                     if (container) {
                         const bundle = new DOMParser().parseFromString(html, 'text/html').getElementById(fragmentId);
+                        if (!bundle) console.warn(`[fetchPartial] Fragment #${fragmentId} not found in response from ${url}`);
                         container.innerHTML = bundle ? bundle.outerHTML : html;
                         container.style.opacity = '1';
                     }
