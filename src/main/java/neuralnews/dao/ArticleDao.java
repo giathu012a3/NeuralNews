@@ -366,6 +366,17 @@ public class ArticleDao {
         } catch (Exception e) { e.printStackTrace(); return false; }
     }
 
+    public long getAuthorIdByArticleId(long articleId) {
+        String sql = "SELECT author_id FROM articles WHERE id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, articleId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) return rs.getLong("author_id");
+        } catch (Exception e) { e.printStackTrace(); }
+        return -1;
+    }
+
     // ── Cập nhật status (Admin) ──────────────────────────────────────────
     public boolean updateArticleStatus(long articleId, String status) {
         return updateArticleStatus(articleId, status, null);

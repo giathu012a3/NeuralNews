@@ -156,6 +156,23 @@ public class CommentDao {
         }
     }
 
+    public Comment getCommentById(long id) {
+        String sql = "SELECT c.*, u.full_name as user_name, a.title as article_title " +
+                     "FROM comments c " +
+                     "JOIN users u ON c.user_id = u.id " +
+                     "JOIN articles a ON c.article_id = a.id " +
+                     "WHERE c.id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, id);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) return mapRow(rs);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     // ─────────────────────────────────────────────────────────────────────────
     // HELPER
     // ─────────────────────────────────────────────────────────────────────────

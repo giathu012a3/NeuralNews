@@ -5,6 +5,7 @@ import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.*;
 
 import neuralnews.dao.CommentDao;
+import neuralnews.dao.ReportDao;
 import neuralnews.model.Comment;
 import neuralnews.model.User;
 
@@ -107,7 +108,16 @@ public class StaffCommentController extends HttpServlet {
             CommentDao dao = new CommentDao();
             switch (action) {
                 case "delete"  -> dao.deleteComment(commentId);
-                case "spam"    -> dao.updateStatus(commentId, "SPAM");
+                case "spam"    -> {
+                    dao.updateStatus(commentId, "SPAM");
+                    ReportDao reportDao = new ReportDao();
+                    String reason = request.getParameter("reason");
+                    if (reason == null) reason = "SPAM";
+                    Comment c = dao.getCommentById(commentId);
+                    String content = (c != null) ? c.getContent() : "...";
+                    reportDao.createReport("COMMENT", commentId, user.getId(), reason, 
+                        "Journalist reported harmful content", "MANUAL_REVIEW", 20, 80, 15, content);
+                }
                 case "hide"    -> dao.updateStatus(commentId, "HIDDEN");
                 case "restore" -> dao.updateStatus(commentId, "NEUTRAL");
                 case "reply"   -> {

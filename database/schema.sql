@@ -98,13 +98,17 @@ CREATE TABLE `comments` (
   `content` text NOT NULL,
   `article_id` bigint NOT NULL,
   `user_id` bigint NOT NULL,
+  `parent_id` bigint DEFAULT NULL,
+  `status` enum('NEUTRAL','HIDDEN','DELETED') DEFAULT 'NEUTRAL',
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `article_id` (`article_id`),
   KEY `user_id` (`user_id`),
+  KEY `parent_id` (`parent_id`),
   CONSTRAINT `comments_ibfk_1` FOREIGN KEY (`article_id`) REFERENCES `articles` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `comments_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  CONSTRAINT `comments_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `comments_ibfk_3` FOREIGN KEY (`parent_id`) REFERENCES `comments` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -113,7 +117,7 @@ CREATE TABLE `comments` (
 
 LOCK TABLES `comments` WRITE;
 /*!40000 ALTER TABLE `comments` DISABLE KEYS */;
-INSERT INTO `comments` VALUES (1,'sai sự thật r',2,2,'2026-03-18 11:48:01');
+INSERT INTO `comments` VALUES (1,'sai sự thật r',2,2,NULL,'NEUTRAL','2026-03-18 11:48:01'),(2,'Bài viết này rất phiến diện và thiếu khách quan!',1,3,NULL,'NEUTRAL','2026-03-19 13:00:00'),(3,'Nội dung này vi phạm bản quyền của tôi, yêu cầu gỡ bỏ ngay lập tức!',2,4,NULL,'NEUTRAL','2026-03-19 14:00:00'),(4,'Tác giả chả biết gì về công nghệ mà cũng viết báo.',3,6,NULL,'NEUTRAL','2026-03-19 15:00:00'),(5,'Thật là một trò đùa, tin này cũ rích rồi.',1,9,NULL,'NEUTRAL','2026-03-19 15:30:00');
 /*!40000 ALTER TABLE `comments` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -190,19 +194,18 @@ DROP TABLE IF EXISTS `reports`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `reports` (
   `id` bigint NOT NULL AUTO_INCREMENT,
-  `article_id` bigint NOT NULL,
+  `target_type` enum('ARTICLE','COMMENT') NOT NULL,
+  `target_id` bigint NOT NULL,
   `reporter_id` bigint DEFAULT NULL,
-  `reason` varchar(100) NOT NULL,
-  `status` enum('PENDING','Reviewed','DISMISSED','ACTION_TAKEN') DEFAULT 'PENDING',
-  `ai_analysis` text,
-  `ai_trust_score` int DEFAULT NULL,
+  `reason` varchar(255) DEFAULT NULL,
+  `details` text,
+  `status` enum('PENDING','RESOLVED','DISMISSED') DEFAULT 'PENDING',
+  `problematic_snippet` text,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  KEY `article_id` (`article_id`),
-  KEY `reporter_id` (`reporter_id`),
-  CONSTRAINT `reports_ibfk_1` FOREIGN KEY (`article_id`) REFERENCES `articles` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `reports_ibfk_2` FOREIGN KEY (`reporter_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  KEY `fk_reports_reporter` (`reporter_id`),
+  CONSTRAINT `fk_reports_reporter` FOREIGN KEY (`reporter_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -211,6 +214,32 @@ CREATE TABLE `reports` (
 
 LOCK TABLES `reports` WRITE;
 /*!40000 ALTER TABLE `reports` DISABLE KEYS */;
+INSERT INTO `reports` VALUES 
+(1,'ARTICLE',1,2,'Fake News','This article contains unverified claims.','PENDING','...unconfirmed reports from secret government insiders...','2026-03-19 03:00:00'),
+(2,'ARTICLE',2,4,'Plagiarism','Copied from a medical blog without citation.','PENDING','Nanobots are programmed to identify protein signatures...','2026-03-19 04:30:00'),
+(3,'ARTICLE',3,3,'Sensationalism','Clickbait title and exaggerated findings.','PENDING','Glassmorphism is the only way to design for 2026...','2026-03-19 05:45:00'),
+(4,'COMMENT',2,1,'Hate Speech','The user is being toxic and insulting.','PENDING','Bài viết này rất phiến diện và thiếu khách quan!','2026-03-19 06:10:00'),
+(5,'COMMENT',4,2,'Harassment','Insulting the author\'s knowledge.','PENDING','Tác giả chả biết gì về công nghệ mà cũng viết báo.','2026-03-19 08:15:00'),
+(6,'COMMENT',1,3,'Inaccurate','Sai thông tin thực tế.','PENDING','sai sự thật r','2026-03-19 09:00:00'),
+(7,'COMMENT',1,6,'Spam','Bình luận lặp lại.','PENDING','sai sự thật r','2026-03-19 09:10:00'),
+(8,'COMMENT',1,9,'Harassment','Kích động thù hận.','PENDING','sai sự thật r','2026-03-19 09:20:00'),
+(9,'COMMENT',1,10,'Irrelevant','Không liên quan đến bài viết.','PENDING','sai sự thật r','2026-03-19 09:30:00'),
+(10,'COMMENT',1,11,'Other','Lý do khác.','PENDING','sai sự thật r','2026-03-19 09:40:00'),
+(11,'COMMENT',2,12,'Offensive','Lời lẽ không phù hợp.','PENDING','Bài viết này rất phiến diện và thiếu khách quan!','2026-03-19 10:00:00'),
+(12,'COMMENT',2,13,'Spam','Tài khoản ảo report.','PENDING','Bài viết này rất phiến diện và thiếu khách quan!','2026-03-19 10:05:00'),
+(13,'COMMENT',2,15,'Inaccurate','Thông tin sai lệch.','PENDING','Bài viết này rất phiến diện và thiếu khách quan!','2026-03-19 10:10:00'),
+(14,'COMMENT',2,16,'Hate Speech','Ghét bỏ tác giả.','PENDING','Bài viết này rất phiến diện và thiếu khách quan!','2026-03-19 10:15:00'),
+(15,'COMMENT',3,17,'Copyright','Vi phạm bản quyền.','PENDING','Nội dung này vi phạm bản quyền của tôi...','2026-03-19 11:00:00'),
+(16,'COMMENT',3,18,'Irrelevant','Rác.','PENDING','Nội dung này vi phạm bản quyền của tôi...','2026-03-19 11:10:00'),
+(17,'COMMENT',3,20,'Spam','Spam gỡ bài.','PENDING','Nội dung này vi phạm bản quyền của tôi...','2026-03-19 11:20:00'),
+(18,'COMMENT',4,21,'Bullying','Bắt nạt tác giả.','PENDING','Tác giả chả biết gì về công nghệ mà cũng viết báo.','2026-03-19 12:00:00'),
+(19,'COMMENT',4,22,'Offensive','Xúc phạm kiến thức.','PENDING','Tác giả chả biết gì về công nghệ mà cũng viết báo.','2026-03-19 12:10:00'),
+(20,'COMMENT',4,23,'Misinformation','Hiểu sai nội dung.','PENDING','Tác giả chả biết gì về công nghệ mà cũng viết báo.','2026-03-19 12:20:00'),
+(21,'COMMENT',5,24,'Irrelevant','Chả liên quan.','PENDING','Thật là một trò đùa, tin này cũ rích rồi.','2026-03-19 13:00:00'),
+(22,'COMMENT',5,30,'Spam','Nội dung vô nghĩa.','PENDING','Thật là một trò đùa, tin này cũ rích rồi.','2026-03-19 13:10:00'),
+(23,'COMMENT',1,4,'Spam','Duplicate report.','PENDING','sai sự thật r','2026-03-19 14:00:00'),
+(24,'COMMENT',2,3,'Hate Speech','Toxic behavior throughout the thread.','PENDING','Bài viết này rất phiến diện và thiếu khách quan!','2026-03-19 14:10:00'),
+(25,'COMMENT',5,2,'Outdated','Tin cũ rồi.','PENDING','Thật là một trò đùa, tin này cũ rích rồi.','2026-03-19 14:20:00');
 /*!40000 ALTER TABLE `reports` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -338,4 +367,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-03-19 12:06:53
+-- Dump completed on 2026-03-19 14:28:16
