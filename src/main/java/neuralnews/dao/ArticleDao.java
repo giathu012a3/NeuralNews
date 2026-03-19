@@ -1,0 +1,581 @@
+package neuralnews.dao;
+
+import neuralnews.model.Article;
+import neuralnews.util.DBConnection;
+
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+
+public class ArticleDao {
+
+    // ======================================================
+    // CAC HAM CHO DOC GIA (VISITOR)
+    // ======================================================
+
+    public List<Article> getArticlesCommon(int limit, int offset, int categoryId) {
+        List<Article> list = new ArrayList<>();
+        String sql = """
+            SELECT a.*, c.name AS category_name FROM articles a 
+            JOIN categories c ON a.category_id = c.id 
+            WHERE a.status='PUBLISHED' 
+        """;
+        if (categoryId > 0) sql += "AND a.category_id=? ";
+        sql += "ORDER BY a.published_at DESC LIMIT ? OFFSET ?";
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            int i = 1;
+            if (categoryId > 0) ps.setInt(i++, categoryId);
+            ps.setInt(i++, limit);
+            ps.setInt(i, offset);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) list.add(mapArticle(rs));
+        } catch (Exception e) { e.printStackTrace(); }
+        return list;
+    }
+
+ // 1. Lấy danh sách bài nổi bật dựa trên lượt LIKE cao nhất (4 bài)
+    public List<Article> getFeaturedArticles(int limit) {
+        List<Article> list = new ArrayList<>();
+        // Sắp xếp theo likes_count giảm dần
+        String sql = """
+            SELECT a.*, c.name AS category_name FROM articles a 
+            JOIN categories c ON a.category_id = c.id 
+            WHERE a.status='PUBLISHED' 
+            ORDER BY a.likes_count DESC LIMIT ?
+        """;
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, limit);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) list.add(mapArticle(rs));
+        } catch (Exception e) { e.printStackTrace(); }
+        return list;
+    }
+    
+ // 2. Lấy danh sách bài mới nhất (Dùng cho mục "Cập nhật mới nhất")
+    public List<Article> getLatestArticles(int limit) {
+        return getArticlesCommon(limit, 0, 0); // Hàm này bạn đã có ORDER BY published_at DESC rồi
+    }
+
+ // 3. Lấy danh sách bài xem nhiều nhất (Dùng cho mục "Đọc nhiều nhất")
+    public List<Article> getMostViewedArticles(int limit) {
+        List<Article> list = new ArrayList<>();
+        String sql = """
+            SELECT a.*, c.name AS category_name FROM articles a 
+            JOIN categories c ON a.category_id = c.id 
+            WHERE a.status='PUBLISHED' 
+            ORDER BY a.views DESC LIMIT ?
+        """;
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, limit);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) list.add(mapArticle(rs));
+        } catch (Exception e) { e.printStackTrace(); }
+        return list;
+    }
+    
+    public List<Article> getRecommendedArticles(int limit, long excludeId) {
+        List<Article> list = new ArrayList<>();
+        // Lấy ngẫu nhiên nhưng loại bỏ bài đang là Nổi bật để không bị trùng
+        String sql = "SELECT a.*, c.name AS category_name FROM articles a " +
+                     "JOIN categories c ON a.category_id = c.id " +
+                     "WHERE a.id != ? " +
+                     "ORDER BY RAND() LIMIT ?";
+                     
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setLong(1, excludeId);
+            ps.setInt(2, limit);
+            
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                list.add(mapArticle(rs)); 
+            }
+        } catch (Exception e) { 
+            e.printStackTrace(); 
+        }
+        return list;
+    }
+    
+ // 1. Hàm ghi nhận điểm sở thích
+    public void updateInterestScore(long userId, int categoryId, int score) {
+        // Nếu chưa có thì INSERT, có rồi thì cộng dồn score
+        String sql = "INSERT INTO user_interests (user_id, category_id, score) VALUES (?, ?, ?) " +
+                     "ON DUPLICATE KEY UPDATE score = score + ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, userId);
+            ps.setInt(2, categoryId);
+            ps.setInt(3, score);
+            ps.setInt(4, score);
+            ps.executeUpdate();
+        } catch (Exception e) { e.printStackTrace(); }
+    }
+
+    // 2. Hàm lấy bài đề xuất dựa trên điểm cao nhất (Dùng cho trang chủ)
+    public List<Article> getRecommendedByInterest(long userId, long excludeId) {
+        List<Article> list = new ArrayList<>();
+        // Lấy bài thuộc Category mà user có điểm cao nhất, trừ bài Nổi bật đang hiện
+        String sql = "SELECT a.*, c.name AS category_name FROM articles a " +
+                     "JOIN categories c ON a.category_id = c.id " +
+                     "WHERE a.id != ? AND a.category_id = (" +
+                     "  SELECT category_id FROM user_interests WHERE user_id = ? " +
+                     "  ORDER BY score DESC LIMIT 1" + 
+                     ") ORDER BY a.published_at DESC LIMIT 4";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, excludeId);
+            ps.setLong(2, userId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                list.add(mapArticle(rs)); // Dùng hàm map của bạn
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        
+        // Nếu user mới chưa có điểm (list rỗng), hãy lấy Random 4 bài để bù vào
+        if (list.isEmpty()) {
+            return getRecommendedArticles(4, excludeId); 
+        }
+        return list;
+    }
+    
+    public String handleReaction(long userId, long articleId, String type) {
+        String resultStatus = "NONE";
+        try (Connection conn = DBConnection.getConnection()) {
+            conn.setAutoCommit(false);
+
+            // 1. Kiểm tra xem đã có interaction loại này chưa
+            // Vì interactions lưu chung LIKE/DISLIKE/VIEW nên phải check cả type
+            String checkSql = "SELECT type FROM interactions WHERE user_id = ? AND article_id = ? AND type IN ('LIKE', 'DISLIKE')";
+            
+            try (PreparedStatement psCheck = conn.prepareStatement(checkSql)) {
+                psCheck.setLong(1, userId);
+                psCheck.setLong(2, articleId);
+                ResultSet rs = psCheck.executeQuery();
+
+                if (rs.next()) {
+                    String oldType = rs.getString("type");
+                    
+                    if (oldType.equals(type)) {
+                        // TRƯỜNG HỢP: Bấm lại cái cũ -> Xóa interaction
+                        executeSql(conn, "DELETE FROM interactions WHERE user_id = ? AND article_id = ? AND type = ?", userId, articleId, type);
+                        updateCount(conn, articleId, type, -1);
+                        resultStatus = "NONE";
+                    } else {
+                        // TRƯỜNG HỢP: Đổi từ LIKE sang DISLIKE (hoặc ngược lại)
+                        executeSql(conn, "UPDATE interactions SET type = ? WHERE user_id = ? AND article_id = ? AND type = ?", type, userId, articleId, oldType);
+                        updateCount(conn, articleId, oldType, -1);
+                        updateCount(conn, articleId, type, 1);
+                        resultStatus = type;
+                    }
+                } else {
+                    // TRƯỜNG HỢP: Mới hoàn toàn
+                    executeSql(conn, "INSERT INTO interactions (user_id, article_id, type) VALUES (?, ?, ?)", userId, articleId, type);
+                    updateCount(conn, articleId, type, 1);
+                    resultStatus = type;
+                }
+            }
+            conn.commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return resultStatus;
+    }
+
+    // Hàm phụ để cập nhật số lượng trong bảng articles
+    private void updateCount(Connection conn, long artId, String type, int value) throws SQLException {
+        String column = type.equalsIgnoreCase("LIKE") ? "likes_count" : "dislikes_count";
+        String sql = "UPDATE articles SET " + column + " = " + column + " + ? WHERE id = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, value);
+            ps.setLong(2, artId);
+            ps.executeUpdate();
+        }
+    }
+
+    private void executeSql(Connection conn, String sql, Object... params) throws SQLException {
+        PreparedStatement ps = conn.prepareStatement(sql);
+        for (int i = 0; i < params.length; i++) ps.setObject(i + 1, params[i]);
+        ps.executeUpdate();
+    }
+    
+    public String getUserReaction(long userId, long articleId) {
+        String sql = "SELECT type FROM interactions WHERE user_id = ? AND article_id = ? AND type IN ('LIKE', 'DISLIKE')";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, userId);
+            ps.setLong(2, articleId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) return rs.getString("type");
+        } catch (Exception e) { e.printStackTrace(); }
+        return "NONE";
+    }
+    
+    public void incrementViewCount(long articleId, long userId) {
+        String updateSql = "UPDATE articles SET views = views + 1 WHERE id = ?";
+        String logSql = "INSERT INTO interactions (user_id, article_id, type) VALUES (?, ?, 'VIEW')";
+
+        try (Connection conn = DBConnection.getConnection()) {
+            conn.setAutoCommit(false); // Dùng transaction để đảm bảo cả 2 cùng thành công
+            
+            // 1. Cập nhật số view tổng
+            try (PreparedStatement ps1 = conn.prepareStatement(updateSql)) {
+                ps1.setLong(1, articleId);
+                ps1.executeUpdate();
+            }
+            
+            // 2. Ghi nhật ký vào bảng interactions (chỉ ghi nếu user đã đăng nhập)
+            if (userId > 0) {
+                try (PreparedStatement ps2 = conn.prepareStatement(logSql)) {
+                    ps2.setLong(1, userId);
+                    ps2.setLong(2, articleId);
+                    ps2.executeUpdate();
+                }
+            }
+            
+            conn.commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public Article getArticleById(long id) {
+        return getById(id);
+    }
+
+    // ── Lấy tất cả bài viết (Admin dùng) ───────────────────────────────────
+    // ── Lấy tất cả bài viết có filter (Admin dùng) ──────────────────────────
+    public List<Article> getAllArticlesFiltered(int limit, int offset, String keyword, String status, Integer categoryId) {
+        StringBuilder sql = new StringBuilder("""
+                    SELECT a.id, a.title, a.content, a.summary, a.image_url,
+                           a.author_id, a.category_id, a.status, a.views, a.likes_count,
+                           a.sentiment_label, a.source_score, a.popularity_score,
+                           a.published_at, a.created_at,
+                           c.name AS category_name,
+                           u.full_name AS author_name
+                    FROM articles a
+                    LEFT JOIN categories c ON a.category_id = c.id
+                    LEFT JOIN users u ON a.author_id = u.id
+                    WHERE a.status != 'DRAFT'
+                """);
+        List<Object> params = new ArrayList<>();
+        
+        if (keyword != null && !keyword.isBlank()) {
+            sql.append(" AND (a.title LIKE ? OR u.full_name LIKE ? OR CAST(a.id AS CHAR) LIKE ?)");
+            String k = "%" + keyword.trim() + "%";
+            params.add(k); params.add(k); params.add(k);
+        }
+        if (status != null && !status.isBlank()) {
+            sql.append(" AND a.status = ?");
+            params.add(status.trim());
+        }
+        if (categoryId != null && categoryId > 0) {
+            sql.append(" AND a.category_id = ?");
+            params.add(categoryId);
+        }
+
+        sql.append(" ORDER BY a.created_at DESC LIMIT ? OFFSET ?");
+        params.add(limit);
+        params.add(offset);
+
+        List<Article> list = new ArrayList<>();
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            for (int i = 0; i < params.size(); i++) ps.setObject(i + 1, params.get(i));
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Article a = mapArticle(rs);
+                try { a.setAuthorName(rs.getString("author_name")); } catch(Exception e) {}
+                list.add(a);
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return list;
+    }
+
+    public List<Article> getAllArticles(int limit, int offset) {
+        return getAllArticlesFiltered(limit, offset, null, null, null);
+    }
+
+    // ── Đếm tổng số bài viết (Admin dùng) ───────────────────────────────
+    public int getTotalArticleCount(String keyword, String status, Integer categoryId) {
+        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM articles a WHERE a.status != 'DRAFT'");
+        List<Object> params = new ArrayList<>();
+        
+        if (keyword != null && !keyword.isBlank()) {
+            sql.append(" AND a.title LIKE ?");
+            params.add("%" + keyword.trim() + "%");
+        }
+        if (status != null && !status.isBlank()) {
+            sql.append(" AND a.status = ?");
+            params.add(status.trim());
+        }
+        if (categoryId != null && categoryId > 0) {
+            sql.append(" AND a.category_id = ?");
+            params.add(categoryId);
+        }
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            for (int i = 0; i < params.size(); i++) ps.setObject(i + 1, params.get(i));
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) return rs.getInt(1);
+        } catch (Exception e) { e.printStackTrace(); }
+        return 0;
+    }
+
+    public int getTotalArticleCount() {
+        return getTotalArticleCount(null, null, null);
+    }
+
+    // ── Lấy bài viết của một tác giả (Staff dùng) ──────────────────────────
+    public List<Article> getArticlesByAuthor(long authorId) {
+        return getArticlesByAuthorFiltered(authorId, "", "", "", "", "", 0, Integer.MAX_VALUE);
+    }
+
+    // ── Đếm tổng bài viết có filter (Staff dùng) ──────────────────────────
+    public int countArticlesByAuthorFiltered(long authorId,
+                                              String keyword, String status,
+                                              String category, String dateFrom, String dateTo) {
+        StringBuilder sql = new StringBuilder("""
+            SELECT COUNT(*) FROM articles a
+            LEFT JOIN categories c ON a.category_id = c.id
+            WHERE a.author_id = ?
+        """);
+        List<Object> params = new ArrayList<>();
+        params.add(authorId);
+        appendFilters(sql, params, keyword, status, category, dateFrom, dateTo);
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            for (int i = 0; i < params.size(); i++) ps.setObject(i + 1, params.get(i));
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) return rs.getInt(1);
+        } catch (Exception e) { e.printStackTrace(); }
+        return 0;
+    }
+
+    // ── Lấy bài viết có filter + phân trang (Staff dùng) ──────────────────
+    public List<Article> getArticlesByAuthorFiltered(long authorId,
+                                                      String keyword, String status,
+                                                      String category, String dateFrom, String dateTo,
+                                                      int offset, int limit) {
+        StringBuilder sql = new StringBuilder("""
+            SELECT a.id, a.title, a.content, a.summary, a.image_url,
+                   a.author_id, a.category_id, a.status, a.views, a.likes_count,
+                   a.sentiment_label, a.source_score, a.popularity_score,
+                   a.published_at, a.created_at,
+                   c.name AS category_name
+            FROM articles a
+            LEFT JOIN categories c ON a.category_id = c.id
+            WHERE a.author_id = ?
+        """);
+        List<Object> params = new ArrayList<>();
+        params.add(authorId);
+        appendFilters(sql, params, keyword, status, category, dateFrom, dateTo);
+        sql.append(" ORDER BY a.created_at DESC LIMIT ? OFFSET ?");
+        params.add(limit);
+        params.add(offset);
+
+        List<Article> list = new ArrayList<>();
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            for (int i = 0; i < params.size(); i++) ps.setObject(i + 1, params.get(i));
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) list.add(mapArticle(rs));
+        } catch (Exception e) { e.printStackTrace(); }
+        return list;
+    }
+
+    // ── Lấy danh sách danh mục của tác giả (Staff filter) ─────────────────
+    public List<String> getCategoriesByAuthor(long authorId) {
+        List<String> list = new ArrayList<>();
+        String sql = """
+            SELECT DISTINCT c.name
+            FROM articles a
+            JOIN categories c ON a.category_id = c.id
+            WHERE a.author_id = ?
+            ORDER BY c.name
+        """;
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, authorId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) list.add(rs.getString("name"));
+        } catch (Exception e) { e.printStackTrace(); }
+        return list;
+    }
+
+    // ── Lấy bài viết theo ID ──────────────────────────────────────────────
+    public Article getById(long id) {
+        String sql = """
+            SELECT a.*, c.name AS category_name
+            FROM articles a
+            LEFT JOIN categories c ON a.category_id = c.id
+            WHERE a.id = ?
+        """;
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, id);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) return mapArticle(rs);
+        } catch (Exception e) { e.printStackTrace(); }
+        return null;
+    }
+
+    // ── Tạo bài viết mới ─────────────────────────────────────────────────
+    public long save(Article a) {
+        String sql = """
+            INSERT INTO articles
+                (title, content, summary, image_url, author_id, category_id, status, published_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """;
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            ps.setString(1, a.getTitle());
+            ps.setString(2, a.getContent());
+            ps.setString(3, a.getSummary());
+            ps.setString(4, a.getImageUrl());
+            ps.setLong(5, a.getAuthorId());
+            if (a.getCategoryId() > 0) ps.setInt(6, a.getCategoryId());
+            else                       ps.setNull(6, Types.INTEGER);
+            ps.setString(7, a.getStatus());
+            if ("PUBLISHED".equals(a.getStatus()))
+                ps.setTimestamp(8, new Timestamp(System.currentTimeMillis()));
+            else
+                ps.setNull(8, Types.TIMESTAMP);
+            ps.executeUpdate();
+            ResultSet keys = ps.getGeneratedKeys();
+            if (keys.next()) return keys.getLong(1);
+        } catch (Exception e) { e.printStackTrace(); }
+        return -1;
+    }
+
+    // ── Cập nhật bài viết ────────────────────────────────────────────────
+    public boolean update(Article a) {
+        String sql = """
+            UPDATE articles
+            SET title=?, content=?, summary=?, image_url=?, category_id=?, status=?,
+                published_at = CASE WHEN ? = 'PUBLISHED' AND published_at IS NULL
+                                    THEN NOW() ELSE published_at END
+            WHERE id=? AND author_id=?
+        """;
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, a.getTitle());
+            ps.setString(2, a.getContent());
+            ps.setString(3, a.getSummary());
+            ps.setString(4, a.getImageUrl());
+            if (a.getCategoryId() > 0) ps.setInt(5, a.getCategoryId());
+            else                       ps.setNull(5, Types.INTEGER);
+            ps.setString(6, a.getStatus());
+            ps.setString(7, a.getStatus());
+            ps.setLong(8, a.getId());
+            ps.setLong(9, a.getAuthorId());
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) { e.printStackTrace(); return false; }
+    }
+
+    // ── Xóa bài viết (Chỉ tác giả) ──────────────────────────────────────
+    public boolean deleteArticle(long articleId, long authorId) {
+        String sql = "DELETE FROM articles WHERE id = ? AND author_id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, articleId);
+            ps.setLong(2, authorId);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) { e.printStackTrace(); return false; }
+    }
+
+    // ── Cập nhật status (Admin) ──────────────────────────────────────────
+    public boolean updateArticleStatus(long articleId, String status) {
+        String sql = "UPDATE articles SET status = ? WHERE id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, status);
+            ps.setLong(2, articleId);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) { e.printStackTrace(); return false; }
+    }
+
+    // ── Cập nhật status (Staff check author) ─────────────────────────────
+    public boolean updateArticleStatus(long articleId, long authorId, String status) {
+        String sql = "UPDATE articles SET status = ? WHERE id = ? AND author_id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, status);
+            ps.setLong(2, articleId);
+            ps.setLong(3, authorId);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) { e.printStackTrace(); return false; }
+    }
+
+    // ── Lấy tất cả danh mục ──────────────────────────────────────────────
+    public List<neuralnews.model.Category> getAllCategories() {
+        List<neuralnews.model.Category> list = new ArrayList<>();
+        String sql = "SELECT id, name FROM categories ORDER BY name";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                neuralnews.model.Category cat = new neuralnews.model.Category();
+                cat.setId(rs.getInt("id"));
+                cat.setName(rs.getString("name"));
+                list.add(cat);
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return list;
+    }
+
+    // ── Helper: append filters ──────────────────────────────────────────
+    private void appendFilters(StringBuilder sql, List<Object> params,
+                                String keyword, String status,
+                                String category, String dateFrom, String dateTo) {
+        if (keyword != null && !keyword.isBlank()) {
+            sql.append(" AND a.title LIKE ?");
+            params.add("%" + keyword.trim() + "%");
+        }
+        if (status != null && !status.isBlank()) {
+            sql.append(" AND a.status = ?");
+            params.add(status.trim());
+        }
+        if (category != null && !category.isBlank()) {
+            sql.append(" AND c.name = ?");
+            params.add(category.trim());
+        }
+        if (dateFrom != null && !dateFrom.isBlank()) {
+            sql.append(" AND DATE(a.created_at) >= ?");
+            params.add(dateFrom.trim());
+        }
+        if (dateTo != null && !dateTo.isBlank()) {
+            sql.append(" AND DATE(a.created_at) <= ?");
+            params.add(dateTo.trim());
+        }
+    }
+
+    // ── Map ResultSet → Article ──────────────────────────────────────────
+    private Article mapArticle(ResultSet rs) throws Exception {
+        Article a = new Article();
+        a.setId(rs.getLong("id"));
+        a.setTitle(rs.getString("title"));
+        a.setContent(rs.getString("content"));
+        a.setSummary(rs.getString("summary"));
+        a.setImageUrl(rs.getString("image_url"));
+        a.setAuthorId(rs.getLong("author_id"));
+        a.setCategoryId(rs.getInt("category_id"));
+        a.setStatus(rs.getString("status"));
+        a.setViews(rs.getInt("views"));
+        a.setLikesCount(rs.getInt("likes_count"));
+        a.setDislikesCount(rs.getInt("dislikes_count"));
+        a.setSentimentLabel(rs.getString("sentiment_label"));
+        a.setSourceScore(rs.getDouble("source_score"));
+        a.setPopularityScore(rs.getDouble("popularity_score"));
+        a.setPublishedAt(rs.getTimestamp("published_at"));
+        a.setCreatedAt(rs.getTimestamp("created_at"));
+        a.setCategoryName(rs.getString("category_name"));
+        return a;
+    }
+}

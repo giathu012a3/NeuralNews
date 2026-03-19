@@ -5,23 +5,24 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
-import neuralnews.model.Category_Model;
+import neuralnews.model.Category;
 import neuralnews.util.DBConnection;
 
-public class Category_Dao {
+public class CategoryDao {
 
-    public List<Category_Model> getAllCategory() {
-        List<Category_Model> list = new ArrayList<>();
-        String sql = "SELECT id, name FROM categories ORDER BY id ASC";
+    public List<Category> getAllCategory() {
+        List<Category> list = new ArrayList<>();
+        String sql = "SELECT id, name, description FROM categories ORDER BY id ASC";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
-                Category_Model c = new Category_Model();
+                Category c = new Category();
                 c.setId(rs.getInt("id"));
                 c.setName(rs.getString("name"));
+                c.setDescription(rs.getString("description"));
                 list.add(c);
             }
 

@@ -1,10 +1,10 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ page import="java.util.List" %>                 
-<%@ page import="neuralnews.model.ArticleModel" %> 
-<%@ page import="neuralnews.model.Category_Model" %> 
+<%@ page import="neuralnews.model.Article" %> 
+<%@ page import="neuralnews.model.Category" %> 
 
 <% String catName = (String) request.getAttribute("categoryName"); %> 
-<% List<ArticleModel> listArt = (List<ArticleModel>) request.getAttribute("listArticles"); %> 
+<% List<Article> listArt = (List<Article>) request.getAttribute("listArticles"); %> 
     <!DOCTYPE html>
     <html class="dark" lang="en">
 
@@ -83,15 +83,15 @@
                     
                     <%
 						if (listArt != null && !listArt.isEmpty()) {
-						    ArticleModel firstArt = listArt.get(0);
+						    Article firstArt = listArt.get(0);
 						%>
                     
                         <!-- Content Articles would go here, for now using static HTML from template -->
-                        <article onclick="window.location.href='article?id=<%= firstArt.getId() %>'"
+                        <article onclick="window.location.href='user/article?id=<%= firstArt.getId() %>'"
                             class="md:col-span-2 flex flex-col md:flex-row gap-6 bg-white dark:bg-surface-dark p-4 rounded-xl border border-slate-100 dark:border-border-dark hover:shadow-lg transition-all group cursor-pointer">
                             <div class="md:w-1/2 h-64 shrink-0 rounded-lg overflow-hidden">
                                 <div class="w-full h-full bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
-                                    style="background-image: url('<%= firstArt.getImageUrl() %>');">
+                                    style="background-image: url('<%= firstArt.getDisplayImageUrl(request.getContextPath()) %>');">
                                 </div>
                             </div>
                             <div class="flex flex-col justify-between py-2">
@@ -115,9 +115,9 @@
                         <% } %>
                         
                         <% for (int i = 1; i < listArt.size(); i++) { 
-    						ArticleModel art = listArt.get(i); %>
+    						Article art = listArt.get(i); %>
     						
-                        <article onclick="window.location.href='article?id=<%= art.getId() %>'"
+                        <article onclick="window.location.href='user/article?id=<%= art.getId() %>'"
                             class="bg-white dark:bg-surface-dark rounded-xl border border-slate-100 dark:border-border-dark overflow-hidden hover:shadow-md transition-all group cursor-pointer">
                             <div class="h-48 overflow-hidden relative">
                                 <div class="absolute top-3 left-3 z-10">
@@ -126,7 +126,7 @@
                                         động</span>
                                 </div>
                                 <div class="w-full h-full bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
-                                    style="background-image: url('<%= art.getImageUrl() %>');">
+                                    style="background-image: url('<%= art.getDisplayImageUrl(request.getContextPath()) %>');">
                                 </div>
                             </div>
                             <div class="p-4">

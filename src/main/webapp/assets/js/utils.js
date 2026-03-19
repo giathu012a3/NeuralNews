@@ -10,12 +10,14 @@ const ajaxUtils = {
      * @param {object} data - Data to send (for POST, PUT)
      * @returns {Promise} - Resolves with JSON response or rejects with error
      */
-    request: async (url, method, data = null) => {
+    request: function(url, method, data) {
+        if (data === undefined) data = null;
+        
         const options = {
             method: method,
             headers: {
                 'Content-Type': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest' // Helper for backend to detect AJAX
+                'X-Requested-With': 'XMLHttpRequest'
             }
         };
 
@@ -23,56 +25,59 @@ const ajaxUtils = {
             options.body = JSON.stringify(data);
         }
 
-        try {
-            const response = await fetch(url, options);
+        return fetch(url, options)
+            .then(function(response) {
+                const contentType = response.headers.get("content-type");
+                let promise;
+                
+                if (contentType && contentType.indexOf("application/json") !== -1) {
+                    promise = response.json();
+                } else {
+                    promise = response.text();
+                }
 
-            // Check if response is JSON
-            const contentType = response.headers.get("content-type");
-            let result;
-            if (contentType && contentType.indexOf("application/json") !== -1) {
-                result = await response.json();
-            } else {
-                result = await response.text();
-            }
-
-            if (!response.ok) {
-                throw {
-                    status: response.status,
-                    message: result.message || 'Something went wrong',
-                    data: result
-                };
-            }
-
-            return result;
-        } catch (error) {
-            console.error('AJAX Error:', error);
-            throw error;
-        }
+                return promise.then(function(result) {
+                    if (!response.ok) {
+                        throw {
+                            status: response.status,
+                            message: result.message || 'Something went wrong',
+                            data: result
+                        };
+                    }
+                    return result;
+                });
+            })
+            .catch(function(error) {
+                console.error('AJAX Error:', error);
+                throw error;
+            });
     },
 
     /**
      * Shorthand for GET requests
-     * @param {string} url 
      */
-    get: (url) => ajaxUtils.request(url, 'GET'),
+    get: function(url) { 
+        return ajaxUtils.request(url, 'GET'); 
+    },
 
     /**
      * Shorthand for POST requests
-     * @param {string} url 
-     * @param {object} data 
      */
-    post: (url, data) => ajaxUtils.request(url, 'POST', data),
+    post: function(url, data) { 
+        return ajaxUtils.request(url, 'POST', data); 
+    },
 
     /**
      * Shorthand for PUT requests
-     * @param {string} url 
-     * @param {object} data 
      */
-    put: (url, data) => ajaxUtils.request(url, 'PUT', data),
+    put: function(url, data) { 
+        return ajaxUtils.request(url, 'PUT', data); 
+    },
 
     /**
      * Shorthand for DELETE requests
-     * @param {string} url 
      */
-    delete: (url) => ajaxUtils.request(url, 'DELETE')
+    delete: function(url) { 
+        return ajaxUtils.request(url, 'DELETE'); 
+    }
 };
