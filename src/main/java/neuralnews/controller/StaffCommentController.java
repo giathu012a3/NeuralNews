@@ -107,8 +107,7 @@ public class StaffCommentController extends HttpServlet {
             long commentId = Long.parseLong(idParam);
             CommentDao dao = new CommentDao();
             switch (action) {
-                case "delete"  -> dao.deleteComment(commentId);
-                case "spam"    -> {
+                 case "spam"    -> {
                     dao.updateStatus(commentId, "SPAM");
                     ReportDao reportDao = new ReportDao();
                     String reason = request.getParameter("reason");
@@ -119,8 +118,7 @@ public class StaffCommentController extends HttpServlet {
                         "Journalist reported harmful content", "MANUAL_REVIEW", 20, 80, 15, content);
                 }
                 case "hide"    -> dao.updateStatus(commentId, "HIDDEN");
-                case "restore" -> dao.updateStatus(commentId, "NEUTRAL");
-                case "reply"   -> {
+                 case "reply"   -> {
                     String content    = request.getParameter("replyContent");
                     String articleStr = request.getParameter("articleId");
                     if (content != null && !content.isBlank() && articleStr != null)

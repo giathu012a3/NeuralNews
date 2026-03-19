@@ -317,23 +317,19 @@
                                 <div class="flex items-center gap-4">
 
                                 <% if (isSpam || isHidden) { %>
-                                    <%-- Xoá vĩnh viễn --%>
+                                    <%-- Chỉ hiển thị nhãn thông báo khi bình luận đã được xử lý --%>
+                                    <span class="text-[10px] text-slate-400 font-medium italic">Không có hành động khả dụng</span>
+                                <% } else { %>
+                                    <%-- Phản hồi --%>
+                                    <button onclick="toggleReply('reply-<%= c.getId() %>')"
+                                            class="flex items-center gap-1.5 text-slate-500 hover:text-primary
+                                                   transition-colors text-[11px] font-bold uppercase tracking-wider">
+                                        <span class="material-symbols-outlined text-lg">reply</span> Phản hồi
+                                    </button>
+                                    
+                                    <%-- Ẩn --%>
                                     <form method="post" action="<%= contextPath %>/journalist/comments" style="display:inline">
-                                        <input type="hidden" name="action"    value="delete"/>
-                                        <input type="hidden" name="commentId" value="<%= c.getId() %>"/>
-                                        <input type="hidden" name="page"      value="<%= currentPage %>"/>
-                                        <input type="hidden" name="sort"      value="<%= sort %>"/>
-                                        <% if (hasKeyword) { %><input type="hidden" name="keyword" value="<%= keyword %>"/><% } %>
-                                        <button type="submit"
-                                                onclick="return confirm('Xoá vĩnh viễn bình luận này?')"
-                                                class="flex items-center gap-1.5 text-red-500 hover:text-red-600
-                                                       text-[11px] font-bold uppercase tracking-wider">
-                                            <span class="material-symbols-outlined text-lg">delete_forever</span> Xóa
-                                        </button>
-                                    </form>
-                                    <%-- Khôi phục --%>
-                                    <form method="post" action="<%= contextPath %>/journalist/comments" style="display:inline">
-                                        <input type="hidden" name="action"    value="restore"/>
+                                        <input type="hidden" name="action"    value="hide"/>
                                         <input type="hidden" name="commentId" value="<%= c.getId() %>"/>
                                         <input type="hidden" name="page"      value="<%= currentPage %>"/>
                                         <input type="hidden" name="sort"      value="<%= sort %>"/>
@@ -341,16 +337,9 @@
                                         <button type="submit"
                                                 class="flex items-center gap-1.5 text-slate-500 hover:text-slate-900
                                                        dark:hover:text-white text-[11px] font-bold uppercase tracking-wider">
-                                            <span class="material-symbols-outlined text-lg">undo</span> Khôi phục
+                                            <span class="material-symbols-outlined text-lg">visibility_off</span> Ẩn
                                         </button>
                                     </form>
-                                <% } else { %>
-                                    <%-- Chỉ giữ Phản hồi, bỏ nút Spam / Ẩn vì đã có Báo cáo --%>
-                                    <button onclick="toggleReply('reply-<%= c.getId() %>')"
-                                            class="flex items-center gap-1.5 text-slate-500 hover:text-primary
-                                                   transition-colors text-[11px] font-bold uppercase tracking-wider">
-                                        <span class="material-symbols-outlined text-lg">reply</span> Phản hồi
-                                    </button>
                                 <% } %>
                                 </div>
                                 <div class="relative">
