@@ -1,8 +1,8 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%@ page import="neuralnews.model.Article" %>
-<%
-    Article art = (Article) request.getAttribute("articleDetail");
-%>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
+<c:set var="art" value="${articleDetail}" />
+<c:set var="uReaction" value="${userReaction != null ? userReaction : 'NONE'}" />
     <!DOCTYPE html>
     <html class="dark" lang="en">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -44,17 +44,22 @@
                 <article class="relative">
                     <div class="flex items-center gap-2 mb-4">
                         <span
-                            class="inline-block px-3 py-1 rounded bg-primary/10 text-primary text-[11px] font-bold uppercase tracking-wider">Công
-                            nghệ</span>
-                        <div
-                            class="flex items-center gap-1.5 px-2 py-1 bg-green-500/10 text-green-500 rounded text-xs font-medium">
-                            <span class="material-symbols-outlined text-sm">sentiment_satisfied</span>
-                            <span>Tình cảm tích cực</span>
-                        </div>
+                            class="inline-block px-3 py-1 rounded bg-primary/10 text-primary text-[11px] font-bold uppercase tracking-wider">
+                            <c:out value="${not empty art.categoryName ? art.categoryName : 'Tin tức'}" />
+                        </span>
+                        <c:if test="${not empty art.sentimentLabel}">
+                            <div
+                                class="flex items-center gap-1.5 px-2 py-1 ${not empty art.sentimentBadgeClass ? art.sentimentBadgeClass : 'bg-green-500/10 text-green-500'} rounded text-xs font-medium">
+                                <span class="material-symbols-outlined text-sm">
+                                    <c:out value="${not empty art.trendIcon ? art.trendIcon : 'sentiment_satisfied'}" />
+                                </span>
+                                <span><c:out value="${art.sentimentLabel}" /></span>
+                            </div>
+                        </c:if>
                     </div>
                     <h1
                         class="text-4xl md:text-5xl lg:text-6xl font-black text-slate-900 dark:text-white leading-[1.1] mb-8">
-                        <%= (art != null) ? art.getTitle() : "Không tìm thấy bài viết" %>
+                        <c:out value="${not empty art ? art.title : 'Không tìm thấy bài viết'}" />
                     </h1>
                     <div
                         class="flex flex-wrap items-center justify-between gap-4 pb-8 border-b border-slate-200 dark:border-slate-800">
@@ -65,8 +70,13 @@
                                 </div>
                             </div>
                             <div>
-                                <p class="text-sm font-bold text-slate-900 dark:text-white">Alex Rivera</p>
-                                <p class="text-xs text-slate-500">24 Tháng 10, 2023 • Đọc 8 phút</p>
+                                <p class="text-sm font-bold text-slate-900 dark:text-white">
+                                    <c:out value="${not empty art.authorName ? art.authorName : 'Tác giả'}" />
+                                </p>
+                                <p class="text-xs text-slate-500">
+                                    <fmt:formatDate value="${art.publishedAt}" pattern="dd 'Tháng' MM, yyyy" /> • 
+                                    <c:out value="${not empty art.readingTime ? art.readingTime : 'Đọc ... phút'}" />
+                                </p>
                             </div>
                         </div>
                         <div class="flex items-center gap-3">
@@ -119,16 +129,16 @@
                         </div>
                     </div>
                     
-                    <% if (art != null && art.getImageUrl() != null && !art.getImageUrl().isBlank()) { %>
+                    <c:if test="${not empty art and not empty art.imageUrl and not art.imageUrl.isBlank()}">
                     <div class="my-8 rounded-2xl overflow-hidden shadow-2xl">
-                        <img src="<%= art.getDisplayImageUrl(request.getContextPath()) %>" 
-                             alt="<%= art.getTitle() %>" 
+                        <img src="${art.getDisplayImageUrl(pageContext.request.contextPath)}" 
+                             alt="${art.title}" 
                              class="w-full h-auto object-cover max-h-[500px]" />
                     </div>
-                    <% } %>
+                    </c:if>
 
                     <div class="article-content prose prose-slate dark:prose-invert max-w-none">
-                        <%= (art != null) ? art.getContentProcessed(request.getContextPath()) : "Nội dung đang được cập nhật..." %>
+                        <c:out value="${not empty art ? art.getContentProcessed(pageContext.request.contextPath) : 'Nội dung đang được cập nhật...'}" escapeXml="false" />
                     </div>
                     
                     <div class="mt-16 pt-12 border-t border-slate-200 dark:border-slate-800">
@@ -141,21 +151,17 @@
 								<h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-8 ">Thảo luận (128)</h3>
 							</div>
 
-<%    String uReaction = (String) request.getAttribute("userReaction");
-    if(uReaction == null) uReaction = "NONE";
-%>
-
 <div class="flex items-center gap-3">
     <button id="btnLike" onclick="sendReaction('LIKE')" 
-            class="p-2 flex items-center gap-1 transition-all hover:text-primary <%= uReaction.equals("LIKE") ? "text-primary" : "" %>">
-        <span class="material-symbols-outlined text-2xl <%= uReaction.equals("LIKE") ? "fill-icon" : "" %>">thumb_up</span>
-        <span id="likeCount"><%= (art != null) ? art.getLikesCount() : 0 %></span>
+            class="p-2 flex items-center gap-1 transition-all hover:text-primary ${uReaction == 'LIKE' ? 'text-primary' : ''}">
+        <span class="material-symbols-outlined text-2xl ${uReaction == 'LIKE' ? 'fill-icon' : ''}">thumb_up</span>
+        <span id="likeCount">${not empty art ? art.likesCount : 0}</span>
     </button>
     
     <button id="btnDislike" onclick="sendReaction('DISLIKE')" 
-            class="p-2 flex items-center gap-1 transition-all hover:text-red-500 <%= uReaction.equals("DISLIKE") ? "text-red-500" : "" %>">
-        <span class="material-symbols-outlined text-2xl <%= uReaction.equals("DISLIKE") ? "fill-icon" : "" %>">thumb_down</span>
-        <span id="dislikeCount"><%= (art != null) ? art.getDislikesCount() : 0 %></span>
+            class="p-2 flex items-center gap-1 transition-all hover:text-red-500 ${uReaction == 'DISLIKE' ? 'text-red-500' : ''}">
+        <span class="material-symbols-outlined text-2xl ${uReaction == 'DISLIKE' ? 'fill-icon' : ''}">thumb_down</span>
+        <span id="dislikeCount">${not empty art ? art.dislikesCount : 0}</span>
     </button>
 </div>
                     </div>
@@ -360,7 +366,7 @@
 			    
 			    function sendReaction(type) {
 			        // Cách 1: Lấy ID từ đối tượng art (phải đảm bảo art không null)
-			        const articleId = "<%= (art != null) ? art.getId() : "" %>";
+			        const articleId = "${not empty art ? art.id : ''}";
 			        
 			        // Kiểm tra nếu articleId rỗng thì không gửi request nữa
 			        if (!articleId || articleId === "") {
