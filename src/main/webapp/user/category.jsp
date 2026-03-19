@@ -117,7 +117,7 @@
                         <% for (int i = 1; i < listArt.size(); i++) { 
     						Article art = listArt.get(i); %>
     						
-                        <article onclick="window.location.href='article?id=<%= art.getId() %>'"
+                        <article onclick="window.location.href='user/article?id=<%= art.getId() %>'"
                             class="bg-white dark:bg-surface-dark rounded-xl border border-slate-100 dark:border-border-dark overflow-hidden hover:shadow-md transition-all group cursor-pointer">
                             <div class="h-48 overflow-hidden relative">
                                 <div class="absolute top-3 left-3 z-10">

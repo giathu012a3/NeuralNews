@@ -5,6 +5,7 @@
 %>
     <!DOCTYPE html>
     <html class="dark" lang="en">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <head>
         <title>NexusAI - Trải nghiệm Đọc Bài viết</title>
@@ -27,6 +28,10 @@
             .dark .article-content p {
                 color: #cbd5e1;
             }
+            
+                .fill-icon { font-variation-settings: 'FILL' 1; }
+    .text-primary { color: #3b82f6; } /* Màu xanh */
+    .text-red-500 { color: #ef4444; } /* Màu đỏ */
         </style>
     </head>
 
@@ -127,7 +132,35 @@
                     </div>
                     
                     <div class="mt-16 pt-12 border-t border-slate-200 dark:border-slate-800">
-                        <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-8">Thảo luận (128)</h3>
+                    
+
+                    
+                    <div
+                        class="flex flex-wrap items-center justify-between gap-4 pb-8 border-b border-slate-200 dark:border-slate-800">
+                        <div class="flex items-center gap-4">
+								<h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-8 ">Thảo luận (128)</h3>
+							</div>
+
+<%    String uReaction = (String) request.getAttribute("userReaction");
+    if(uReaction == null) uReaction = "NONE";
+%>
+
+<div class="flex items-center gap-3">
+    <button id="btnLike" onclick="sendReaction('LIKE')" 
+            class="p-2 flex items-center gap-1 transition-all hover:text-primary <%= uReaction.equals("LIKE") ? "text-primary" : "" %>">
+        <span class="material-symbols-outlined text-2xl <%= uReaction.equals("LIKE") ? "fill-icon" : "" %>">thumb_up</span>
+        <span id="likeCount"><%= (art != null) ? art.getLikesCount() : 0 %></span>
+    </button>
+    
+    <button id="btnDislike" onclick="sendReaction('DISLIKE')" 
+            class="p-2 flex items-center gap-1 transition-all hover:text-red-500 <%= uReaction.equals("DISLIKE") ? "text-red-500" : "" %>">
+        <span class="material-symbols-outlined text-2xl <%= uReaction.equals("DISLIKE") ? "fill-icon" : "" %>">thumb_down</span>
+        <span id="dislikeCount"><%= (art != null) ? art.getDislikesCount() : 0 %></span>
+    </button>
+</div>
+                    </div>
+                    
+                    
                         <div class="flex gap-4 mb-10">
                             <div class="size-10 rounded-full bg-slate-200 overflow-hidden shrink-0">
                                 <div class="size-full bg-cover bg-center"
@@ -264,7 +297,127 @@
                     aiPanel.classList.remove('flex');
                 });
             });
+            
+//---------------------------------------------------------------------------------------------------------------------------
+            
+            // Lấy categoryId từ object articleDetail mà Controller của bạn đã nạp
+			    const catId = <%= ((neuralnews.model.Article)request.getAttribute("articleDetail")).getCategoryId() %>;
+			    let scoredTime = false;
+			    let scoredScroll = false;
+			
+			    // 1. Cộng 1 điểm ngay khi vừa mở bài báo
+			    sendInteraction(1);
+			
+			    // 2. Sau 20 giây ở lại trang, cộng 3 điểm
+			    setTimeout(() => {
+			        if (!scoredTime) {
+			            sendInteraction(3);
+			            scoredTime = true;
+			        }
+			    }, 20000);
+			
+			    // 3. Lướt xuống gần cuối trang (còn 200px nữa là hết), cộng 5 điểm
+			    window.addEventListener('scroll', function() {
+    // Logic cộng điểm khi đọc hết bài
+    if (!scoredScroll && (window.innerHeight + window.scrollY) >= document.body.offsetHeight - 200) {
+        sendInteraction(5);
+        scoredScroll = true;
+    }
+});
+			
+			    function sendInteraction(points) {
+			        const params = new URLSearchParams();
+			        params.append('categoryId', catId);
+			        params.append('score', points);
+
+			        // Dùng EL ${pageContext.request.contextPath} để chắc chắn đường dẫn luôn đúng
+			        fetch('${pageContext.request.contextPath}/update-interest', {
+			            method: 'POST',
+			            body: params
+			        }).then(res => {
+			            if(res.ok) console.log("Đã cộng " + points + " điểm thành công!");
+			        });
+			    }
+			    
+			    setTimeout(() => {
+			        const artId = "<%= (art != null) ? art.getId() : "" %>";
+			        console.log("--- Đã đủ 30 giây! Đang chuẩn bị gửi request tăng view cho ID: " + artId + " ---");
+
+			        const params = new URLSearchParams();
+			        params.append('articleId', artId);
+			        params.append('action', 'view');
+
+			        fetch('${pageContext.request.contextPath}/handle-reaction', {
+			            method: 'POST',
+			            body: params
+			        }).then(res => {
+			            console.log("--- Server đã phản hồi! Status: " + res.status + " ---");
+			            if(res.ok) console.log("--- Tăng view thành công trên giao diện ---");
+			        }).catch(err => {
+			            console.error("--- Lỗi Fetch: ", err);
+			        });
+			    }, 3000);
+			    
+			    function sendReaction(type) {
+			        // Cách 1: Lấy ID từ đối tượng art (phải đảm bảo art không null)
+			        const articleId = "<%= (art != null) ? art.getId() : "" %>";
+			        
+			        // Kiểm tra nếu articleId rỗng thì không gửi request nữa
+			        if (!articleId || articleId === "") {
+			            console.error("Lỗi: Không tìm thấy ID bài viết trong JSP!");
+			            return;
+			        }
+
+			        const params = new URLSearchParams();
+			        params.append('articleId', articleId);
+			        params.append('type', type);
+
+			        fetch('${pageContext.request.contextPath}/handle-reaction', {
+			            method: 'POST',
+			            body: params
+			        })
+			        .then(res => {
+			            if (!res.ok) throw new Error('Server 500');
+			            return res.json();
+			        })
+			        .then(data => {
+				        if (data.status === 'UNAUTHORIZED') {
+				            const goToLogin = confirm("Bạn cần đăng nhập để thực hiện tính năng này.");
+				            return;
+				        }
+				        updateUI(data.status, data.newLikes, data.newDislikes);
+				    })
+			    }
+
+			    function updateUI(status, likes, dislikes) {
+			        const btnLike = document.getElementById('btnLike');
+			        const btnDislike = document.getElementById('btnDislike');
+			        const lCount = document.getElementById('likeCount');
+			        const dCount = document.getElementById('dislikeCount');
+
+			        // 1. Reset trạng thái cũ
+			        btnLike.classList.remove('text-primary');
+			        btnLike.querySelector('span').classList.remove('fill-icon');
+			        btnDislike.classList.remove('text-red-500');
+			        btnDislike.querySelector('span').classList.remove('fill-icon');
+
+			        // 2. Cập nhật màu sắc dựa trên status mới
+			        if (status === 'LIKE') {
+			            btnLike.classList.add('text-primary');
+			            btnLike.querySelector('span').classList.add('fill-icon');
+			        } else if (status === 'DISLIKE') {
+			            btnDislike.classList.add('text-red-500');
+			            btnDislike.querySelector('span').classList.add('fill-icon');
+			        }
+
+			        // 3. Cập nhật con số (Dùng || 0 để tránh hiện chữ 'undefined')
+			        lCount.innerText = likes || 0;
+			        dCount.innerText = dislikes || 0;
+			        
+			        console.log("Cập nhật UI xong - Trạng thái hiện tại:", status);
+			    }
         </script>
     </body>
 
     </html>
+    

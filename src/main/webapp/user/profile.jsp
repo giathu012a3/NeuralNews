@@ -1,4 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ page import="neuralnews.model.Article" %> 
+<%@ page import="neuralnews.model.Category" %> 
     <!DOCTYPE html>
     <html class="dark" lang="en">
 

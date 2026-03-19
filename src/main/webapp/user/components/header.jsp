@@ -1,4 +1,10 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%
+    if (request.getAttribute("listCategory") == null) {
+        neuralnews.dao.CategoryDao headerCatDao = new neuralnews.dao.CategoryDao();
+        request.setAttribute("listCategory", headerCatDao.getAllCategory());
+    }
+%>
 
     <header
         class="sticky top-0 z-50 w-full border-b border-border-light dark:border-border-dark bg-white/95 dark:bg-background-dark/95 backdrop-blur-md">
@@ -70,7 +76,7 @@
                                 </div>
                                 <div class="py-2">
                                     <a class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
-                                        href="${pageContext.request.contextPath}/user/profile.jsp">
+                                        href="user/profile.jsp">
                                         <span class="material-symbols-outlined text-xl text-slate-400">person</span>
                                         Hồ sơ của tôi
                                     </a>
