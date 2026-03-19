@@ -61,6 +61,7 @@ public class LoginController extends HttpServlet {
 		session.setAttribute("userStatus", user.getStatus());
 		session.setAttribute("userRole", user.getRole().getName());
 		session.setAttribute("userName", user.getFullName());
+		session.setAttribute("avatarUrl", user.getAvatarUrl());
 
 		// Redirect by role
 		boolean isAdmin = user.hasRole("ADMIN");

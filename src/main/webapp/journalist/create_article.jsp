@@ -320,48 +320,41 @@
     <main class="flex-1 flex flex-col relative bg-white dark:bg-[#0a0f14] overflow-hidden">
 
         <%-- Header --%>
-        <header class="h-14 bg-white dark:bg-surface-dark border-b border-slate-200 dark:border-border-dark flex items-center justify-between px-6 shrink-0 z-30">
-            <div class="flex items-center gap-5">
-                <a class="flex items-center gap-2 text-slate-400 hover:text-white transition-colors group"
-                   href="${pageContext.request.contextPath}/journalist/articles">
-                    <span class="material-symbols-outlined text-xl transition-transform group-hover:-translate-x-1">arrow_back</span>
-                    <span class="text-xs font-semibold uppercase tracking-wider">Quay lại Bảng điều khiển</span>
-                </a>
-                <div class="h-5 w-px bg-slate-200 dark:bg-border-dark"></div>
-                <div class="flex items-center gap-2">
-                    <% if ("true".equals(savedMsg)) { %>
-                    <span class="size-1.5 bg-emerald-500 rounded-full"></span>
-                    <span class="text-[10px] font-semibold text-emerald-500 uppercase tracking-widest">Đã lưu bản nháp!</span>
-                    <% } else if (errorMsg != null) { %>
-                    <span class="size-1.5 bg-red-500 rounded-full"></span>
-                    <span class="text-[10px] font-semibold text-red-400 uppercase tracking-widest">Lỗi: <%= errorMsg %></span>
-                    <% } else { %>
-                    <span class="size-1.5 bg-indigo-500 rounded-full animate-pulse"></span>
-                    <span class="text-[10px] font-semibold text-slate-500 uppercase tracking-widest">
-                        <%= artId > 0 ? "Chỉnh sửa bài viết" : "Bài viết mới" %>
-                    </span>
-                    <% } %>
-                </div>
+        <jsp:include page="components/header.jsp">
+            <jsp:param name="pageTitle" value="<%= artId > 0 ? \"Chỉnh sửa Bài viết\" : \"Tạo Bài viết Mới\" %>" />
+            <jsp:param name="backUrl" value="${pageContext.request.contextPath}/journalist/articles" />
+        </jsp:include>
+
+        <div class="h-10 bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-border-dark flex items-center justify-between px-8 shrink-0 z-20">
+            <div class="flex items-center gap-3">
+                <% if ("true".equals(savedMsg)) { %>
+                    <div class="flex items-center gap-2">
+                        <span class="size-1.5 bg-emerald-500 rounded-full"></span>
+                        <span class="text-[10px] font-bold text-emerald-500 uppercase tracking-widest">Bản nháp đã lưu</span>
+                    </div>
+                <% } else if (errorMsg != null) { %>
+                    <div class="flex items-center gap-2">
+                        <span class="size-1.5 bg-red-500 rounded-full"></span>
+                        <span class="text-[10px] font-bold text-red-400 uppercase tracking-widest">Lỗi: <%= errorMsg %></span>
+                    </div>
+                <% } %>
             </div>
             <div class="flex items-center gap-2">
-                <%-- Lưu nháp --%>
                 <button type="button" onclick="submitForm('draft')"
-                        class="px-4 py-1.5 text-[11px] font-bold text-slate-400 border border-slate-200 dark:border-border-dark hover:border-indigo-500/50 hover:text-slate-200 rounded-lg transition-all uppercase tracking-widest">
+                        class="px-3 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-border-dark hover:border-indigo-500/50 text-slate-500 dark:text-slate-400 text-[10px] font-bold rounded transition-all uppercase tracking-widest">
                     Lưu Bản Nháp
                 </button>
-                <%-- Xem trước — luôn hiển thị, dùng modal --%>
                 <button type="button" onclick="openPreview()"
-                        class="px-4 py-1.5 text-[11px] font-bold text-slate-400 border border-slate-200 dark:border-border-dark hover:border-indigo-500/50 hover:text-slate-200 rounded-lg transition-all flex items-center gap-1.5 uppercase tracking-widest">
-                    <span class="material-symbols-outlined" style="font-size:15px">visibility</span>
+                        class="px-3 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-border-dark hover:border-indigo-500/50 text-slate-500 dark:text-slate-400 text-[10px] font-bold rounded transition-all flex items-center gap-1.5 uppercase tracking-widest">
+                    <span class="material-symbols-outlined" style="font-size:13px">visibility</span>
                     Xem trước
                 </button>
-                <%-- Gửi --%>
                 <button type="button" onclick="submitForm('submit')"
-                        class="px-5 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-bold rounded-lg transition-all uppercase tracking-widest shadow shadow-indigo-600/30">
+                        class="px-4 py-1 bg-primary hover:bg-primary/90 text-white text-[10px] font-bold rounded transition-all uppercase tracking-widest shadow-sm shadow-primary/20">
                     Gửi để Đánh giá
                 </button>
             </div>
-        </header>
+        </div>
 
         <%-- Hidden form --%>
         <form id="articleForm" method="post" action="${pageContext.request.contextPath}/journalist/create-article" style="display:none">
@@ -525,17 +518,8 @@
     // ── Bootstrap ─────────────────────────────────────────────────────────────
     document.addEventListener('DOMContentLoaded', function() {
         var iconTheme = document.getElementById('iconTheme');
-        var saved = localStorage.getItem('editor_theme');
-        if (saved === 'light') {
-            document.documentElement.classList.remove('dark');
-            _isDark = false;
-            if (iconTheme) iconTheme.textContent = 'dark_mode';
-        } else {
-            document.documentElement.classList.add('dark');
-            _isDark = true;
-            if (iconTheme) iconTheme.textContent = 'light_mode';
-        }
-        initTinyMCE(_isDark);
+        // Theme is already applied by head.jsp
+        initTinyMCE(document.documentElement.classList.contains('dark'));
         var sum = document.getElementById('summaryInput');
         if (sum) document.getElementById('sumCount').textContent = sum.value.length;
     });
@@ -620,21 +604,20 @@
     });
 
     // ── Theme ─────────────────────────────────────────────────────────────────
-    function toggleTheme() {
-        var iconTheme = document.getElementById('iconTheme');
-        if (document.documentElement.classList.contains('dark')) {
-            document.documentElement.classList.remove('dark');
-            localStorage.setItem('editor_theme', 'light');
-            iconTheme.textContent = 'dark_mode';
-            _isDark = false;
-        } else {
-            document.documentElement.classList.add('dark');
-            localStorage.setItem('editor_theme', 'dark');
-            iconTheme.textContent = 'light_mode';
-            _isDark = true;
-        }
-        initTinyMCE(_isDark);
-    }
+    // Wrap global toggleTheme to also update TinyMCE
+    (function() {
+        var baseToggle = window.toggleTheme;
+        window.toggleTheme = function() {
+            if (baseToggle) baseToggle();
+            initTinyMCE(document.documentElement.classList.contains('dark'));
+            
+            // Also update the local iconTheme if it exists
+            var iconTheme = document.getElementById('iconTheme');
+            if (iconTheme) {
+                iconTheme.textContent = document.documentElement.classList.contains('dark') ? 'light_mode' : 'dark_mode';
+            }
+        };
+    })();
 
     // ── Focus mode ────────────────────────────────────────────────────────────
     var focusMode = false;

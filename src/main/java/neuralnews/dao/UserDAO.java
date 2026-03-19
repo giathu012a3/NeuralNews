@@ -287,4 +287,49 @@ public class UserDAO {
         }
         return user;
     }
+
+    /**
+     * Cập nhật thông tin hồ sơ người dùng.
+     */
+    public boolean updateProfile(User user) {
+        String sql = "UPDATE users SET full_name = ?, bio = ?, avatar_url = ? WHERE id = ?";
+        try (Connection conn = DBConnection.getConnection(); 
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, user.getFullName());
+            ps.setString(2, user.getBio());
+            ps.setString(3, user.getAvatarUrl());
+            ps.setLong(4, user.getId());
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) { e.printStackTrace(); }
+        return false;
+    }
+
+    /**
+     * Lấy mã băm mật khẩu từ ID.
+     */
+    public String getPasswordHashById(long userId) {
+        String sql = "SELECT password_hash FROM users WHERE id = ?";
+        try (Connection conn = DBConnection.getConnection(); 
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, userId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getString("password_hash");
+            }
+        } catch (SQLException e) { e.printStackTrace(); }
+        return null;
+    }
+
+    /**
+     * Cập nhật mật khẩu mới (đã băm).
+     */
+    public boolean updatePassword(long userId, String newPasswordHash) {
+        String sql = "UPDATE users SET password_hash = ? WHERE id = ?";
+        try (Connection conn = DBConnection.getConnection(); 
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, newPasswordHash);
+            ps.setLong(2, userId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) { e.printStackTrace(); }
+        return false;
+    }
 }

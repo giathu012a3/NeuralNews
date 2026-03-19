@@ -65,10 +65,16 @@
     <div class="mt-auto p-4 border-t border-slate-200 dark:border-border-dark bg-slate-50/50 dark:bg-slate-900/50">
         <div class="flex items-center gap-3">
             <%-- Avatar: ảnh nếu có, chữ tắt nếu không --%>
-            <% if (_sidebarUser != null && _sidebarUser.getAvatarUrl() != null && !_sidebarUser.getAvatarUrl().isBlank()) { %>
+            <% 
+                String _sidebarAvatar = (_sidebarUser != null) ? _sidebarUser.getAvatarUrl() : null;
+                if (_sidebarAvatar != null && !_sidebarAvatar.isBlank()) {
+                    if (!(_sidebarAvatar.startsWith("http") || _sidebarAvatar.startsWith("https"))) {
+                        _sidebarAvatar = _ctxPath + "/" + _sidebarAvatar;
+                    }
+            %>
             <img alt="<%= _sidebarName %>"
                  class="size-9 rounded-full object-cover ring-2 ring-slate-200 dark:ring-slate-700"
-                 src="<%= _sidebarUser.getAvatarUrl() %>" />
+                 src="<%= _sidebarAvatar %>" />
             <% } else { %>
             <div class="size-9 rounded-full bg-primary/20 text-primary flex items-center justify-center font-bold text-sm ring-2 ring-slate-200 dark:ring-slate-700 shrink-0">
                 <%= _initials %>

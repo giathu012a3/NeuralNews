@@ -64,121 +64,34 @@
         <main class="flex-1 flex flex-col min-w-0 bg-background-light dark:bg-background-dark">
 
             <%-- ═══ HEADER ══════════════════════════════════════════════════ --%>
-            <header class="h-16 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-border-dark flex items-center justify-between px-8 shrink-0 z-20">
-                <div class="flex items-center gap-6">
-                    <h2 class="text-lg font-bold tracking-tight">Thư viện Bài viết</h2>
-                    <div class="hidden md:flex items-center gap-2 text-xs text-slate-500 font-medium">
-                        <span>Cổng thông tin Nhà báo</span>
-                        <span class="material-symbols-outlined text-sm">chevron_right</span>
-                        <span class="text-slate-900 dark:text-slate-200">Quản lý</span>
-                    </div>
-                </div>
-                <div class="flex items-center gap-3">
-                    <form method="get" action="<%= servletUrl %>" id="headerSearchForm" class="relative group">
-                        <input type="hidden" name="status"   value="<%= filterStatus %>">
-                        <input type="hidden" name="category" value="<%= filterCategory %>">
-                        <input type="hidden" name="dateFrom" value="<%= filterDateFrom %>">
-                        <input type="hidden" name="dateTo"   value="<%= filterDateTo %>">
-                        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
-                        <input id="headerKeyword" name="keyword" value="<%= filterKeyword %>"
-                            class="bg-slate-100 dark:bg-slate-800 border-none rounded-lg py-1.5 pl-10 pr-4 w-64 focus:ring-2 focus:ring-primary text-xs transition-all"
-                            placeholder="Tìm kiếm bài viết theo tiêu đề hoặc thẻ..." type="text" />
-                    </form>
-                    <div class="h-6 w-px bg-slate-200 dark:border-border-dark mx-1"></div>
-
-                    <%-- Nút Thông báo --%>
-                    <div class="relative" id="notifWrapper">
-                        <button id="notifBtn" onclick="toggleNotif()"
-                                class="relative p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-slate-500">
-                            <span class="material-symbols-outlined">notifications</span>
-                            <span id="notifDot" class="absolute top-2 right-2 size-2 bg-red-500 rounded-full border-2 border-white dark:border-slate-900"></span>
-                        </button>
-                        <div id="notifDropdown"
-                             class="hidden absolute right-0 top-12 w-80 bg-white dark:bg-slate-900 border border-slate-200 dark:border-border-dark rounded-xl shadow-xl z-50 overflow-hidden">
-                            <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100 dark:border-border-dark">
-                                <div class="flex items-center gap-2">
-                                    <span class="text-sm font-bold text-slate-800 dark:text-white">Thông báo</span>
-                                    <span id="notifCount" class="bg-primary/10 text-primary text-[10px] font-bold px-1.5 py-0.5 rounded-full">2</span>
-                                </div>
-                                <button onclick="markAllRead()" class="text-[11px] text-primary hover:underline font-semibold">Đánh dấu đã đọc</button>
-                            </div>
-                            <ul class="max-h-80 overflow-y-auto divide-y divide-slate-100 dark:divide-border-dark">
-                                <li class="notif-item unread flex items-start gap-3 px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors" data-id="a_notif_1" onclick="markOneRead(this)">
-                                    <div class="size-8 rounded-full bg-emerald-100 dark:bg-emerald-500/10 flex items-center justify-center shrink-0 mt-0.5">
-                                        <span class="material-symbols-outlined text-emerald-500 text-sm">check_circle</span>
-                                    </div>
-                                    <div class="flex-1 min-w-0">
-                                        <p class="text-xs font-semibold text-slate-800 dark:text-white">Bài viết được duyệt</p>
-                                        <p class="text-[11px] text-slate-500 mt-0.5">Bài "Sự bùng nổ của AI..." đã được xuất bản.</p>
-                                        <p class="text-[10px] text-slate-400 mt-1">2 giờ trước</p>
-                                    </div>
-                                    <span class="unread-dot size-2 bg-primary rounded-full shrink-0 mt-2"></span>
-                                </li>
-                                <li class="notif-item unread flex items-start gap-3 px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors" data-id="a_notif_2" onclick="markOneRead(this)">
-                                    <div class="size-8 rounded-full bg-red-100 dark:bg-red-500/10 flex items-center justify-center shrink-0 mt-0.5">
-                                        <span class="material-symbols-outlined text-red-500 text-sm">cancel</span>
-                                    </div>
-                                    <div class="flex-1 min-w-0">
-                                        <p class="text-xs font-semibold text-slate-800 dark:text-white">Bài viết bị từ chối</p>
-                                        <p class="text-[11px] text-slate-500 mt-0.5">Vui lòng chỉnh sửa và gửi lại.</p>
-                                        <p class="text-[10px] text-slate-400 mt-1">5 giờ trước</p>
-                                    </div>
-                                    <span class="unread-dot size-2 bg-primary rounded-full shrink-0 mt-2"></span>
-                                </li>
-                                <li class="notif-item flex items-start gap-3 px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors" data-id="a_notif_3" onclick="markOneRead(this)">
-                                    <div class="size-8 rounded-full bg-blue-100 dark:bg-blue-500/10 flex items-center justify-center shrink-0 mt-0.5">
-                                        <span class="material-symbols-outlined text-blue-500 text-sm">comment</span>
-                                    </div>
-                                    <div class="flex-1 min-w-0">
-                                        <p class="text-xs font-semibold text-slate-800 dark:text-white">Bình luận mới</p>
-                                        <p class="text-[11px] text-slate-500 mt-0.5">Có 3 bình luận mới trên bài viết của bạn.</p>
-                                        <p class="text-[10px] text-slate-400 mt-1">1 ngày trước</p>
-                                    </div>
-                                </li>
-                                <li class="notif-item flex items-start gap-3 px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors" data-id="a_notif_4" onclick="markOneRead(this)">
-                                    <div class="size-8 rounded-full bg-amber-100 dark:bg-amber-500/10 flex items-center justify-center shrink-0 mt-0.5">
-                                        <span class="material-symbols-outlined text-amber-500 text-sm">star</span>
-                                    </div>
-                                    <div class="flex-1 min-w-0">
-                                        <p class="text-xs font-semibold text-slate-800 dark:text-white">Bài viết nổi bật</p>
-                                        <p class="text-[11px] text-slate-500 mt-0.5">Bài của bạn được chọn vào Top tuần.</p>
-                                        <p class="text-[10px] text-slate-400 mt-1">2 ngày trước</p>
-                                    </div>
-                                </li>
-                                <li class="notif-item flex items-start gap-3 px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors" data-id="a_notif_5" onclick="markOneRead(this)">
-                                    <div class="size-8 rounded-full bg-violet-100 dark:bg-violet-500/10 flex items-center justify-center shrink-0 mt-0.5">
-                                        <span class="material-symbols-outlined text-violet-500 text-sm">bar_chart</span>
-                                    </div>
-                                    <div class="flex-1 min-w-0">
-                                        <p class="text-xs font-semibold text-slate-800 dark:text-white">Lượt xem tăng mạnh</p>
-                                        <p class="text-[11px] text-slate-500 mt-0.5">Bài viết đạt 10,000 lượt xem hôm nay.</p>
-                                        <p class="text-[10px] text-slate-400 mt-1">3 ngày trước</p>
-                                    </div>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <%-- Nút Dark/Light mode --%>
-                    <button id="themeToggleBtn" onclick="toggleTheme()"
-                            class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-slate-500"
-                            title="Chuyển giao diện">
-                        <span id="themeIcon" class="material-symbols-outlined">light_mode</span>
-                    </button>
-                </div>
-            </header>
+            <jsp:include page="components/header.jsp">
+                <jsp:param name="pageTitle" value="Quản lý Bài viết" />
+            </jsp:include>
 
             <div class="flex-1 overflow-y-auto">
                 <div class="p-8 max-w-[1200px] mx-auto space-y-6">
 
                     <%-- ═══ HEADER + ACTIONS ═════════════════════════════════ --%>
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
-                        <div>
-                            <h3 class="text-xl font-bold">Bài viết của tôi</h3>
-                            <p class="text-slate-500 dark:text-slate-400 text-xs mt-1">
-                                Quản lý <span class="text-slate-900 dark:text-white font-semibold"><%= totalArticles %></span> bài viết của bạn
-                            </p>
-                        </div>
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
+                            <div class="flex items-center gap-4">
+                                <div>
+                                    <h3 class="text-xl font-bold">Bài viết của tôi</h3>
+                                    <p class="text-slate-500 dark:text-slate-400 text-xs mt-1">
+                                        Quản lý <span class="text-slate-900 dark:text-white font-semibold"><%= totalArticles %></span> bài viết của bạn
+                                    </p>
+                                </div>
+                                <div class="h-8 w-px bg-slate-200 dark:bg-border-dark hidden sm:block"></div>
+                                <form method="get" action="<%= servletUrl %>" id="headerSearchForm" class="relative group">
+                                    <input type="hidden" name="status"   value="<%= filterStatus %>">
+                                    <input type="hidden" name="category" value="<%= filterCategory %>">
+                                    <input type="hidden" name="dateFrom" value="<%= filterDateFrom %>">
+                                    <input type="hidden" name="dateTo"   value="<%= filterDateTo %>">
+                                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg transition-colors group-focus-within:text-primary">search</span>
+                                    <input id="headerKeyword" name="keyword" value="<%= filterKeyword %>"
+                                        class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-border-dark rounded-xl py-2 pl-10 pr-4 w-72 focus:ring-2 focus:ring-primary/20 focus:border-primary text-xs transition-all shadow-sm"
+                                        placeholder="Tìm bài viết..." type="text" />
+                                </form>
+                            </div>
                         <div class="flex items-center gap-3">
                             <button onclick="toggleFilterPanel()"
                                 class="flex items-center gap-2 px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-border-dark hover:border-primary/50 rounded-lg text-xs font-semibold transition-all shadow-sm<%= hasActiveFilter ? " ring-2 ring-primary/40" : "" %>">
@@ -486,102 +399,6 @@
             document.getElementById('filterKeywordHidden').value = searchInput.value;
             document.getElementById('filterForm').submit();
         });
-
-        // ── Thông báo dropdown ────────────────────────────────────────
-        var NOTIF_KEY_A = 'articles_read_notifs';
-
-        function getReadSetA() {
-            try { return JSON.parse(localStorage.getItem(NOTIF_KEY_A) || '[]'); } catch(e) { return []; }
-        }
-        function saveReadSetA(arr) {
-            try { localStorage.setItem(NOTIF_KEY_A, JSON.stringify(arr)); } catch(e) {}
-        }
-
-        // Áp dụng trạng thái đã đọc khi load trang
-        (function applyReadState() {
-            var readIds = getReadSetA();
-            document.querySelectorAll('.notif-item[data-id]').forEach(function(el) {
-                if (readIds.indexOf(el.dataset.id) !== -1) {
-                    el.classList.remove('unread');
-                    var dot = el.querySelector('.unread-dot');
-                    if (dot) dot.remove();
-                }
-            });
-            updateNotifBadge();
-        })();
-
-        function toggleNotif() {
-            document.getElementById('notifDropdown').classList.toggle('hidden');
-        }
-
-        function updateNotifBadge() {
-            var count = document.querySelectorAll('.notif-item.unread').length;
-            var dot   = document.getElementById('notifDot');
-            var badge = document.getElementById('notifCount');
-            if (count > 0) {
-                dot.classList.remove('hidden');
-                badge.textContent = count;
-                badge.classList.remove('hidden');
-            } else {
-                dot.classList.add('hidden');
-                badge.classList.add('hidden');
-            }
-        }
-
-        function markOneRead(el) {
-            if (el.classList.contains('unread')) {
-                el.classList.remove('unread');
-                var dot = el.querySelector('.unread-dot');
-                if (dot) dot.remove();
-                var readIds = getReadSetA();
-                if (el.dataset.id && readIds.indexOf(el.dataset.id) === -1) {
-                    readIds.push(el.dataset.id);
-                    saveReadSetA(readIds);
-                }
-                updateNotifBadge();
-            }
-        }
-
-        function markAllRead() {
-            document.querySelectorAll('.notif-item.unread').forEach(function(el) {
-                markOneRead(el);
-            });
-        }
-
-        document.addEventListener('click', function (e) {
-            var wrapper = document.getElementById('notifWrapper');
-            if (wrapper && !wrapper.contains(e.target)) {
-                document.getElementById('notifDropdown').classList.add('hidden');
-            }
-        });
-
-        // ── Dark / Light mode ─────────────────────────────────────────────
-        // Đồng bộ với các trang journalist khác qua localStorage('editor_theme')
-        const html      = document.documentElement;
-        const themeIcon = document.getElementById('themeIcon');
-
-        // Áp dụng theme đã lưu ngay khi load (hỗ trợ key cũ 'theme')
-        const savedTheme = localStorage.getItem('editor_theme') || localStorage.getItem('theme') || 'dark';
-        if (savedTheme === 'light') {
-            html.classList.remove('dark');
-            if (themeIcon) themeIcon.textContent = 'dark_mode';
-        } else {
-            html.classList.add('dark');
-            if (themeIcon) themeIcon.textContent = 'light_mode';
-        }
-
-        function toggleTheme() {
-            const next = html.classList.contains('dark') ? 'light' : 'dark';
-            localStorage.setItem('editor_theme', next);
-            localStorage.setItem('theme', next); // giữ tương thích key cũ
-            if (next === 'light') {
-                html.classList.remove('dark');
-                if (themeIcon) themeIcon.textContent = 'dark_mode';
-            } else {
-                html.classList.add('dark');
-                if (themeIcon) themeIcon.textContent = 'light_mode';
-            }
-        }
     </script>
 </body>
 </html>

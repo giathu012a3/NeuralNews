@@ -3,8 +3,8 @@
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <script>
         (function () {
-            var KEY_PRIMARY = 'editor_theme';
-            var KEY_LEGACY  = 'theme';
+            var KEY_PRIMARY = 'theme';
+            var KEY_LEGACY  = 'editor_theme';
 
             function getSaved() {
                 try {
@@ -17,7 +17,7 @@
             function persist(v) {
                 try {
                     localStorage.setItem(KEY_PRIMARY, v);
-                    localStorage.setItem(KEY_LEGACY, v); // giữ tương thích trang cũ
+                    localStorage.setItem(KEY_LEGACY, v);
                 } catch (e) {}
             }
 
@@ -26,18 +26,19 @@
                 if (v === 'light') html.classList.remove('dark');
                 else html.classList.add('dark');
 
-                // Cập nhật icon nếu trang có
+                // Update icons with standard IDs if they exist
                 var iconA = document.getElementById('themeIcon');
                 var iconB = document.getElementById('iconTheme');
+                var iconToggle = document.getElementById('themeToggleBtn');
+                
                 if (iconA) iconA.textContent = html.classList.contains('dark') ? 'light_mode' : 'dark_mode';
                 if (iconB) iconB.textContent = html.classList.contains('dark') ? 'light_mode' : 'dark_mode';
             }
 
-            // Apply ngay trong <head> để tránh flash
-            var saved = getSaved();
-            apply(saved);
+            // Apply immediately to prevent flash
+            apply(getSaved());
 
-            window.toggleTheme = window.toggleTheme || function () {
+            window.toggleTheme = function () {
                 var html = document.documentElement;
                 var next = html.classList.contains('dark') ? 'light' : 'dark';
                 persist(next);

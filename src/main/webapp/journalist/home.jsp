@@ -100,95 +100,9 @@
     <main class="flex-1 flex flex-col min-w-0">
 
         <%-- HEADER --%>
-        <header class="h-16 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-border-dark flex items-center justify-between px-8 shrink-0 z-30">
-            <div class="flex items-center gap-6">
-                <h2 class="text-lg font-bold tracking-tight">Bảng điều khiển Nhà báo</h2>
-                <div class="hidden md:flex items-center gap-2 text-xs text-slate-500 font-medium">
-                    <span>Cổng thông tin Nhà báo</span>
-                    <span class="material-symbols-outlined text-sm">chevron_right</span>
-                    <span class="text-slate-900 dark:text-slate-200">Tóm tắt Hiệu suất</span>
-                </div>
-            </div>
-            <div class="flex items-center gap-3">
-                <%-- NOTIFICATION BELL --%>
-                <div class="relative" id="notifWrapper">
-                    <button id="notifBtn" class="relative p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-slate-500">
-                        <span class="material-symbols-outlined">notifications</span>
-                        <span id="notifDot" class="absolute top-2 right-2 size-2 bg-red-500 rounded-full border-2 border-white dark:border-slate-900"></span>
-                    </button>
-                    <div id="notifPanel" class="hidden absolute right-0 top-12 w-80 bg-white dark:bg-slate-900 border border-slate-200 dark:border-border-dark rounded-xl shadow-xl overflow-hidden z-50">
-                        <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100 dark:border-border-dark">
-                            <div class="flex items-center gap-2">
-                                <span class="text-sm font-bold">Thông báo</span>
-                                <span id="notifCount" class="bg-primary/10 text-primary text-[10px] font-bold px-1.5 py-0.5 rounded-full">3</span>
-                            </div>
-                            <button id="markAllRead" class="text-[11px] text-primary font-semibold hover:underline">Đánh dấu đã đọc</button>
-                        </div>
-                        <ul class="max-h-80 overflow-y-auto divide-y divide-slate-100 dark:divide-border-dark">
-                            <li class="notif-item unread flex items-start gap-3 px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/60 cursor-pointer transition-colors" data-id="h_notif_1" onclick="markRead(this)">
-                                <div class="size-8 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 flex items-center justify-center shrink-0 mt-0.5">
-                                    <span class="material-symbols-outlined text-sm">check_circle</span>
-                                </div>
-                                <div class="flex-1 min-w-0">
-                                    <p class="text-xs font-semibold text-slate-800 dark:text-white">Bài viết được duyệt</p>
-                                    <p class="text-[11px] text-slate-500 mt-0.5 truncate">Bài viết của bạn đã được xuất bản.</p>
-                                    <p class="text-[10px] text-slate-400 mt-1">2 giờ trước</p>
-                                </div>
-                                <span class="unread-dot size-2 bg-primary rounded-full shrink-0 mt-2"></span>
-                            </li>
-                            <li class="notif-item unread flex items-start gap-3 px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/60 cursor-pointer transition-colors" data-id="h_notif_2" onclick="markRead(this)">
-                                <div class="size-8 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-600 flex items-center justify-center shrink-0 mt-0.5">
-                                    <span class="material-symbols-outlined text-sm">comment</span>
-                                </div>
-                                <div class="flex-1 min-w-0">
-                                    <p class="text-xs font-semibold text-slate-800 dark:text-white">Bình luận mới</p>
-                                    <p class="text-[11px] text-slate-500 mt-0.5 truncate">Có 3 bình luận mới trên bài viết của bạn.</p>
-                                    <p class="text-[10px] text-slate-400 mt-1">15 phút trước</p>
-                                </div>
-                                <span class="unread-dot size-2 bg-primary rounded-full shrink-0 mt-2"></span>
-                            </li>
-                            <li class="notif-item unread flex items-start gap-3 px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/60 cursor-pointer transition-colors" data-id="h_notif_3" onclick="markRead(this)">
-                                <div class="size-8 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-600 flex items-center justify-center shrink-0 mt-0.5">
-                                    <span class="material-symbols-outlined text-sm">bar_chart</span>
-                                </div>
-                                <div class="flex-1 min-w-0">
-                                    <p class="text-xs font-semibold text-slate-800 dark:text-white">Lượt xem tăng mạnh</p>
-                                    <p class="text-[11px] text-slate-500 mt-0.5 truncate">Bài viết đạt 10,000 lượt xem hôm nay.</p>
-                                    <p class="text-[10px] text-slate-400 mt-1">1 giờ trước</p>
-                                </div>
-                                <span class="unread-dot size-2 bg-primary rounded-full shrink-0 mt-2"></span>
-                            </li>
-                            <li class="notif-item flex items-start gap-3 px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/60 cursor-pointer transition-colors" data-id="h_notif_4" onclick="markRead(this)">
-                                <div class="size-8 rounded-full bg-violet-100 dark:bg-violet-900/40 text-violet-600 flex items-center justify-center shrink-0 mt-0.5">
-                                    <span class="material-symbols-outlined text-sm">star</span>
-                                </div>
-                                <div class="flex-1 min-w-0">
-                                    <p class="text-xs font-semibold text-slate-800 dark:text-white">Bài viết nổi bật</p>
-                                    <p class="text-[11px] text-slate-500 mt-0.5 truncate">Bài của bạn được chọn vào Top tuần.</p>
-                                    <p class="text-[10px] text-slate-400 mt-1">2 ngày trước</p>
-                                </div>
-                            </li>
-                            <li class="notif-item flex items-start gap-3 px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/60 cursor-pointer transition-colors" data-id="h_notif_5" onclick="markRead(this)">
-                                <div class="size-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 flex items-center justify-center shrink-0 mt-0.5">
-                                    <span class="material-symbols-outlined text-sm">article</span>
-                                </div>
-                                <div class="flex-1 min-w-0">
-                                    <p class="text-xs font-semibold text-slate-800 dark:text-white">Bản nháp chưa hoàn thành</p>
-                                    <p class="text-[11px] text-slate-500 mt-0.5 truncate">Bạn có 1 bản nháp chưa được gửi duyệt.</p>
-                                    <p class="text-[10px] text-slate-400 mt-1">3 ngày trước</p>
-                                </div>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-
-                <%-- DARK/LIGHT TOGGLE --%>
-                <button id="themeBtn" onclick="toggleTheme()"
-                        class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-slate-500">
-                    <span id="themeIcon" class="material-symbols-outlined">light_mode</span>
-                </button>
-            </div>
-        </header>
+        <jsp:include page="components/header.jsp">
+            <jsp:param name="pageTitle" value="Tóm tắt Hiệu suất" />
+        </jsp:include>
 
         <div class="flex-1 overflow-y-auto">
             <div class="p-8 max-w-7xl mx-auto space-y-8">
@@ -524,31 +438,7 @@
         });
     });
 
-    // ── Dark / Light mode ─────────────────────────────────────────────────────
-    var themeIcon = document.getElementById('themeIcon');
-    (function applyTheme() {
-        var saved = localStorage.getItem('editor_theme');
-        if (saved === 'light') {
-            document.documentElement.classList.remove('dark');
-            themeIcon.textContent = 'dark_mode';
-        } else {
-            document.documentElement.classList.add('dark');
-            themeIcon.textContent = 'light_mode';
-        }
-    })();
 
-    function toggleTheme() {
-        var html = document.documentElement;
-        if (html.classList.contains('dark')) {
-            html.classList.remove('dark');
-            localStorage.setItem('editor_theme', 'light');
-            themeIcon.textContent = 'dark_mode';
-        } else {
-            html.classList.add('dark');
-            localStorage.setItem('editor_theme', 'dark');
-            themeIcon.textContent = 'light_mode';
-        }
-    }
 </script>
 </body>
 </html>

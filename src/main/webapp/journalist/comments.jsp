@@ -57,131 +57,45 @@
     </jsp:include>
 
     <main class="flex-1 flex flex-col min-w-0 bg-background-light dark:bg-background-dark">
+        <jsp:include page="components/header.jsp">
+            <jsp:param name="pageTitle" value="Kiểm duyệt Bình luận" />
+        </jsp:include>
 
-        <!-- ══════════════════ HEADER ══════════════════ -->
-        <header class="h-16 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-border-dark flex items-center justify-between px-8 shrink-0 z-30">
-            <div class="flex items-center gap-6">
-                <h2 class="text-lg font-bold tracking-tight">Quản lý Bình luận</h2>
-                <div class="hidden md:flex items-center gap-2 text-xs text-slate-500 font-medium">
-                    <span>Cổng thông tin Nhà báo</span>
-                    <span class="material-symbols-outlined text-sm">chevron_right</span>
-                    <span class="text-slate-900 dark:text-slate-200">Kiểm duyệt</span>
-                </div>
-            </div>
-            <div class="flex items-center gap-3">
-
-                <%-- SEARCH FORM: debounce + enter + clear --%>
-                <form id="searchForm" method="get" action="<%= contextPath %>/journalist/comments" class="relative">
-                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg pointer-events-none">search</span>
-                    <input id="searchInput" name="keyword" value="<%= keyword %>" type="text" autocomplete="off"
-                           placeholder="Tìm kiếm bình luận..."
-                           class="bg-slate-100 dark:bg-slate-800 border-none rounded-lg py-1.5 pl-10 pr-8 w-64 focus:ring-2 focus:ring-primary text-xs transition-all" />
-                    <input type="hidden" name="sort" value="<%= sort %>" />
-                    <input type="hidden" name="page" value="1" />
-                    <button type="button" id="clearSearch"
-                            class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 dark:hover:text-white transition-colors <%= hasKeyword ? "" : "invisible" %>"
-                            title="Xoá">
-                        <span class="material-symbols-outlined text-base leading-none">close</span>
-                    </button>
-                </form>
-
-                <div class="h-6 w-px bg-slate-200 dark:bg-slate-700 mx-1"></div>
-
-                <%-- NOTIFICATION BELL --%>
-                <div class="relative" id="notifWrapper">
-                    <button id="notifBtn" class="relative p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-slate-500">
-                        <span class="material-symbols-outlined">notifications</span>
-                        <span id="notifDot" class="absolute top-2 right-2 size-2 bg-red-500 rounded-full border-2 border-white dark:border-slate-900"></span>
-                    </button>
-                    <div id="notifPanel" class="hidden absolute right-0 top-12 w-80 bg-white dark:bg-slate-900 border border-slate-200 dark:border-border-dark rounded-xl shadow-xl overflow-hidden z-50">
-                        <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100 dark:border-border-dark">
-                            <div class="flex items-center gap-2">
-                                <span class="text-sm font-bold">Thông báo</span>
-                                <span id="notifCount" class="bg-primary/10 text-primary text-[10px] font-bold px-1.5 py-0.5 rounded-full">3</span>
-                            </div>
-                            <button id="markAllRead" class="text-[11px] text-primary font-semibold hover:underline">Đánh dấu đã đọc</button>
-                        </div>
-                        <ul id="notifList" class="max-h-80 overflow-y-auto divide-y divide-slate-100 dark:divide-border-dark">
-                            <li class="notif-item unread flex items-start gap-3 px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/60 cursor-pointer transition-colors" data-id="c_notif_1" onclick="markRead(this)">
-                                <div class="size-8 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-600 flex items-center justify-center shrink-0 mt-0.5 text-xs font-bold">TW</div>
-                                <div class="flex-1 min-w-0">
-                                    <p class="text-xs font-semibold text-slate-800 dark:text-white">Tech Writer vừa bình luận</p>
-                                    <p class="text-[11px] text-slate-500 mt-0.5 truncate">"Bài viết mang tính giáo dục cao, nên chia sẻ..."</p>
-                                    <p class="text-[10px] text-slate-400 mt-1">2 phút trước</p>
-                                </div>
-                                <span class="unread-dot size-2 bg-primary rounded-full shrink-0 mt-2"></span>
-                            </li>
-                            <li class="notif-item unread flex items-start gap-3 px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/60 cursor-pointer transition-colors" data-id="c_notif_2" onclick="markRead(this)">
-                                <div class="size-8 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 flex items-center justify-center shrink-0 mt-0.5 text-xs font-bold">HE</div>
-                                <div class="flex-1 min-w-0">
-                                    <p class="text-xs font-semibold text-slate-800 dark:text-white">Health Expert đã phản hồi</p>
-                                    <p class="text-[11px] text-slate-500 mt-0.5 truncate">"Cảm ơn bạn đã chia sẻ thông tin hữu ích..."</p>
-                                    <p class="text-[10px] text-slate-400 mt-1">15 phút trước</p>
-                                </div>
-                                <span class="unread-dot size-2 bg-primary rounded-full shrink-0 mt-2"></span>
-                            </li>
-                            <li class="notif-item unread flex items-start gap-3 px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/60 cursor-pointer transition-colors" data-id="c_notif_3" onclick="markRead(this)">
-                                <div class="size-8 rounded-full bg-violet-100 dark:bg-violet-900/40 text-violet-600 flex items-center justify-center shrink-0 mt-0.5 text-xs font-bold">AS</div>
-                                <div class="flex-1 min-w-0">
-                                    <p class="text-xs font-semibold text-slate-800 dark:text-white">asdfghjkl bình luận mới</p>
-                                    <p class="text-[11px] text-slate-500 mt-0.5 truncate">"Mong chờ kết quả từ hội nghị này..."</p>
-                                    <p class="text-[10px] text-slate-400 mt-1">1 giờ trước</p>
-                                </div>
-                                <span class="unread-dot size-2 bg-primary rounded-full shrink-0 mt-2"></span>
-                            </li>
-                            <li class="notif-item flex items-start gap-3 px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/60 cursor-pointer transition-colors" data-id="c_notif_4" onclick="markRead(this)">
-                                <div class="size-8 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-600 flex items-center justify-center shrink-0 mt-0.5">
-                                    <span class="material-symbols-outlined text-sm">block</span>
-                                </div>
-                                <div class="flex-1 min-w-0">
-                                    <p class="text-xs font-semibold text-slate-800 dark:text-white">1 bình luận bị đánh dấu Spam</p>
-                                    <p class="text-[11px] text-slate-500 mt-0.5">Hệ thống tự động phát hiện</p>
-                                    <p class="text-[10px] text-slate-400 mt-1">3 giờ trước</p>
-                                </div>
-                            </li>
-                            <li class="notif-item flex items-start gap-3 px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/60 cursor-pointer transition-colors" data-id="c_notif_5" onclick="markRead(this)">
-                                <div class="size-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 flex items-center justify-center shrink-0 mt-0.5">
-                                    <span class="material-symbols-outlined text-sm">article</span>
-                                </div>
-                                <div class="flex-1 min-w-0">
-                                    <p class="text-xs font-semibold text-slate-800 dark:text-white">Bài viết được xuất bản</p>
-                                    <p class="text-[11px] text-slate-500 mt-0.5 truncate">"Khám phá đột phá mới trong công nghệ y tế..."</p>
-                                    <p class="text-[10px] text-slate-400 mt-1">1 ngày trước</p>
-                                </div>
-                            </li>
-                        </ul>
-
-                    </div>
-                </div>
-
-                <button onclick="document.documentElement.classList.toggle('dark')"
-                        class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-slate-500">
-                    <span class="material-symbols-outlined">light_mode</span>
-                </button>
-            </div>
-        </header>
-
-        <!-- ══════════════════ CONTENT ══════════════════ -->
+        <%-- ══════════════════ CONTENT ══════════════════ --%>
         <div class="flex-1 overflow-y-auto">
             <div class="p-8 max-w-5xl mx-auto space-y-6">
 
                 <%-- Toolbar --%>
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
-                    <div>
-                        <h3 class="text-xl font-bold">
-                            <%= hasKeyword ? "Kết quả tìm kiếm" : "Nguồn Cấp dữ liệu Hoạt động" %>
-                        </h3>
-                        <p class="text-slate-500 dark:text-slate-400 text-xs mt-1">
-                            <% if (hasKeyword) { %>
-                                Tìm thấy <strong class="text-slate-700 dark:text-slate-200"><%= totalComments %></strong>
-                                bình luận cho từ khoá "<span class="text-primary font-semibold"><%= keyword %></span>"
-                                &nbsp;·&nbsp;
-                                <a href="<%= contextPath %>/journalist/comments?sort=<%= sort %>"
-                                   class="text-primary hover:underline font-medium">Xem tất cả</a>
-                            <% } else { %>
-                                Đang xem xét <strong class="text-slate-700 dark:text-slate-200"><%= totalComments %></strong> bình luận từ độc giả của bạn
-                            <% } %>
-                        </p>
+                    <div class="flex items-center gap-4">
+                        <div>
+                            <h3 class="text-xl font-bold">
+                                <%= hasKeyword ? "Kết quả tìm kiếm" : "Nguồn Cấp dữ liệu Hoạt động" %>
+                            </h3>
+                            <p class="text-slate-500 dark:text-slate-400 text-xs mt-1">
+                                <% if (hasKeyword) { %>
+                                    Tìm thấy <strong class="text-slate-700 dark:text-slate-200"><%= totalComments %></strong>
+                                    bình luận cho từ khoá "<span class="text-primary font-semibold"><%= keyword %></span>"
+                                <% } else { %>
+                                    Đang xem xét <strong class="text-slate-700 dark:text-slate-200"><%= totalComments %></strong> bình luận từ độc giả
+                                <% } %>
+                            </p>
+                        </div>
+                        <div class="h-8 w-px bg-slate-200 dark:bg-border-dark hidden sm:block"></div>
+                        <%-- SEARCH FORM: debounce + enter + clear --%>
+                        <form id="searchForm" method="get" action="<%= contextPath %>/journalist/comments" class="relative group">
+                            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg pointer-events-none transition-colors group-focus-within:text-primary">search</span>
+                            <input id="searchInput" name="keyword" value="<%= keyword %>" type="text" autocomplete="off"
+                                   placeholder="Tìm kiếm bình luận..."
+                                   class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-border-dark rounded-xl py-2 pl-10 pr-8 w-72 focus:ring-2 focus:ring-primary/20 focus:border-primary text-xs transition-all shadow-sm" />
+                            <input type="hidden" name="sort" value="<%= sort %>" />
+                            <input type="hidden" name="page" value="1" />
+                            <button type="button" id="clearSearch"
+                                    class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 transition-colors <%= hasKeyword ? "" : "invisible" %>"
+                                    title="Xoá">
+                                <span class="material-symbols-outlined text-base leading-none">close</span>
+                            </button>
+                        </form>
                     </div>
                     <div class="flex items-center gap-2">
                         <%-- Sort — giữ keyword khi đổi sort --%>
@@ -196,11 +110,6 @@
                             <span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2
                                          text-slate-400 text-sm pointer-events-none">expand_more</span>
                         </div>
-                        <button class="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90
-                                       text-white rounded-lg text-xs font-semibold transition-all shadow-sm">
-                            <span class="material-symbols-outlined text-sm">download</span>
-                            Xuất Dữ liệu
-                        </button>
                     </div>
                 </div>
 
@@ -574,77 +483,9 @@ if (clearBtn) {
     });
 }
 
-// ── Notification panel ───────────────────────────────────────────────────────
-var notifBtn   = document.getElementById('notifBtn');
-var notifPanel = document.getElementById('notifPanel');
-var notifDot   = document.getElementById('notifDot');
-var notifCount = document.getElementById('notifCount');
-var NOTIF_KEY  = 'comments_read_notifs';
-
-// Lấy danh sách id đã đọc từ localStorage
-function getReadSet() {
-    try { return JSON.parse(localStorage.getItem(NOTIF_KEY) || '[]'); } catch(e) { return []; }
-}
-function saveReadSet(arr) {
-    try { localStorage.setItem(NOTIF_KEY, JSON.stringify(arr)); } catch(e) {}
-}
-
-// Áp dụng trạng thái đã đọc khi load trang
-(function applyReadState() {
-    var readIds = getReadSet();
-    document.querySelectorAll('.notif-item[data-id]').forEach(function(el) {
-        if (readIds.indexOf(el.dataset.id) !== -1) {
-            el.classList.remove('unread');
-            var dot = el.querySelector('.unread-dot');
-            if (dot) dot.remove();
-        }
-    });
-    updateNotifBadge();
-})();
-
-function updateNotifBadge() {
-    var count = document.querySelectorAll('.notif-item.unread').length;
-    if (count > 0) {
-        notifDot.classList.remove('hidden');
-        notifCount.textContent = count;
-        notifCount.classList.remove('hidden');
-    } else {
-        notifDot.classList.add('hidden');
-        notifCount.classList.add('hidden');
-    }
-}
-
-notifBtn.addEventListener('click', function(e) {
-    e.stopPropagation();
-    notifPanel.classList.toggle('hidden');
-});
-
-document.addEventListener('click', function(e) {
-    if (!document.getElementById('notifWrapper').contains(e.target)) {
-        notifPanel.classList.add('hidden');
-    }
-});
-
-function markRead(el) {
-    if (el.classList.contains('unread')) {
-        el.classList.remove('unread');
-        var dot = el.querySelector('.unread-dot');
-        if (dot) dot.remove();
-        // Lưu vào localStorage
-        var readIds = getReadSet();
-        if (el.dataset.id && readIds.indexOf(el.dataset.id) === -1) {
-            readIds.push(el.dataset.id);
-            saveReadSet(readIds);
-        }
-        updateNotifBadge();
-    }
-}
-
-document.getElementById('markAllRead').addEventListener('click', function() {
-    document.querySelectorAll('.notif-item.unread').forEach(function(item) {
-        markRead(item);
-    });
-});
+// ── Dark / Light mode ─────────────────────────────────────────────
+const html      = document.documentElement;
+const themeIcon = document.getElementById('themeIcon');
 
 // ── Báo cáo bình luận: toggle menu ─────────────────────────────────────
 function toggleReportMenu(id) {
