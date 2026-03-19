@@ -307,7 +307,7 @@
 //---------------------------------------------------------------------------------------------------------------------------
             
             // Lấy categoryId từ object articleDetail mà Controller của bạn đã nạp
-			    const catId = <%= ((neuralnews.model.Article)request.getAttribute("articleDetail")).getCategoryId() %>;
+			    const catId = "${not empty art ? art.categoryId : 0}";
 			    let scoredTime = false;
 			    let scoredScroll = false;
 			
@@ -346,7 +346,7 @@
 			    }
 			    
 			    setTimeout(() => {
-			        const artId = "<%= (art != null) ? art.getId() : "" %>";
+			        const artId = "${not empty art ? art.id : ''}";
 			        console.log("--- Đã đủ 30 giây! Đang chuẩn bị gửi request tăng view cho ID: " + artId + " ---");
 
 			        const params = new URLSearchParams();
