@@ -41,6 +41,19 @@ public class CommentDao {
         return 0;
     }
 
+    public int countCommentsByUser(long userId) {
+        String sql = "SELECT COUNT(*) FROM comments WHERE user_id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, userId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) return rs.getInt(1);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
     // ─────────────────────────────────────────────────────────────────────────
     // GET LIST (phân trang + sort + keyword)
     // ─────────────────────────────────────────────────────────────────────────

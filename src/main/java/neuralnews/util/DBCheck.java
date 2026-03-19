@@ -1,8 +1,10 @@
+package neuralnews.util;
+
 import neuralnews.dao.UserDAO;
 import neuralnews.model.User;
 import java.util.List;
 
-public class db_check {
+public class DBCheck {
     public static void main(String[] args) {
         UserDAO dao = new UserDAO();
         List<User> users = dao.getAllUsersFiltered(null, null, null, 100, 0);

@@ -60,7 +60,6 @@ public class ArticleDao {
         return getById(id);
     }
 
-    // ── Lấy tất cả bài viết (Admin dùng) ───────────────────────────────────
     // ── Lấy tất cả bài viết có filter (Admin dùng) ──────────────────────────
     public List<Article> getAllArticlesFiltered(int limit, int offset, String keyword, String status, Integer categoryId) {
         StringBuilder sql = new StringBuilder("""
@@ -350,6 +349,201 @@ public class ArticleDao {
             }
         } catch (Exception e) { e.printStackTrace(); }
         return list;
+    }
+
+    // ======================================================
+    // CAC HAM CHO TRANG PROFILE (USER)
+    // ======================================================
+
+    /**
+     * Đếm số bài viết user đã lưu (interactions loại SAVE).
+     */
+    public int countSavedByUser(long userId) {
+        String sql = "SELECT COUNT(*) FROM interactions WHERE user_id = ? AND type = 'BOOKMARK'";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, userId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) return rs.getInt(1);
+        } catch (Exception e) { e.printStackTrace(); }
+        return 0;
+    }
+
+    /**
+     * Đếm số bài viết user đã đọc (interactions loại VIEW).
+     */
+    public int countReadByUser(long userId) {
+        String sql = "SELECT COUNT(*) FROM interactions WHERE user_id = ? AND type = 'VIEW'";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, userId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) return rs.getInt(1);
+        } catch (Exception e) { e.printStackTrace(); }
+        return 0;
+    }
+
+    public int getTotalSavedArticlesByUser(long userId) {
+        String sql = "SELECT COUNT(*) FROM interactions WHERE user_id = ? AND type = 'BOOKMARK'";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, userId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) return rs.getInt(1);
+        } catch (Exception e) { e.printStackTrace(); }
+        return 0;
+    }
+
+    public int getTotalReadArticlesByUser(long userId) {
+        String sql = "SELECT COUNT(DISTINCT article_id) FROM interactions WHERE user_id = ? AND type = 'VIEW'";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, userId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) return rs.getInt(1);
+        } catch (Exception e) { e.printStackTrace(); }
+        return 0;
+    }
+
+    public List<Article> getSavedArticlesByUser(long userId, int limit, int offset) {
+        String sql = "SELECT a.*, c.name AS category_name FROM articles a " +
+                     "JOIN interactions i ON a.id = i.article_id " +
+                     "LEFT JOIN categories c ON a.category_id = c.id " +
+                     "WHERE i.user_id = ? AND i.type = 'BOOKMARK' " +
+                     "ORDER BY i.created_at DESC LIMIT ? OFFSET ?";
+        List<Article> list = new ArrayList<>();
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, userId);
+            ps.setInt(2, limit);
+            ps.setInt(3, offset);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) list.add(mapArticle(rs));
+        } catch (Exception e) { e.printStackTrace(); }
+        return list;
+    }
+
+    public List<Article> getReadArticlesByUser(long userId, int limit, int offset) {
+        String sql = "SELECT a.*, c.name AS category_name FROM articles a " +
+                     "JOIN interactions i ON a.id = i.article_id " +
+                     "LEFT JOIN categories c ON a.category_id = c.id " +
+                     "WHERE i.user_id = ? AND i.type = 'VIEW' " +
+                     "GROUP BY a.id, c.name, i.created_at " +
+                     "ORDER BY i.created_at DESC LIMIT ? OFFSET ?";
+        List<Article> list = new ArrayList<>();
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, userId);
+            ps.setInt(2, limit);
+            ps.setInt(3, offset);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) list.add(mapArticle(rs));
+        } catch (Exception e) { e.printStackTrace(); }
+        return list;
+    }
+
+    /**
+     * Lấy bài viết mới trong các chủ đề user quan tâm, dùng cho thông báo profile.
+     * Trả về List<String[]> với mỗi phần tử: [message, timeAgo]
+     */
+    public List<String[]> getRecentArticlesForUser(long userId, int limit) {
+        List<String[]> list = new ArrayList<>();
+        String sql = """
+            SELECT DISTINCT a.title,
+                TIMESTAMPDIFF(HOUR, a.published_at, NOW()) AS hours_ago
+            FROM articles a
+            WHERE a.status = 'PUBLISHED'
+              AND a.category_id IN (
+                  SELECT DISTINCT a2.category_id
+                  FROM interactions i
+                  JOIN articles a2 ON i.article_id = a2.id
+                  WHERE i.user_id = ?
+              )
+              AND a.published_at >= DATE_SUB(NOW(), INTERVAL 3 DAY)
+            ORDER BY a.published_at DESC
+            LIMIT ?
+        """;
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, userId);
+            ps.setInt(2, limit);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                String title = rs.getString("title");
+                int hoursAgo = rs.getInt("hours_ago");
+                String timeAgo = hoursAgo < 1 ? "Vừa xong"
+                        : hoursAgo < 24 ? hoursAgo + " giờ trước"
+                        : (hoursAgo / 24) + " ngày trước";
+                list.add(new String[]{
+                        "AI đề xuất bài viết mới: \u201c" + title + "\u201d",
+                        timeAgo
+                });
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return list;
+    }
+
+    public boolean isBookmarked(long userId, long articleId) {
+        String sql = "SELECT COUNT(*) FROM interactions WHERE user_id = ? AND article_id = ? AND type = 'BOOKMARK'";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, userId);
+            ps.setLong(2, articleId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) return rs.getInt(1) > 0;
+        } catch (Exception e) { e.printStackTrace(); }
+        return false;
+    }
+
+    public boolean addBookmark(long userId, long articleId) {
+        String sql = "INSERT INTO interactions (user_id, article_id, type) VALUES (?, ?, 'BOOKMARK')";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, userId);
+            ps.setLong(2, articleId);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) { e.printStackTrace(); }
+        return false;
+    }
+
+    public boolean removeBookmark(long userId, long articleId) {
+        String sql = "DELETE FROM interactions WHERE user_id = ? AND article_id = ? AND type = 'BOOKMARK'";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, userId);
+            ps.setLong(2, articleId);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) { e.printStackTrace(); }
+        return false;
+    }
+
+    public boolean toggleBookmark(long userId, long articleId) {
+        if (isBookmarked(userId, articleId)) {
+            return removeBookmark(userId, articleId);
+        } else {
+            return addBookmark(userId, articleId);
+        }
+    }
+
+    public boolean removeReadingHistory(long userId, long articleId) {
+        String sql = "DELETE FROM interactions WHERE user_id = ? AND article_id = ? AND type = 'VIEW'";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, userId);
+            ps.setLong(2, articleId);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) { e.printStackTrace(); }
+        return false;
+    }
+
+    public boolean clearReadingHistory(long userId) {
+        String sql = "DELETE FROM interactions WHERE user_id = ? AND type = 'VIEW'";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, userId);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) { e.printStackTrace(); }
+        return false;
     }
 
     // ── Helper: append filters ──────────────────────────────────────────
