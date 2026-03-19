@@ -154,8 +154,6 @@ public class Article {
     public int getLikesCount() { return likesCount; }
     public void setLikesCount(int likesCount) { this.likesCount = likesCount; }
 
-    public int getDislikesCount() { return dislikesCount; }
-    public void setDislikesCount(int dislikesCount) { this.dislikesCount = dislikesCount; }
 
     
     public int getDislikesCount() {

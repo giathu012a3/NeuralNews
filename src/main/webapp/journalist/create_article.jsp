@@ -67,7 +67,7 @@
         /* Toolbar cố định trên cùng, full width */
         .tox .tox-editor-header {
             position: fixed !important;
-            top: 56px !important;
+            top: 96px !important;
             left: 288px !important;
             right: 0 !important;
             width: auto !important;

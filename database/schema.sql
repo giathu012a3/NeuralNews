@@ -166,7 +166,7 @@ CREATE TABLE `interactions` (
   `id` bigint NOT NULL AUTO_INCREMENT,
   `user_id` bigint NOT NULL,
   `article_id` bigint NOT NULL,
-  `type` enum('LIKE','BOOKMARK','VIEW') NOT NULL,
+  `type` enum('LIKE','DISLIKE','BOOKMARK','VIEW') NOT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`),
