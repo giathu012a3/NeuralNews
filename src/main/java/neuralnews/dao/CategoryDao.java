@@ -12,7 +12,7 @@ public class CategoryDao {
 
     public List<Category> getAllCategory() {
         List<Category> list = new ArrayList<>();
-        String sql = "SELECT id, name, description FROM categories ORDER BY name";
+        String sql = "SELECT id, name, description FROM categories ORDER BY id ASC";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);

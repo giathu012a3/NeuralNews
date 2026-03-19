@@ -35,17 +35,15 @@ public class ArticleDao {
         return list;
     }
 
-    public Article getFeaturedArticle() {
-        List<Article> list = getArticlesCommon(1, 0, 0);
-        return list.isEmpty() ? null : list.get(0);
-    }
-
-    public List<Article> getMostViewedArticles(int limit) {
+ // 1. Lấy danh sách bài nổi bật dựa trên lượt LIKE cao nhất (4 bài)
+    public List<Article> getFeaturedArticles(int limit) {
         List<Article> list = new ArrayList<>();
+        // Sắp xếp theo likes_count giảm dần
         String sql = """
             SELECT a.*, c.name AS category_name FROM articles a 
-            JOIN categories c ON a.category_id=c.id 
-            WHERE a.status='PUBLISHED' ORDER BY a.views DESC LIMIT ?
+            JOIN categories c ON a.category_id = c.id 
+            WHERE a.status='PUBLISHED' 
+            ORDER BY a.likes_count DESC LIMIT ?
         """;
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -54,6 +52,195 @@ public class ArticleDao {
             while (rs.next()) list.add(mapArticle(rs));
         } catch (Exception e) { e.printStackTrace(); }
         return list;
+    }
+    
+ // 2. Lấy danh sách bài mới nhất (Dùng cho mục "Cập nhật mới nhất")
+    public List<Article> getLatestArticles(int limit) {
+        return getArticlesCommon(limit, 0, 0); // Hàm này bạn đã có ORDER BY published_at DESC rồi
+    }
+
+ // 3. Lấy danh sách bài xem nhiều nhất (Dùng cho mục "Đọc nhiều nhất")
+    public List<Article> getMostViewedArticles(int limit) {
+        List<Article> list = new ArrayList<>();
+        String sql = """
+            SELECT a.*, c.name AS category_name FROM articles a 
+            JOIN categories c ON a.category_id = c.id 
+            WHERE a.status='PUBLISHED' 
+            ORDER BY a.views DESC LIMIT ?
+        """;
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, limit);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) list.add(mapArticle(rs));
+        } catch (Exception e) { e.printStackTrace(); }
+        return list;
+    }
+    
+    public List<Article> getRecommendedArticles(int limit, long excludeId) {
+        List<Article> list = new ArrayList<>();
+        // Lấy ngẫu nhiên nhưng loại bỏ bài đang là Nổi bật để không bị trùng
+        String sql = "SELECT a.*, c.name AS category_name FROM articles a " +
+                     "JOIN categories c ON a.category_id = c.id " +
+                     "WHERE a.id != ? " +
+                     "ORDER BY RAND() LIMIT ?";
+                     
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setLong(1, excludeId);
+            ps.setInt(2, limit);
+            
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                list.add(mapArticle(rs)); 
+            }
+        } catch (Exception e) { 
+            e.printStackTrace(); 
+        }
+        return list;
+    }
+    
+ // 1. Hàm ghi nhận điểm sở thích
+    public void updateInterestScore(long userId, int categoryId, int score) {
+        // Nếu chưa có thì INSERT, có rồi thì cộng dồn score
+        String sql = "INSERT INTO user_interests (user_id, category_id, score) VALUES (?, ?, ?) " +
+                     "ON DUPLICATE KEY UPDATE score = score + ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, userId);
+            ps.setInt(2, categoryId);
+            ps.setInt(3, score);
+            ps.setInt(4, score);
+            ps.executeUpdate();
+        } catch (Exception e) { e.printStackTrace(); }
+    }
+
+    // 2. Hàm lấy bài đề xuất dựa trên điểm cao nhất (Dùng cho trang chủ)
+    public List<Article> getRecommendedByInterest(long userId, long excludeId) {
+        List<Article> list = new ArrayList<>();
+        // Lấy bài thuộc Category mà user có điểm cao nhất, trừ bài Nổi bật đang hiện
+        String sql = "SELECT a.*, c.name AS category_name FROM articles a " +
+                     "JOIN categories c ON a.category_id = c.id " +
+                     "WHERE a.id != ? AND a.category_id = (" +
+                     "  SELECT category_id FROM user_interests WHERE user_id = ? " +
+                     "  ORDER BY score DESC LIMIT 1" + 
+                     ") ORDER BY a.published_at DESC LIMIT 4";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, excludeId);
+            ps.setLong(2, userId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                list.add(mapArticle(rs)); // Dùng hàm map của bạn
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        
+        // Nếu user mới chưa có điểm (list rỗng), hãy lấy Random 4 bài để bù vào
+        if (list.isEmpty()) {
+            return getRecommendedArticles(4, excludeId); 
+        }
+        return list;
+    }
+    
+    public String handleReaction(long userId, long articleId, String type) {
+        String resultStatus = "NONE";
+        try (Connection conn = DBConnection.getConnection()) {
+            conn.setAutoCommit(false);
+
+            // 1. Kiểm tra xem đã có interaction loại này chưa
+            // Vì interactions lưu chung LIKE/DISLIKE/VIEW nên phải check cả type
+            String checkSql = "SELECT type FROM interactions WHERE user_id = ? AND article_id = ? AND type IN ('LIKE', 'DISLIKE')";
+            
+            try (PreparedStatement psCheck = conn.prepareStatement(checkSql)) {
+                psCheck.setLong(1, userId);
+                psCheck.setLong(2, articleId);
+                ResultSet rs = psCheck.executeQuery();
+
+                if (rs.next()) {
+                    String oldType = rs.getString("type");
+                    
+                    if (oldType.equals(type)) {
+                        // TRƯỜNG HỢP: Bấm lại cái cũ -> Xóa interaction
+                        executeSql(conn, "DELETE FROM interactions WHERE user_id = ? AND article_id = ? AND type = ?", userId, articleId, type);
+                        updateCount(conn, articleId, type, -1);
+                        resultStatus = "NONE";
+                    } else {
+                        // TRƯỜNG HỢP: Đổi từ LIKE sang DISLIKE (hoặc ngược lại)
+                        executeSql(conn, "UPDATE interactions SET type = ? WHERE user_id = ? AND article_id = ? AND type = ?", type, userId, articleId, oldType);
+                        updateCount(conn, articleId, oldType, -1);
+                        updateCount(conn, articleId, type, 1);
+                        resultStatus = type;
+                    }
+                } else {
+                    // TRƯỜNG HỢP: Mới hoàn toàn
+                    executeSql(conn, "INSERT INTO interactions (user_id, article_id, type) VALUES (?, ?, ?)", userId, articleId, type);
+                    updateCount(conn, articleId, type, 1);
+                    resultStatus = type;
+                }
+            }
+            conn.commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return resultStatus;
+    }
+
+    // Hàm phụ để cập nhật số lượng trong bảng articles
+    private void updateCount(Connection conn, long artId, String type, int value) throws SQLException {
+        String column = type.equalsIgnoreCase("LIKE") ? "likes_count" : "dislikes_count";
+        String sql = "UPDATE articles SET " + column + " = " + column + " + ? WHERE id = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, value);
+            ps.setLong(2, artId);
+            ps.executeUpdate();
+        }
+    }
+
+    private void executeSql(Connection conn, String sql, Object... params) throws SQLException {
+        PreparedStatement ps = conn.prepareStatement(sql);
+        for (int i = 0; i < params.length; i++) ps.setObject(i + 1, params[i]);
+        ps.executeUpdate();
+    }
+    
+    public String getUserReaction(long userId, long articleId) {
+        String sql = "SELECT type FROM interactions WHERE user_id = ? AND article_id = ? AND type IN ('LIKE', 'DISLIKE')";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, userId);
+            ps.setLong(2, articleId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) return rs.getString("type");
+        } catch (Exception e) { e.printStackTrace(); }
+        return "NONE";
+    }
+    
+    public void incrementViewCount(long articleId, long userId) {
+        String updateSql = "UPDATE articles SET views = views + 1 WHERE id = ?";
+        String logSql = "INSERT INTO interactions (user_id, article_id, type) VALUES (?, ?, 'VIEW')";
+
+        try (Connection conn = DBConnection.getConnection()) {
+            conn.setAutoCommit(false); // Dùng transaction để đảm bảo cả 2 cùng thành công
+            
+            // 1. Cập nhật số view tổng
+            try (PreparedStatement ps1 = conn.prepareStatement(updateSql)) {
+                ps1.setLong(1, articleId);
+                ps1.executeUpdate();
+            }
+            
+            // 2. Ghi nhật ký vào bảng interactions (chỉ ghi nếu user đã đăng nhập)
+            if (userId > 0) {
+                try (PreparedStatement ps2 = conn.prepareStatement(logSql)) {
+                    ps2.setLong(1, userId);
+                    ps2.setLong(2, articleId);
+                    ps2.executeUpdate();
+                }
+            }
+            
+            conn.commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public Article getArticleById(long id) {

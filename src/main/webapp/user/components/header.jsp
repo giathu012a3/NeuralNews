@@ -3,6 +3,13 @@
 <%@ page import="neuralnews.model.Notification" %>
 <%@ page import="java.util.List" %>
 <%@ page import="neuralnews.model.User" %>
+<%
+    if (request.getAttribute("listCategory") == null) {
+        neuralnews.dao.CategoryDao headerCatDao = new neuralnews.dao.CategoryDao();
+        request.setAttribute("listCategory", headerCatDao.getAllCategory());
+    }
+%>
+
 
 <%
     User _u = (User) session.getAttribute("currentUser");

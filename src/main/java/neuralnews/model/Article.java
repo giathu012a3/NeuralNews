@@ -157,6 +157,15 @@ public class Article {
     public int getDislikesCount() { return dislikesCount; }
     public void setDislikesCount(int dislikesCount) { this.dislikesCount = dislikesCount; }
 
+    
+    public int getDislikesCount() {
+        return dislikesCount;
+    }
+
+    public void setDislikesCount(int dislikesCount) {
+        this.dislikesCount = dislikesCount;
+    }
+    
     public String getSentimentLabel() {
         return sentimentLabel;
     }
