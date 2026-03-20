@@ -27,8 +27,9 @@ public class InterestController extends HttpServlet {
                 int categoryId = Integer.parseInt(request.getParameter("categoryId"));
                 int score = Integer.parseInt(request.getParameter("score"));
                 
-                ArticleDao dao = new ArticleDao();
-                dao.updateInterestScore(currentUser.getId(), categoryId, score);
+                // ArticleDao dao = new ArticleDao();
+                // dao.updateInterestScore(currentUser.getId(), categoryId, score);
+                System.out.println("Ghi nhận tương tác Category: " + categoryId + " cho User: " + currentUser.getId());
             } catch (Exception e) { e.printStackTrace(); }
             System.out.println("User ID: " + currentUser.getId() + " | Cat ID: " + request.getParameter("categoryId"));
         }
