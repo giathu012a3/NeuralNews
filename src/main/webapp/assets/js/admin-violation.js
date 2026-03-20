@@ -171,7 +171,7 @@ function showToast(message, type = 'success') {
 }
 
 // Global functions for onclick attributes in JSP
-function handleViolationAction(action) {
+function handleAction(action) {
     AdminViolation.handleAction(action);
 }
 

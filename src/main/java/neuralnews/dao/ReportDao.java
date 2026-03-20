@@ -111,9 +111,14 @@ public class ReportDao {
 
     public boolean createReport(String targetType, long targetId, long reporterId, String reason, String details, 
                                String snippet) {
-        String sql = "INSERT INTO reports (target_type, target_id, reporter_id, reason, details, " +
-                     "problematic_snippet) " +
-                     "VALUES (?, ?, ?, ?, ?, ?)";
+        return createReport(targetType, targetId, reporterId, reason, details, "PENDING", 0, 0, 0, snippet);
+    }
+
+    public boolean createReport(String targetType, long targetId, long reporterId, String reason, String details, 
+                               String status, int confidence, int severity, int toxicity, String snippet) {
+        String sql = "INSERT INTO reports (target_type, target_id, reporter_id, reason, details, status, " +
+                     "ai_confidence, ai_severity, ai_toxicity, problematic_snippet) " +
+                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, targetType);
@@ -121,7 +126,11 @@ public class ReportDao {
             ps.setLong(3, reporterId);
             ps.setString(4, reason);
             ps.setString(5, details);
-            ps.setString(6, snippet);
+            ps.setString(6, status);
+            ps.setInt(7, confidence);
+            ps.setInt(8, severity);
+            ps.setInt(9, toxicity);
+            ps.setString(10, snippet);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();

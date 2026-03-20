@@ -116,7 +116,6 @@ public class ArticleDao {
         } catch (Exception e) { e.printStackTrace(); }
     }
 
-    // 2. Hàm lấy bài đề xuất dựa trên điểm cao nhất (Dùng cho trang chủ)
     public List<Article> getRecommendedByInterest(long userId, long excludeId) {
         List<Article> list = new ArrayList<>();
         // Lấy bài thuộc Category mà user có điểm cao nhất, trừ bài Nổi bật đang hiện
@@ -140,6 +139,24 @@ public class ArticleDao {
         if (list.isEmpty()) {
             return getRecommendedArticles(4, excludeId); 
         }
+        return list;
+    }
+
+    public List<Article> searchArticles(String keyword, int limit) {
+        List<Article> list = new ArrayList<>();
+        String sql = "SELECT a.*, c.name AS category_name FROM articles a " +
+                     "LEFT JOIN categories c ON a.category_id = c.id " +
+                     "WHERE a.status = 'PUBLISHED' AND (a.title LIKE ? OR a.summary LIKE ?) " +
+                     "ORDER BY a.published_at DESC LIMIT ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            String k = "%" + keyword + "%";
+            ps.setString(1, k);
+            ps.setString(2, k);
+            ps.setInt(3, limit);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) list.add(mapArticle(rs));
+        } catch (Exception e) { e.printStackTrace(); }
         return list;
     }
     
@@ -186,13 +203,14 @@ public class ArticleDao {
         return resultStatus;
     }
 
-    // Hàm phụ để cập nhật số lượng trong bảng articles
     private void updateCount(Connection conn, long artId, String type, int value) throws SQLException {
         String column = type.equalsIgnoreCase("LIKE") ? "likes_count" : "dislikes_count";
-        String sql = "UPDATE articles SET " + column + " = " + column + " + ? WHERE id = ?";
+        // Logic: Like +1 đồng thời popularity +5. Undo Like (value=-1) thì trừ lại.
+        String sql = "UPDATE articles SET " + column + " = " + column + " + ?, popularity_score = popularity_score + ? WHERE id = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, value);
-            ps.setLong(2, artId);
+            ps.setInt(2, type.equalsIgnoreCase("LIKE") ? (value * 5) : 0);
+            ps.setLong(3, artId);
             ps.executeUpdate();
         }
     }
@@ -222,8 +240,9 @@ public class ArticleDao {
         try (Connection conn = DBConnection.getConnection()) {
             conn.setAutoCommit(false); // Dùng transaction để đảm bảo cả 2 cùng thành công
             
-            // 1. Cập nhật số view tổng
-            try (PreparedStatement ps1 = conn.prepareStatement(updateSql)) {
+            // 1. Cập nhật số view tổng và điểm phổ biến (+1)
+            String updateSqlWithPopularity = "UPDATE articles SET views = views + 1, popularity_score = popularity_score + 1 WHERE id = ?";
+            try (PreparedStatement ps1 = conn.prepareStatement(updateSqlWithPopularity)) {
                 ps1.setLong(1, articleId);
                 ps1.executeUpdate();
             }
