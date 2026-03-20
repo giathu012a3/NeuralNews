@@ -49,7 +49,7 @@ public class CategoryController extends HttpServlet {
             // Lấy 6 bài mới nhất, không cần offset vì mục này độc lập
 //            request.setAttribute("latestArtsWithCat", artDao.getLatestArticles(6));
          // Nếu muốn bỏ qua 4 bài đã hiện ở mục Nổi bật để lấy các bài tiếp theo
-            request.setAttribute("latestArtsWithCat", artDao.getArticlesCommon(6, 4, 0));
+            request.setAttribute("latestArtsWithCat", artDao.getArticlesCommon(6, 0, 0));
 
             // 3. Lấy BÁO ĐỌC NHIỀU NHẤT (Most Viewed - Cho Sidebar)
             request.setAttribute("mostViewedArts", artDao.getMostViewedArticles(5));

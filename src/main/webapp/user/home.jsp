@@ -22,14 +22,14 @@
                         <span class="w-1.5 h-6 bg-primary rounded-full"></span>
                         Bài báo nổi bật
                     </h3>
-                    <div class="flex gap-2 text-sm text-slate-500">
-                        <span class="cursor-pointer hover:text-primary font-medium text-primary">Thịnh hành</span>
+                    <div class="flex gap-2 text-sm text-slate-500" id="featured-tabs">
+                        <span data-type="trending" class="cursor-pointer hover:text-primary font-medium text-primary">Thịnh hành</span>
                         <span class="text-slate-300">|</span>
-                        <span class="cursor-pointer hover:text-primary font-medium">Lượt thích cao nhất</span>
+                        <span data-type="liked" class="cursor-pointer hover:text-primary font-medium">Lượt thích cao nhất</span>
                     </div>
                 </div>
                 
-                <section class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <section id="featured-section" class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <c:set var="featured" value="${featuredArt}" />
                     <c:if test="${not empty featured}">
                     <article onclick="window.location.href='user/article?id=${featured.id}'"
@@ -103,7 +103,7 @@
                             Mới cập nhật
                         </h3>
                     </div>
-                    <div class="flex flex-col gap-6">
+                    <div id="latest-articles-list" class="flex flex-col gap-6">
                         <c:forEach var="art" items="${latestArtsWithCat}">
                         <article onclick="window.location.href='user/article?id=${art.id}'"
                             class="flex flex-col sm:flex-row gap-5 bg-white dark:bg-surface-dark p-4 rounded-xl border border-slate-100 dark:border-border-dark hover:shadow-lg hover:border-primary/30 transition-all duration-300 group cursor-pointer">
@@ -130,7 +130,7 @@
                         </c:forEach>
                     </div>
                     <%-- NÚT TẢI THÊM BÀI VIẾT --%>
-                    <button class="w-full py-3 mt-8 text-sm font-semibold text-primary border border-primary/20 rounded-lg hover:bg-primary/5 transition-colors flex items-center justify-center gap-2">
+                    <button id="btn-load-more" class="w-full py-3 mt-8 text-sm font-semibold text-primary border border-primary/20 rounded-lg hover:bg-primary/5 transition-colors flex items-center justify-center gap-2">
                         Tải thêm bài viết
                         <span class="material-symbols-outlined text-lg">expand_more</span>
                     </button>
@@ -196,5 +196,144 @@
         </main>
         <jsp:include page="components/footer.jsp" />
     </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const ctxPath = '${pageContext.request.contextPath}';
+
+    function getImageUrl(img) {
+        if (!img) return ctxPath + '/uploads/images/placeholder.jpg';
+        if (img.startsWith('http')) return img;
+        let path = img.startsWith('/') ? img : '/' + img;
+        return ctxPath + path;
+    }
+
+    // 1. Lượt thích cao nhất (Featured Tabs)
+    const featuredTabs = document.querySelectorAll('#featured-tabs span[data-type]');
+    const featuredSection = document.getElementById('featured-section');
+
+    featuredTabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            // Update active state
+            featuredTabs.forEach(t => t.classList.remove('text-primary'));
+            this.classList.add('text-primary');
+
+            const type = this.getAttribute('data-type');
+            fetch(ctxPath + '/home-ajax?action=getFeatured&type=' + type)
+                .then(res => res.json())
+                .then(data => {
+                    if(data.length > 0) {
+                        const mainArt = data[0];
+                        let subHtml = '';
+                        for(let i=1; i<data.length; i++) {
+                            const art = data[i];
+                            subHtml += `
+                            <article onclick="window.location.href='\${ctxPath}/user/article?id=\${art.id}'"
+                                class="flex-1 flex gap-4 bg-white dark:bg-surface-dark p-3 rounded-lg border border-border-light dark:border-border-dark hover:border-primary/50 transition-colors cursor-pointer group">
+                                <div class="w-1/3 h-full rounded-md overflow-hidden bg-slate-100">
+                                    <div class="w-full h-full bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
+                                        style="background-image: url('\${getImageUrl(art.imageUrl)}');"></div>
+                                </div>
+                                <div class="w-2/3 flex flex-col justify-center">
+                                    <span class="text-[10px] font-bold text-primary uppercase mb-1">\${art.categoryName || 'TIN TỨC'}</span>
+                                    <h3 class="text-sm font-bold text-slate-900 dark:text-white leading-snug group-hover:text-primary transition-colors line-clamp-2">
+                                        \${art.title}
+                                    </h3>
+                                </div>
+                            </article>`;
+                        }
+
+                        let mainHtml = `
+                        <article onclick="window.location.href='\${ctxPath}/user/article?id=\${mainArt.id}'"
+                            class="relative md:col-span-2 lg:col-span-1 xl:col-span-1 h-[450px] rounded-xl overflow-hidden group cursor-pointer shadow-sm hover:shadow-md transition-shadow">
+                            <div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
+                                style="background-image: url('\${getImageUrl(mainArt.imageUrl)}');">
+                            </div>
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"></div>
+                            <div class="absolute bottom-0 left-0 p-6 w-full">
+                                <span class="inline-block px-2.5 py-0.5 rounded bg-primary text-white text-[10px] font-bold uppercase tracking-wider mb-3">HOT</span>
+                                <h2 class="text-2xl md:text-3xl font-bold text-white leading-tight mb-2 group-hover:text-blue-100 transition-colors">
+                                    \${mainArt.title}
+                                </h2>
+                                <p class="text-slate-300 text-sm line-clamp-2 mb-4 hidden md:block">\${mainArt.summary}</p>
+                                <div class="flex items-center text-xs text-slate-400 gap-3">
+                                    <span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">schedule</span> \${mainArt.createdAt ? mainArt.createdAt.substring(0,10) : ''}</span>
+                                    <span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">thumb_up</span> \${mainArt.likesCount || 0} thích</span>
+                                </div>
+                            </div>
+                        </article>
+                        <div class="flex flex-col gap-4 h-[450px]">
+                            \${subHtml}
+                        </div>`;
+
+                        featuredSection.innerHTML = mainHtml;
+                    }
+                })
+                .catch(err => console.error(err));
+        });
+    });
+
+    // 2. Tải thêm bài viết mới nhất
+    const btnLoadMore = document.getElementById('btn-load-more');
+    const latestList = document.getElementById('latest-articles-list');
+    let offsetLatest = 6; // Đã load 6 bài đầu
+    const limitLatest = 6;
+
+    if(btnLoadMore) {
+        btnLoadMore.addEventListener('click', function() {
+            btnLoadMore.innerHTML = 'Đang tải...';
+            fetch(ctxPath + '/home-ajax?action=loadMoreLatest&offset=' + offsetLatest + '&limit=' + limitLatest)
+                .then(res => res.json())
+                .then(data => {
+                    if(data.length > 0) {
+                        let html = '';
+                        data.forEach(art => {
+                            let ds = '';
+                            if(art.createdAt) {
+                            	ds = new Date(art.createdAt).toLocaleDateString('vi-VN');
+                            }
+                            html += `
+                            <article onclick="window.location.href='\${ctxPath}/user/article?id=\${art.id}'"
+                                class="flex flex-col sm:flex-row gap-5 bg-white dark:bg-surface-dark p-4 rounded-xl border border-slate-100 dark:border-border-dark hover:shadow-lg hover:border-primary/30 transition-all duration-300 group cursor-pointer">
+                                <div class="sm:w-56 h-40 shrink-0 rounded-lg overflow-hidden relative">
+                                    <div class="absolute top-2 left-2 bg-black/60 backdrop-blur-sm text-white text-[10px] font-bold px-2 py-0.5 rounded">\${art.categoryName || 'TIN TỨC'}</div>
+                                    <div class="w-full h-full bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
+                                        style="background-image: url('\${getImageUrl(art.imageUrl)}');">
+                                    </div>
+                                </div>
+                                <div class="flex flex-col flex-1 justify-between py-1">
+                                    <div>
+                                        <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2 group-hover:text-primary transition-colors leading-snug">\${art.title}</h3>
+                                        <p class="text-slate-600 dark:text-slate-400 text-sm line-clamp-2">\${art.summary}</p>
+                                    </div>
+                                    <div class="flex items-center justify-between text-xs text-slate-400 border-t border-slate-100 dark:border-slate-800 pt-3 mt-3">
+                                        <div class="flex items-center gap-4">
+                                            <span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">calendar_today</span> \${ds}</span>
+                                            <span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">visibility</span> \${art.views} xem</span>
+                                        </div>
+                                        <button class="text-slate-400 hover:text-primary"><span class="material-symbols-outlined text-lg">bookmark_add</span></button>
+                                    </div>
+                                </div>
+                            </article>`;
+                        });
+                        latestList.insertAdjacentHTML('beforeend', html);
+                        offsetLatest += limitLatest;
+                        btnLoadMore.innerHTML = `Tải thêm bài viết <span class="material-symbols-outlined text-lg">expand_more</span>`;
+                        if (data.length < limitLatest) {
+                            btnLoadMore.style.display = 'none'; // Đã hết bài
+                        }
+                    } else {
+                        btnLoadMore.innerHTML = 'Đã tải hết bài viết';
+                        btnLoadMore.disabled = true;
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    btnLoadMore.innerHTML = `Tải lỗi, thử lại <span class="material-symbols-outlined text-lg">expand_more</span>`;
+                });
+        });
+    }
+});
+</script>
 </body>
 </html>

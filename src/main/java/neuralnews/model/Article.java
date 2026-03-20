@@ -21,7 +21,6 @@ public class Article {
     private Timestamp createdAt;
     private String categoryName;
 
-    // Display fields - ─æ╞░ß╗úc set bß╗ƒi Controller
     private String authorName;
     private String statusLabel;
     private String statusBadgeClass;
