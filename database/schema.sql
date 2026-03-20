@@ -120,6 +120,30 @@ INSERT INTO `comments` VALUES (1,'sai sự thật r',2,2,NULL,'NEUTRAL','2026-03
 UNLOCK TABLES;
 
 --
+-- Table structure for table `daily_traffic`
+--
+
+DROP TABLE IF EXISTS `daily_traffic`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `daily_traffic` (
+  `date` date NOT NULL,
+  `view_count` int DEFAULT '0',
+  PRIMARY KEY (`date`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `daily_traffic`
+--
+
+LOCK TABLES `daily_traffic` WRITE;
+/*!40000 ALTER TABLE `daily_traffic` DISABLE KEYS */;
+INSERT INTO `daily_traffic` VALUES ('2026-03-10',450),('2026-03-11',620),('2026-03-12',380),('2026-03-13',890),('2026-03-14',1150),('2026-03-15',740),('2026-03-16',1500),('2026-03-17',2100),('2026-03-18',1850),('2026-03-19',2400),('2026-03-20',850);
+/*!40000 ALTER TABLE `daily_traffic` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `homepage_config`
 --
 
@@ -151,41 +175,6 @@ LOCK TABLES `homepage_config` WRITE;
 /*!40000 ALTER TABLE `homepage_config` DISABLE KEYS */;
 INSERT INTO `homepage_config` VALUES (1,'Hero Banner',1,1,'HERO',3,6,'FEATURED',NULL,NULL),(2,'Tech News Grid',2,1,'GRID',4,8,'CATEGORY',1,NULL),(3,'Ad Banner',3,1,'GRID',3,6,'CUSTOM_HTML',NULL,'<div style=\"background:#f0f0f0; padding:20px; text-align:center;\">Quảng Cáo Tại Đây</div>');
 /*!40000 ALTER TABLE `homepage_config` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `daily_traffic`
---
-
-DROP TABLE IF EXISTS `daily_traffic`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `daily_traffic` (
-  `date` date NOT NULL,
-  `view_count` int DEFAULT '0',
-  PRIMARY KEY (`date`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `daily_traffic`
---
-
-LOCK TABLES `daily_traffic` WRITE;
-/*!40000 ALTER TABLE `daily_traffic` DISABLE KEYS */;
-INSERT INTO `daily_traffic` VALUES
-('2026-03-10', 450),
-('2026-03-11', 620),
-('2026-03-12', 380),
-('2026-03-13', 890),
-('2026-03-14', 1150),
-('2026-03-15', 740),
-('2026-03-16', 1500),
-('2026-03-17', 2100),
-('2026-03-18', 1850),
-('2026-03-19', 2400),
-('2026-03-20', 850);
-/*!40000 ALTER TABLE `daily_traffic` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -376,4 +365,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-03-20 15:03:10
+-- Dump completed on 2026-03-20 18:27:45
