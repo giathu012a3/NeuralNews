@@ -43,7 +43,7 @@ public class ArticleDao {
             SELECT a.*, c.name AS category_name FROM articles a 
             JOIN categories c ON a.category_id = c.id 
             WHERE a.status='PUBLISHED' 
-            ORDER BY a.likes_count DESC LIMIT ?
+            ORDER BY a.popularity_score DESC LIMIT ?
         """;
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
