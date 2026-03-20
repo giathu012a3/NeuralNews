@@ -9,9 +9,6 @@ import java.util.List;
 
 public class ArticleDao {
 
-    // ======================================================
-    // CAC HAM CHO DOC GIA (VISITOR)
-    // ======================================================
 
     public List<Article> getArticlesCommon(int limit, int offset, int categoryId) {
         List<Article> list = new ArrayList<>();
@@ -35,10 +32,8 @@ public class ArticleDao {
         return list;
     }
 
- // 1. Lấy danh sách bài nổi bật dựa trên lượt LIKE cao nhất (4 bài)
     public List<Article> getFeaturedArticles(int limit) {
         List<Article> list = new ArrayList<>();
-        // Sắp xếp theo likes_count giảm dần
         String sql = """
             SELECT a.*, c.name AS category_name FROM articles a 
             JOIN categories c ON a.category_id = c.id 
@@ -55,12 +50,10 @@ public class ArticleDao {
         return list;
     }
     
- // 2. Lấy danh sách bài mới nhất (Dùng cho mục "Cập nhật mới nhất")
     public List<Article> getLatestArticles(int limit) {
-        return getArticlesCommon(limit, 0, 0); // Hàm này bạn đã có ORDER BY published_at DESC rồi
+        return getArticlesCommon(limit, 0, 0);
     }
 
- // 3. Lấy danh sách bài xem nhiều nhất (Dùng cho mục "Đọc nhiều nhất")
     public List<Article> getMostViewedArticles(int limit) {
         List<Article> list = new ArrayList<>();
         String sql = """
@@ -80,7 +73,6 @@ public class ArticleDao {
     
     public List<Article> getRecommendedArticles(int limit, long excludeId) {
         List<Article> list = new ArrayList<>();
-        // Lấy ngẫu nhiên nhưng loại bỏ bài đang là Nổi bật để không bị trùng
         String sql = "SELECT a.*, c.name AS category_name FROM articles a " +
                      "JOIN categories c ON a.category_id = c.id " +
                      "WHERE a.id != ? " +
@@ -152,8 +144,6 @@ public class ArticleDao {
         try (Connection conn = DBConnection.getConnection()) {
             conn.setAutoCommit(false);
 
-            // 1. Kiểm tra xem đã có interaction loại này chưa
-            // Vì interactions lưu chung LIKE/DISLIKE/VIEW nên phải check cả type
             String checkSql = "SELECT type FROM interactions WHERE user_id = ? AND article_id = ? AND type IN ('LIKE', 'DISLIKE')";
             
             try (PreparedStatement psCheck = conn.prepareStatement(checkSql)) {
@@ -165,19 +155,19 @@ public class ArticleDao {
                     String oldType = rs.getString("type");
                     
                     if (oldType.equals(type)) {
-                        // TRƯỜNG HỢP: Bấm lại cái cũ -> Xóa interaction
+                        // Bấm lại cái cũ -> Xóa interaction
                         executeSql(conn, "DELETE FROM interactions WHERE user_id = ? AND article_id = ? AND type = ?", userId, articleId, type);
                         updateCount(conn, articleId, type, -1);
                         resultStatus = "NONE";
                     } else {
-                        // TRƯỜNG HỢP: Đổi từ LIKE sang DISLIKE (hoặc ngược lại)
+                        // Đổi từ LIKE sang DISLIKE (hoặc ngược lại)
                         executeSql(conn, "UPDATE interactions SET type = ? WHERE user_id = ? AND article_id = ? AND type = ?", type, userId, articleId, oldType);
                         updateCount(conn, articleId, oldType, -1);
                         updateCount(conn, articleId, type, 1);
                         resultStatus = type;
                     }
                 } else {
-                    // TRƯỜNG HỢP: Mới hoàn toàn
+                        // Tương tác mới
                     executeSql(conn, "INSERT INTO interactions (user_id, article_id, type) VALUES (?, ?, ?)", userId, articleId, type);
                     updateCount(conn, articleId, type, 1);
                     resultStatus = type;
@@ -252,7 +242,7 @@ public class ArticleDao {
         return getById(id);
     }
 
-    // ── Lấy tất cả bài viết có filter (Admin dùng) ──────────────────────────
+    // -- Admin Methods --
     public List<Article> getAllArticlesFiltered(int limit, int offset,
             String keyword, String status, Integer categoryId,
             String authorName, String sortBy, String sortDir) {
@@ -323,7 +313,6 @@ public class ArticleDao {
         return getAllArticlesFiltered(limit, offset, null, null, null);
     }
 
-    // ── Đếm tổng số bài viết (Admin dùng) ───────────────────────────────
     public int getTotalArticleCount(String keyword, String status, Integer categoryId, String authorName) {
         StringBuilder sql = new StringBuilder(
             "SELECT COUNT(*) FROM articles a LEFT JOIN users u ON a.author_id = u.id WHERE a.status != 'DRAFT'");
@@ -365,12 +354,10 @@ public class ArticleDao {
         return getTotalArticleCount(null, null, null);
     }
 
-    // ── Lấy bài viết của một tác giả (Staff dùng) ──────────────────────────
     public List<Article> getArticlesByAuthor(long authorId) {
         return getArticlesByAuthorFiltered(authorId, "", "", "", "", "", 0, Integer.MAX_VALUE);
     }
 
-    // ── Đếm tổng bài viết có filter (Staff dùng) ──────────────────────────
     public int countArticlesByAuthorFiltered(long authorId,
                                               String keyword, String status,
                                               String category, String dateFrom, String dateTo) {
@@ -392,7 +379,6 @@ public class ArticleDao {
         return 0;
     }
 
-    // ── Lấy bài viết có filter + phân trang (Staff dùng) ──────────────────
     public List<Article> getArticlesByAuthorFiltered(long authorId,
                                                       String keyword, String status,
                                                       String category, String dateFrom, String dateTo,
@@ -424,7 +410,6 @@ public class ArticleDao {
         return list;
     }
 
-    // ── Lấy danh sách danh mục của tác giả (Staff filter) ─────────────────
     public List<String> getCategoriesByAuthor(long authorId) {
         List<String> list = new ArrayList<>();
         String sql = """
@@ -443,7 +428,6 @@ public class ArticleDao {
         return list;
     }
 
-    // ── Lấy bài viết theo ID ──────────────────────────────────────────────
     public Article getById(long id) {
         String sql = """
             SELECT a.*, c.name AS category_name
@@ -460,7 +444,6 @@ public class ArticleDao {
         return null;
     }
 
-    // ── Tạo bài viết mới ─────────────────────────────────────────────────
     public long save(Article a) {
         String sql = """
             INSERT INTO articles
@@ -488,7 +471,6 @@ public class ArticleDao {
         return -1;
     }
 
-    // ── Cập nhật bài viết ────────────────────────────────────────────────
     public boolean update(Article a) {
         String sql = """
             UPDATE articles
@@ -513,7 +495,6 @@ public class ArticleDao {
         } catch (Exception e) { e.printStackTrace(); return false; }
     }
 
-    // ── Xóa bài viết (Admin – không cần check author) ────────────────────
     public boolean deleteArticleById(long articleId) {
         String sql = "DELETE FROM articles WHERE id = ?";
         try (Connection conn = DBConnection.getConnection();
@@ -523,7 +504,6 @@ public class ArticleDao {
         } catch (Exception e) { e.printStackTrace(); return false; }
     }
 
-    // ── Đếm bài viết theo từng trạng thái (Admin stats bar) ──────────────
     public java.util.Map<String, Integer> getArticleStatsByStatus() {
         java.util.Map<String, Integer> map = new java.util.LinkedHashMap<>();
         map.put("TOTAL", 0);
@@ -547,7 +527,6 @@ public class ArticleDao {
         return map;
     }
 
-    // ── Xóa bài viết (Chỉ tác giả) ──────────────────────────────────────
     public boolean deleteArticle(long articleId, long authorId) {
         String sql = "DELETE FROM articles WHERE id = ? AND author_id = ?";
         try (Connection conn = DBConnection.getConnection();
@@ -569,13 +548,12 @@ public class ArticleDao {
         return -1;
     }
 
-    // ── Cập nhật status (Admin) ──────────────────────────────────────────
     public boolean updateArticleStatus(long articleId, String status) {
         return updateArticleStatus(articleId, status, null);
     }
 
     public boolean updateArticleStatus(long articleId, String status, Long approvedBy) {
-        String sql = "UPDATE articles SET status = ?, approved_by = ?, popularity_score = popularity_score + 1 WHERE id = ?";
+        String sql = "UPDATE articles SET status = ?, approved_by = ? WHERE id = ?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, status);
@@ -586,7 +564,6 @@ public class ArticleDao {
         } catch (Exception e) { e.printStackTrace(); return false; }
     }
 
-    // ── Cập nhật status (Staff check author) ─────────────────────────────
     public boolean updateArticleStatus(long articleId, long authorId, String status) {
         String sql = "UPDATE articles SET status = ? WHERE id = ? AND author_id = ?";
         try (Connection conn = DBConnection.getConnection();
@@ -598,7 +575,6 @@ public class ArticleDao {
         } catch (Exception e) { e.printStackTrace(); return false; }
     }
 
-    // ── Lấy tất cả danh mục ──────────────────────────────────────────────
     public List<neuralnews.model.Category> getAllCategories() {
         List<neuralnews.model.Category> list = new ArrayList<>();
         String sql = "SELECT id, name FROM categories ORDER BY name";
@@ -615,9 +591,7 @@ public class ArticleDao {
         return list;
     }
 
-    // ======================================================
-    // CAC HAM CHO TRANG PROFILE (USER)
-    // ======================================================
+    // -- Profile Methods --
 
     /**
      * Đếm số bài viết user đã lưu (interactions loại SAVE).
