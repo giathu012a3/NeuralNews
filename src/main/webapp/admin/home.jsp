@@ -101,18 +101,17 @@
                     </div>
                     <!-- Row 2: Traffic and AI Insights -->
                     <div class="grid grid-cols-1 lg:grid-cols-10 gap-6">
+                        <!-- Traffic Chart -->
                         <div
-                            class="lg:col-span-6 bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-slate-50 dark:border-slate-700">
+                            class="lg:col-span-7 bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-slate-50 dark:border-slate-700">
                             <div class="flex items-center justify-between mb-6">
                                 <div>
-                                    class="absolute inset-0 flex flex-col justify-between pointer-events-none border-b border-slate-100 dark:border-slate-700 pb-2">
-                                    <div class="border-t border-slate-100 dark:border-slate-700/50 w-full"></div>
-                                    <div class="border-t border-slate-100 dark:border-slate-700/50 w-full"></div>
-                                    <div class="border-t border-slate-100 dark:border-slate-700/50 w-full"></div>
+                                    <h3 class="font-bold text-slate-800 dark:text-white">Tổng quan Lưu lượng 7 ngày qua</h3>
+                                    <p class="text-xs text-slate-500">Dựa trên số lượt xem thực tế</p>
                                 </div>
                             </div>
-                            <div class="flex justify-between mt-4 text-xs text-slate-400 font-medium">
-                                <span>00:00</span><span>04:00</span><span>08:00</span><span>12:00</span><span>16:00</span><span>20:00</span><span>23:59</span>
+                            <div class="h-64 relative">
+                                <canvas id="trafficChart"></canvas>
                             </div>
                         </div>
                         <!-- Category Distribution Chart -->
