@@ -10,8 +10,13 @@ import java.net.http.HttpResponse;
 import java.time.Duration;
 
 public class GeminiService {
-    private static final String API_KEY = "AIzaSyDavUbnqXgf57kOWUnx79GsUaV9VXYNQ1g";
-    private static final String API_URL = "https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=" + API_KEY;
+    // LƯU Ý: Vui lòng thay thế placeholder bên dưới bằng API Key của bạn khi sử
+    // dụng.
+    // Để bảo mật, hãy cân nhắc sử dụng biến môi trường hoặc file cấu hình được bỏ
+    // qua bởi git.
+    private static final String API_KEY = "YOUR_API_KEY_HERE";
+    private static final String API_URL = "https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key="
+            + API_KEY;
     private final HttpClient client;
     private final Gson gson;
 
@@ -34,7 +39,8 @@ public class GeminiService {
                 cleanText = cleanText.substring(0, 5000); // Truncate if very long
             }
 
-            String prompt = "Dựa trên nội dung sau, hãy viết một bản tóm tắt cực kỳ ngắn gọn gồm 4-5 gạch đầu dòng tóm tắt các ý quan trọng nhất của bài báo này. Chỉ trả về các gạch đầu dòng, không thêm lời dẫn. \n\nNội dung: " + cleanText;
+            String prompt = "Dựa trên nội dung sau, hãy viết một bản tóm tắt cực kỳ ngắn gọn gồm 4-5 gạch đầu dòng tóm tắt các ý quan trọng nhất của bài báo này. Chỉ trả về các gạch đầu dòng, không thêm lời dẫn. \n\nNội dung: "
+                    + cleanText;
 
             // Construct JSON request
             JsonObject part = new JsonObject();
