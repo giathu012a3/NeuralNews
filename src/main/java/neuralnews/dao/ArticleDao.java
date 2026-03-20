@@ -101,44 +101,30 @@ public class ArticleDao {
         return list;
     }
     
- // 1. Hàm ghi nhận điểm sở thích
-    public void updateInterestScore(long userId, int categoryId, int score) {
-        // Nếu chưa có thì INSERT, có rồi thì cộng dồn score
-        String sql = "INSERT INTO user_interests (user_id, category_id, score) VALUES (?, ?, ?) " +
-                     "ON DUPLICATE KEY UPDATE score = score + ?";
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setLong(1, userId);
-            ps.setInt(2, categoryId);
-            ps.setInt(3, score);
-            ps.setInt(4, score);
-            ps.executeUpdate();
-        } catch (Exception e) { e.printStackTrace(); }
-    }
-
+    /**
+     * Lấy bài đề xuất dựa trên các Category mà User đã tương tác nhiều nhất.
+     */
     public List<Article> getRecommendedByInterest(long userId, long excludeId) {
         List<Article> list = new ArrayList<>();
-        // Lấy bài thuộc Category mà user có điểm cao nhất, trừ bài Nổi bật đang hiện
+        // Lấy Category mà user đã xem/like nhiều nhất từ bảng interactions
         String sql = "SELECT a.*, c.name AS category_name FROM articles a " +
                      "JOIN categories c ON a.category_id = c.id " +
                      "WHERE a.id != ? AND a.category_id = (" +
-                     "  SELECT category_id FROM user_interests WHERE user_id = ? " +
-                     "  ORDER BY score DESC LIMIT 1" + 
+                     "  SELECT a2.category_id FROM interactions i " +
+                     "  JOIN articles a2 ON i.article_id = a2.id " +
+                     "  WHERE i.user_id = ? " +
+                     "  GROUP BY a2.category_id ORDER BY COUNT(*) DESC LIMIT 1" + 
                      ") ORDER BY a.published_at DESC LIMIT 4";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setLong(1, excludeId);
             ps.setLong(2, userId);
             ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                list.add(mapArticle(rs)); // Dùng hàm map của bạn
-            }
+            while (rs.next()) list.add(mapArticle(rs));
         } catch (Exception e) { e.printStackTrace(); }
         
-        // Nếu user mới chưa có điểm (list rỗng), hãy lấy Random 4 bài để bù vào
-        if (list.isEmpty()) {
-            return getRecommendedArticles(4, excludeId); 
-        }
+        // Nếu user mới chưa có tương tác (list rỗng), lấy Random 4 bài
+        if (list.isEmpty()) return getRecommendedArticles(4, excludeId); 
         return list;
     }
 
