@@ -37,7 +37,7 @@
                     href="#"> <span class="material-icons text-[20px]">psychology</span> <span class="font-medium">Cấu
                         hình AI</span> </a> <a
                     class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 transition-all text-slate-400 hover:text-white"
-                    href="${pageContext.request.contextPath}/auth/logout.jsp"> <span
+                    href="${pageContext.request.contextPath}/logout"> <span
                         class="material-icons text-[20px]">logout</span> <span class="font-medium">Đăng xuất</span> </a>
             </nav>
             <div class="p-4 mt-auto">

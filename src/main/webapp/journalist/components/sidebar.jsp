@@ -88,7 +88,7 @@
                class="text-slate-400 hover:text-primary transition-colors" title="Cài đặt">
                 <span class="material-symbols-outlined text-xl">settings</span>
             </a>
-            <a href="${pageContext.request.contextPath}/auth/logout.jsp"
+            <a href="${pageContext.request.contextPath}/logout"
                class="text-slate-400 hover:text-red-500 transition-colors ml-1" title="Đăng xuất">
                 <span class="material-symbols-outlined text-xl">logout</span>
             </a>

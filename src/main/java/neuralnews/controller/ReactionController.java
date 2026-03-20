@@ -71,6 +71,22 @@ public class ReactionController extends HttpServlet {
             Article art = dao.getArticleById(articleId); 
 
             if (art != null) {
+                // Tạo thông báo nếu lượt tương tác là LIKE (và người like không phải tác giả)
+                if ("LIKE".equals(newStatus) && art.getAuthorId() != currentUser.getId()) {
+                    String userNameStr = (String) session.getAttribute("userName");
+                    if (userNameStr == null) userNameStr = "Độc giả";
+
+                    neuralnews.model.Notification noti = new neuralnews.model.Notification();
+                    noti.setUserId(art.getAuthorId());
+                    noti.setTitle("Lượt Thích Mới");
+                    noti.setContent(userNameStr + " vừa nhấn Thích bài viết '" + art.getTitle() + "'.");
+                    noti.setType("LIKE");
+                    noti.setUrl("/user/article?id=" + articleId);
+                    
+                    neuralnews.dao.NotificationDao notiDao = new neuralnews.dao.NotificationDao();
+                    notiDao.create(noti);
+                }
+
                 String json = String.format(
                     "{\"status\":\"%s\", \"newLikes\":%d, \"newDislikes\":%d}",
                     newStatus,

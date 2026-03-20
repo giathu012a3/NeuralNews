@@ -25,24 +25,8 @@
                             Trang / Bảng điều khiển</p>
                         <h2 class="text-2xl font-bold text-slate-800 dark:text-white">Bảng điều khiển hệ thống</h2>
                     </div>
-                    <div
-                        class="flex items-center gap-4 bg-white dark:bg-slate-800 p-2 rounded-full shadow-sm border border-slate-100 dark:border-slate-700">
-                        <div class="relative flex items-center ml-2">
-                            <span class="material-icons absolute left-3 text-slate-400 text-[18px]">search</span>
-                            <input
-                                class="pl-10 pr-4 py-2 bg-[#F4F7FE] dark:bg-slate-900 border-none rounded-full text-sm focus:ring-2 focus:ring-primary w-48 lg:w-64 transition-all"
-                                placeholder="Tìm kiếm..." type="text" />
-                        </div>
-                        <button class="p-2 text-slate-500 hover:text-primary transition-colors">
-                            <span class="material-icons">notifications</span>
-                        </button>
-                        <button class="p-2 text-slate-500 hover:text-primary transition-colors">
-                            <span class="material-icons">settings</span>
-                        </button>
-                        <div class="h-8 w-8 rounded-full overflow-hidden bg-primary/20 border-2 border-primary/20">
-                            <img class="w-full h-full object-cover" data-alt="Admin user profile avatar"
-                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuC4v1Xj-x5c0-BNWvuQMWrNKnYpUqHJu2FzBC2ANgMo6855wzRgUZD-tyPVU_iWy9HANXuBFUBSMxHPeds14WCinCTTRCtzwz4MqbtS_WsSwg5Gy0dENGvERGxaw9BORVzow9HavpimbV7bIQ6_ZH8VevoPeGWPT5YBZAurWMoIevRvkLkGWt1gp_7QPG9XNSgbrNUujAcFewuJkhw1rocmmASWGj67hq21d4jI11-j3ZZxxaxhgSjEO9Fx64PNgntutDDQHHdl5Ubo" />
-                        </div>
+                    <div class="flex items-center gap-4">
+                        <jsp:include page="components/header_profile.jsp" />
                     </div>
                 </header>
                 <div class="p-8 space-y-8">

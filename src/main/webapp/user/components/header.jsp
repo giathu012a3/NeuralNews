@@ -23,7 +23,7 @@
     }
 %>
 
-<header class="sticky top-0 z-50 w-full border-b border-border-light dark:border-border-dark bg-white/95 dark:bg-background-dark/95 backdrop-blur-md">
+<header class="sticky top-0 z-[10000] w-full border-b border-border-light dark:border-border-dark bg-white/95 dark:bg-background-dark/95 backdrop-blur-md">
     <div class="max-w-[1440px] mx-auto px-4 lg:px-8 h-16 flex items-center justify-between gap-4">
         <a class="flex items-center gap-2 group" href="${pageContext.request.contextPath}/home">
             <div class="flex items-center justify-center size-9 rounded bg-primary text-white group-hover:bg-primary-dark transition-colors">
@@ -64,14 +64,14 @@
                 </button>
                 
                 <!-- Notification Dropdown -->
-                <div class="relative group dropdown-container" tabindex="0">
-                    <button class="relative p-1.5 text-slate-500 hover:bg-slate-100 dark:hover:bg-surface-dark rounded-full transition-colors">
+                <div class="relative" id="notifWrapper">
+                    <button type="button" onclick="toggleNotifPanel(event)" class="relative p-1.5 text-slate-500 hover:bg-slate-100 dark:hover:bg-surface-dark rounded-full transition-colors focus:outline-none">
                         <span class="material-symbols-outlined text-[22px]">notifications</span>
                         <c:if test="${unreadCount > 0}">
                             <span id="notifDot" class="absolute top-1 right-1 size-2 bg-red-500 rounded-full border border-white dark:border-background-dark"></span>
                         </c:if>
                     </button>
-                    <div id="notifPanel" class="hidden group-focus-within:block absolute right-0 top-full mt-2 w-80 bg-white dark:bg-surface-dark border border-slate-200 dark:border-border-dark rounded-xl shadow-xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                    <div id="notifPanel" class="hidden absolute right-0 top-full mt-2 w-80 bg-white dark:bg-surface-dark border border-slate-200 dark:border-border-dark rounded-xl shadow-xl z-[10001] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
                         <div class="p-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/30">
                             <div class="flex items-center gap-2">
                                 <h3 class="text-sm font-bold text-slate-900 dark:text-white">Thông báo</h3>
@@ -90,10 +90,8 @@
                                 <c:otherwise>
                                     <c:forEach var="n" items="${notifs}">
                                         <div class="notif-item ${not n.read ? 'unread' : ''} p-4 hover:bg-slate-50 dark:hover:bg-slate-800/40 cursor-pointer transition-colors flex items-start gap-4 border-l-2 ${not n.read ? 'border-primary' : 'border-transparent'}" 
-                                             data-id="${n.id}" onclick="markRead(this)">
-                                            <div class="size-10 rounded-full ${n.bgColor} flex items-center justify-center shrink-0">
-                                                <span class="material-symbols-outlined text-[18px]">${n.iconClass}</span>
-                                            </div>
+                                             data-id="${n.id}" data-url="${n.url}" onclick="markRead(this)">
+
                                             <div class="flex-1 min-w-0">
                                                 <p class="text-sm font-bold text-slate-900 dark:text-white">${n.title}</p>
                                                 <p class="text-[11px] text-slate-500 mt-1 line-clamp-2">${n.content}</p>
@@ -169,7 +167,7 @@
                                 </div>
                                 <div class="border-t border-slate-100 dark:border-slate-700 py-2">
                                     <a class="flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
-                                        href="${pageContext.request.contextPath}/auth/logout.jsp">
+                                        href="${pageContext.request.contextPath}/logout">
                                         <span class="material-symbols-outlined text-xl">logout</span>
                                         Đăng xuất
                                     </a>

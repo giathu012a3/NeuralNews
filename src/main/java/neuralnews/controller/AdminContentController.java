@@ -184,8 +184,11 @@ public class AdminContentController extends HttpServlet {
                 try {
                     int count = 0;
                     for (String idStr : ids) {
-                        if (dao.updateArticleStatus(Long.parseLong(idStr), "PUBLISHED", reviewerId))
+                        long aid = Long.parseLong(idStr);
+                        if (dao.updateArticleStatus(aid, "PUBLISHED", reviewerId)) {
+                            sendNotification(aid, "PUBLISHED", null);
                             count++;
+                        }
                     }
                     success = true;
                     message = "Đã duyệt thành công " + count + " bài viết";
@@ -224,15 +227,18 @@ public class AdminContentController extends HttpServlet {
                 switch (action) {
                     case "approve":
                         success = dao.updateArticleStatus(articleId, "PUBLISHED", reviewerId);
+                        if (success) sendNotification(articleId, "PUBLISHED", null);
                         message = success ? "Phê duyệt bài viết thành công" : "Không thể phê duyệt bài viết";
                         break;
                     case "reject":
                         success = dao.updateArticleStatus(articleId, "REJECTED", reviewerId);
+                        if (success) sendNotification(articleId, "REJECTED", null);
                         message = success ? "Đã từ chối bài viết" : "Thao tác thất bại";
                         break;
                     case "reject_with_reason":
                         String reason = request.getParameter("reason");
                         success = dao.updateArticleStatus(articleId, "REJECTED", reviewerId);
+                        if (success) sendNotification(articleId, "REJECTED", reason);
                         message = success
                                 ? "Đã từ chối. Lý do: " + (reason != null ? reason.replace("\"", "'") : "")
                                 : "Thao tác thất bại";
@@ -269,5 +275,35 @@ public class AdminContentController extends HttpServlet {
         PrintWriter out = response.getWriter();
         out.print("{\"success\": " + success + ", \"message\": \"" + message.replace("\"", "'") + "\"}");
         out.flush();
+    }
+
+    private void sendNotification(long articleId, String status, String reason) {
+        try {
+            neuralnews.model.Article art = dao.getArticleById(articleId);
+            if (art != null) {
+                neuralnews.model.Notification noti = new neuralnews.model.Notification();
+                noti.setUserId(art.getAuthorId());
+                if ("PUBLISHED".equals(status)) {
+                    noti.setTitle("Bài Viết Đã Được Duyệt");
+                    noti.setContent("Xin chúc mừng! Bài viết '" + art.getTitle() + "' đã được phê duyệt và xuất bản lên trang chủ.");
+                    noti.setType("ARTICLE");
+                    noti.setUrl("/user/article?id=" + art.getId());
+                } else if ("REJECTED".equals(status)) {
+                    noti.setTitle("Bài Viết Bị Từ Chối");
+                    String content = "Rất tiếc! Bài biên tập '" + art.getTitle() + "' của bạn không đạt yêu cầu.";
+                    if (reason != null && !reason.trim().isEmpty()) {
+                        content += " Lý do: " + reason;
+                    }
+                    noti.setContent(content);
+                    noti.setType("ARTICLE");
+                    noti.setUrl("/journalist/create-article?id=" + art.getId());
+                } else {
+                    return;
+                }
+                new neuralnews.dao.NotificationDao().create(noti);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
