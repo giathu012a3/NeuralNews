@@ -13,6 +13,8 @@ public class Comment {
     private String statusDotClass;
     private Timestamp createdAt;
     private String formattedTime;
+    private int likesCount;
+    private boolean likedByUser;
 
     // User info
     private long userId;
@@ -72,8 +74,15 @@ public class Comment {
     public String getArticleTitle() { return articleTitle; }
     public void setArticleTitle(String articleTitle) { this.articleTitle = articleTitle; }
 
-    public Long getParentId() { return parentId; }
+    public Long getParentId() { return parentId; };
     public void setParentId(Long parentId) { this.parentId = parentId; }
+    
+    public int getLikesCount() { return likesCount; }
+    public void setLikesCount(int likesCount) { this.likesCount = likesCount; }
+    
+    public boolean isLikedByUser() { return likedByUser; }
+
+    public void setLikedByUser(boolean likedByUser) { this.likedByUser = likedByUser; }
 
     public List<Comment> getReplies() { return replies; }
     public void setReplies(List<Comment> replies) { this.replies = replies; }

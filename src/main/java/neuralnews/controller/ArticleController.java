@@ -10,8 +10,10 @@ import java.io.IOException;
 import java.util.List;
 import neuralnews.dao.ArticleDao;
 import neuralnews.dao.CategoryDao;
+import neuralnews.dao.CommentDao;
 import neuralnews.model.Article;
 import neuralnews.model.Category;
+import neuralnews.model.Comment;
 import neuralnews.model.User;
 
 @WebServlet("/user/article")
@@ -24,34 +26,45 @@ public class ArticleController extends HttpServlet {
             try {
                 long articleId = Long.parseLong(idParam);
                 ArticleDao artDao = new ArticleDao();
+                CategoryDao catDao = new CategoryDao();
+                CommentDao cmtDao = new CommentDao(); 
                 
-                // 1. Lấy thông tin bài viết
+                // 1. Kiểm tra User đang đăng nhập (Lấy ID để check trạng thái Like cmt)
+                HttpSession session = request.getSession();
+                User user = (User) session.getAttribute("currentUser");
+                long currentUserId = (user != null) ? user.getId() : 0;
+                
+                // 2. Lấy thông tin bài viết chi tiết
                 Article article = artDao.getArticleById(articleId);
                 request.setAttribute("articleDetail", article);
 
-                // 2. LẤY TRẠNG THÁI LIKE/DISLIKE (Phần quan trọng nhất)
-                HttpSession session = request.getSession();
-                User user = (User) session.getAttribute("currentUser");
+                // 3. Lấy danh sách bình luận (TRUYỀN THÊM currentUserId VÀO ĐÂY)
+                // Hàm này trong CommentDao của Thịnh giờ phải nhận 2 tham số nhé
+                List<Comment> listComments = cmtDao.getCommentsByArticle(articleId, currentUserId);
+
+                System.out.println(">>> Article ID: " + articleId);
+                System.out.println(">>> So luong cmt tim thay: " + listComments.size());
                 
+                request.setAttribute("listComments", listComments); 
+                request.setAttribute("commentCount", listComments.size()); 
+                
+                // 4. Kiểm tra trạng thái tương tác của User với BÀI VIẾT (Like/Dislike)
                 String userReaction = "NONE";
                 if (user != null) {
-                    // Gọi hàm kiểm tra từ DB
                     userReaction = artDao.getUserReaction(user.getId(), articleId);
                 }
-                // Gửi "màu sắc" sang cho JSP
                 request.setAttribute("userReaction", userReaction);
 
-                // 3. Lấy danh sách danh mục (cho menu hoặc sidebar)
-                CategoryDao catDao = new CategoryDao();
+                // 5. Lấy danh sách danh mục để hiện trên menu/sidebar
                 List<Category> listCat = catDao.getAllCategory();
                 request.setAttribute("listCategory", listCat);
 
             } catch (NumberFormatException ignored) {
-                // Nếu ID không phải là số, có thể redirect về trang chủ
+                response.sendRedirect(request.getContextPath() + "/home");
+                return;
             }
         }
         
-        // CHỈ GỌI FORWARD MỘT LẦN DUY NHẤT Ở CUỐI CÙNG
         request.getRequestDispatcher("/user/article.jsp").forward(request, response);
     }
 }
