@@ -71,10 +71,13 @@
                             </div>
                         </div>
                         <div class="flex items-center gap-3">
-                            <button
-                                class="flex items-center gap-2 px-4 py-2 rounded-full border border-slate-200 dark:border-slate-700 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-                                <span class="material-symbols-outlined text-xl">bookmark</span>
-                                Lưu
+                            <button id="btnBookmark" onclick="toggleBookmark()"
+                                class="flex items-center gap-2 px-4 py-2 rounded-full border border-slate-200 dark:border-slate-700 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors ${isBookmarked ? 'text-primary border-primary bg-primary/5' : ''}">
+                                <span class="material-symbols-outlined text-xl ${isBookmarked ? 'fill-icon' : ''}">bookmark</span>
+                                <span id="bookmarkText">${isBookmarked ? 'Đã lưu' : 'Lưu'}</span>
+                            </button>
+                            <button onclick="openReportModal()" class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 hover:text-red-500 transition-colors" title="Báo cáo vi phạm">
+                                <span class="material-symbols-outlined text-xl">report</span>
                             </button>
                             <button class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800">
                                 <span class="material-symbols-outlined text-xl">share</span>
@@ -82,7 +85,7 @@
                         </div>
                     </div>
                     <div class="my-8">
-                        <button
+                        <button id="btnAiSummary" onclick="generateAiSummary()"
                             class="w-full flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-surface-dark border border-slate-200 dark:border-slate-700 hover:border-primary/50 transition-all group">
                             <div class="flex items-center gap-3">
                                 <div
@@ -91,32 +94,13 @@
                                 </div>
                                 <span class="font-bold text-slate-900 dark:text-white">Tạo Tóm tắt AI</span>
                             </div>
-                            <span
-                                class="material-symbols-outlined text-slate-400 group-hover:text-primary">expand_more</span>
+                            <span class="material-symbols-outlined text-slate-400 group-hover:text-primary">expand_more</span>
                         </button>
-                        <div class="mt-4 p-6 bg-blue-50/50 dark:bg-primary/5 rounded-xl border border-primary/10">
-                            <h4 class="text-xs font-bold text-primary uppercase tracking-widest mb-4">Nổi bật nhanh</h4>
-                            <ul class="space-y-3">
-                                <li class="flex items-start gap-3 text-slate-700 dark:text-slate-300 text-sm">
-                                    <span class="size-1.5 rounded-full bg-primary shrink-0 mt-1.5"></span>
-                                    Các mô hình AI dựa trên trung tâm xử lý dữ liệu mới thể hiện độ chính xác chưa từng
-                                    có trong việc dự đoán các thay đổi thời tiết khắc nghiệt.
-                                </li>
-                                <li class="flex items-start gap-3 text-slate-700 dark:text-slate-300 text-sm">
-                                    <span class="size-1.5 rounded-full bg-primary shrink-0 mt-1.5"></span>
-                                    Hệ thống sử dụng bộ dữ liệu khí tượng toàn cầu trải dài hơn 40 năm lịch sử khí hậu.
-                                </li>
-                                <li class="flex items-start gap-3 text-slate-700 dark:text-slate-300 text-sm">
-                                    <span class="size-1.5 rounded-full bg-primary shrink-0 mt-1.5"></span>
-                                    Tích hợp với cơ sở hạ tầng hiện tại có thể tiết kiệm hàng tỷ đô la chi phí chuẩn bị
-                                    phòng chống thiên tai hàng năm.
-                                </li>
-                                <li class="flex items-start gap-3 text-slate-700 dark:text-slate-300 text-sm">
-                                    <span class="size-1.5 rounded-full bg-primary shrink-0 mt-1.5"></span>
-                                    Kết quả được bình duyệt cho thấy AI vượt trội hơn các mô hình siêu máy tính truyền
-                                    thống 15%.
-                                </li>
-                            </ul>
+                        <div id="aiSummaryContent" class="hidden mt-4 p-6 bg-blue-50/50 dark:bg-primary/5 rounded-xl border border-primary/10">
+                            <h4 class="text-xs font-bold text-primary uppercase tracking-widest mb-4">Nổi bật nhanh (AI Tạo)</h4>
+                            <div id="aiSummaryBody" class="text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+                                Đang chuẩn bị tóm tắt...
+                            </div>
                         </div>
                     </div>
                     
@@ -222,52 +206,40 @@
 
             <jsp:include page="components/footer.jsp" />
 
-            <div class="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-4">
-                <div id="aiAssistantPanel"
-                    class="hidden w-80 bg-white dark:bg-surface-dark border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300">
-                    <div class="p-4 bg-primary text-white flex items-center justify-between">
-                        <div class="flex items-center gap-2">
-                            <span class="material-symbols-outlined text-xl">smart_toy</span>
-                            <span class="font-bold text-sm">Trợ lý NexusAI</span>
-                        </div>
-                        <button id="closeAiPanel" class="text-white/80 hover:text-white transition-colors">
-                            <span class="material-symbols-outlined text-sm">close</span>
+            </div>
+
+            <!-- Report Modal -->
+            <div id="reportModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4">
+                <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closeReportModal()"></div>
+                <div class="relative w-full max-w-md bg-white dark:bg-surface-dark rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in duration-200">
+                    <div class="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                        <h3 class="text-xl font-bold text-slate-900 dark:text-white">Báo cáo bài viết</h3>
+                        <button onclick="closeReportModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                            <span class="material-symbols-outlined">close</span>
                         </button>
                     </div>
-                    <div class="p-4 h-64 overflow-y-auto space-y-4">
-                        <div
-                            class="bg-slate-100 dark:bg-slate-800 p-3 rounded-lg text-xs text-slate-700 dark:text-slate-300">
-                            Xin chào! Tôi đã đọc bài viết này. Tôi có thể giúp gì cho bạn hôm nay?
+                    <form id="reportForm" onsubmit="submitReport(event)" class="p-6 space-y-4">
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Lý do báo cáo</label>
+                            <select name="reason" required class="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-sm">
+                                <option value="">Chọn một lý do...</option>
+                                <option value="Nội dung sai sự thật">Nội dung sai sự thật</option>
+                                <option value="Ngôn từ thù ghét">Ngôn từ thù ghét</option>
+                                <option value="Vi phạm bản quyền">Vi phạm bản quyền</option>
+                                <option value="Nội dung nhạy cảm">Nội dung nhạy cảm</option>
+                                <option value="Khác">Lý do khác</option>
+                            </select>
                         </div>
-                        <div class="flex flex-col gap-2">
-                            <button
-                                class="text-left p-2 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-[11px] hover:bg-primary/10 transition-colors text-slate-600 dark:text-slate-400">
-                                "Giải thích thêm về mô hình thời tiết AI"
-                            </button>
-                            <button
-                                class="text-left p-2 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-[11px] hover:bg-primary/10 transition-colors text-slate-600 dark:text-slate-400">
-                                "Tóm tắt phần kỹ thuật"
-                            </button>
-                            <button
-                                class="text-left p-2 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-[11px] hover:bg-primary/10 transition-colors text-slate-600 dark:text-slate-400">
-                                "Dữ liệu này đã được bình duyệt chưa?"
-                            </button>
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Chi tiết (Tùy chọn)</label>
+                            <textarea name="details" rows="4" class="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-sm" placeholder="Mô tả thêm về vi phạm..."></textarea>
                         </div>
-                    </div>
-                    <div class="p-3 border-t border-slate-100 dark:border-slate-800">
-                        <div class="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 rounded-lg px-3 py-2">
-                            <input
-                                class="bg-transparent border-none text-xs focus:ring-0 flex-1 text-slate-900 dark:text-white"
-                                placeholder="Hỏi AI..." type="text" />
-                            <button class="text-primary"><span
-                                    class="material-symbols-outlined text-sm">send</span></button>
+                        <div class="flex gap-3 pt-2">
+                            <button type="button" onclick="closeReportModal()" class="flex-1 px-4 py-2 rounded-full border border-slate-200 dark:border-slate-700 text-sm font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">Hủy</button>
+                            <button type="submit" class="flex-1 px-4 py-2 bg-red-500 text-white text-sm font-bold rounded-full hover:bg-red-600 transition-colors">Gửi báo cáo</button>
                         </div>
-                    </div>
+                    </form>
                 </div>
-                <button id="toggleAiPanel"
-                    class="size-14 rounded-full bg-primary text-white shadow-xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all ring-4 ring-white dark:ring-background-dark">
-                    <span class="material-symbols-outlined text-3xl">smart_toy</span>
-                </button>
             </div>
         </div>
 
@@ -375,6 +347,121 @@
 			        
 			        console.log("Cập nhật UI xong - Trạng thái hiện tại:", status);
 			    }
+
+                // 3. Toggles
+                function toggleBookmark() {
+                    const articleId = "${not empty art ? art.id : ''}";
+                    if (!articleId) return;
+
+                    const params = new URLSearchParams();
+                    params.append('articleId', articleId);
+                    params.append('action', 'bookmark');
+
+                    fetch('${pageContext.request.contextPath}/handle-reaction', {
+                        method: 'POST',
+                        body: params
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.status === 'UNAUTHORIZED') {
+                            alert("Bạn cần đăng nhập để lưu bài viết.");
+                            return;
+                        }
+                        if (data.status === 'SUCCESS') {
+                            const btn = document.getElementById('btnBookmark');
+                            const text = document.getElementById('bookmarkText');
+                            const icon = btn.querySelector('.material-symbols-outlined');
+                            
+                            if (data.isBookmarked) {
+                                btn.classList.add('text-primary', 'border-primary', 'bg-primary/5');
+                                icon.classList.add('fill-icon');
+                                text.innerText = 'Đã lưu';
+                            } else {
+                                btn.classList.remove('text-primary', 'border-primary', 'bg-primary/5');
+                                icon.classList.remove('fill-icon');
+                                text.innerText = 'Lưu';
+                            }
+                        }
+                    });
+                }
+
+                function openReportModal() {
+                    document.getElementById('reportModal').classList.remove('hidden');
+                }
+                function closeReportModal() {
+                    document.getElementById('reportModal').classList.add('hidden');
+                }
+                function submitReport(e) {
+                    e.preventDefault();
+                    const articleId = "${not empty art ? art.id : ''}";
+                    const formData = new FormData(e.target);
+                    
+                    const params = new URLSearchParams();
+                    params.append('articleId', articleId);
+                    params.append('action', 'report');
+                    params.append('reason', formData.get('reason'));
+                    params.append('details', formData.get('details'));
+
+                    fetch('${pageContext.request.contextPath}/handle-reaction', {
+                        method: 'POST',
+                        body: params
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.status === 'UNAUTHORIZED') {
+                            alert("Bạn cần đăng nhập để báo cáo.");
+                            return;
+                        }
+                        if (data.status === 'SUCCESS') {
+                            alert("Cảm ơn bạn đã báo cáo. Chúng tôi sẽ xem xét sớm nhất có thể.");
+                            closeReportModal();
+                        } else {
+                            alert("Có lỗi xảy ra, vui lòng thử lại sau.");
+                        }
+                    });
+                }
+
+                function generateAiSummary() {
+                    const articleId = "${not empty art ? art.id : ''}";
+                    const container = document.getElementById('aiSummaryContent');
+                    const body = document.getElementById('aiSummaryBody');
+                    const btn = document.getElementById('btnAiSummary');
+                    
+                    if (!articleId) return;
+
+                    // Hiện container và thông báo đang tải
+                    container.classList.remove('hidden');
+                    body.innerHTML = `
+                        <div class="flex flex-col gap-2">
+                            <div class="h-4 bg-slate-200 dark:bg-slate-700 rounded animate-pulse w-3/4"></div>
+                            <div class="h-4 bg-slate-200 dark:bg-slate-700 rounded animate-pulse w-full"></div>
+                            <div class="h-4 bg-slate-200 dark:bg-slate-700 rounded animate-pulse w-5/6"></div>
+                        </div>
+                    `;
+                    
+                    // Vô hiệu hóa nút trong khi chờ
+                    btn.disabled = true;
+                    btn.style.opacity = '0.5';
+
+                    fetch('${pageContext.request.contextPath}/ai-summary?articleId=' + articleId)
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.error) {
+                            body.innerHTML = '<span class="text-red-500">' + data.error + '</span>';
+                        } else {
+                            // Convert newline/br to better list format
+                            const formatted = data.summary.replace(/- /g, '<br/>• ').replace(/^<br\/>/, '');
+                            body.innerHTML = formatted;
+                        }
+                    })
+                    .catch(err => {
+                        body.innerHTML = '<span class="text-red-500">Không thể kết nối với dịch vụ AI.</span>';
+                    })
+                    .finally(() => {
+                        btn.disabled = false;
+                        btn.style.opacity = '1';
+                    });
+                }
         </script>
     </body>
 

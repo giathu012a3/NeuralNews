@@ -763,22 +763,48 @@ public class ArticleDao {
 
     public boolean addBookmark(long userId, long articleId) {
         String sql = "INSERT INTO interactions (user_id, article_id, type) VALUES (?, ?, 'BOOKMARK')";
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setLong(1, userId);
-            ps.setLong(2, articleId);
-            return ps.executeUpdate() > 0;
+        String updatePop = "UPDATE articles SET popularity_score = popularity_score + 10 WHERE id = ?";
+        try (Connection conn = DBConnection.getConnection()) {
+            conn.setAutoCommit(false);
+            try (PreparedStatement ps1 = conn.prepareStatement(sql);
+                 PreparedStatement ps2 = conn.prepareStatement(updatePop)) {
+                ps1.setLong(1, userId);
+                ps1.setLong(2, articleId);
+                int r1 = ps1.executeUpdate();
+                
+                ps2.setLong(1, articleId);
+                ps2.executeUpdate();
+                
+                conn.commit();
+                return r1 > 0;
+            } catch (Exception e) {
+                conn.rollback();
+                e.printStackTrace();
+            }
         } catch (Exception e) { e.printStackTrace(); }
         return false;
     }
 
     public boolean removeBookmark(long userId, long articleId) {
         String sql = "DELETE FROM interactions WHERE user_id = ? AND article_id = ? AND type = 'BOOKMARK'";
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setLong(1, userId);
-            ps.setLong(2, articleId);
-            return ps.executeUpdate() > 0;
+        String updatePop = "UPDATE articles SET popularity_score = popularity_score - 10 WHERE id = ?";
+        try (Connection conn = DBConnection.getConnection()) {
+            conn.setAutoCommit(false);
+            try (PreparedStatement ps1 = conn.prepareStatement(sql);
+                 PreparedStatement ps2 = conn.prepareStatement(updatePop)) {
+                ps1.setLong(1, userId);
+                ps1.setLong(2, articleId);
+                int r1 = ps1.executeUpdate();
+                
+                ps2.setLong(1, articleId);
+                ps2.executeUpdate();
+                
+                conn.commit();
+                return r1 > 0;
+            } catch (Exception e) {
+                conn.rollback();
+                e.printStackTrace();
+            }
         } catch (Exception e) { e.printStackTrace(); }
         return false;
     }

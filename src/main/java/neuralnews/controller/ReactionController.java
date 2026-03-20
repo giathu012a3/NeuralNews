@@ -58,14 +58,30 @@ public class ReactionController extends HttpServlet {
         try {
             String type = request.getParameter("type"); 
 
-            if (artIdParam == null || artIdParam.trim().isEmpty() || type == null) {
+            if (artIdParam == null || artIdParam.trim().isEmpty() || action == null && type == null) {
                 out.print("{\"status\":\"INVALID_DATA\"}");
                 return;
             }
 
             long articleId = Long.parseLong(artIdParam);
             
-            // Xử lý logic trong bảng interactions
+            if ("bookmark".equals(action)) {
+                boolean success = dao.toggleBookmark(currentUser.getId(), articleId);
+                boolean isNowBookmarked = dao.isBookmarked(currentUser.getId(), articleId);
+                out.print("{\"status\":\"SUCCESS\", \"isBookmarked\":" + isNowBookmarked + "}");
+                return;
+            }
+            
+            if ("report".equals(action)) {
+                String reason = request.getParameter("reason");
+                String details = request.getParameter("details");
+                neuralnews.dao.ReportDao reportDao = new neuralnews.dao.ReportDao();
+                boolean success = reportDao.createReport("ARTICLE", articleId, currentUser.getId(), reason, details, "");
+                out.print("{\"status\":\"" + (success ? "SUCCESS" : "FAILED") + "\"}");
+                return;
+            }
+            
+            // Xử lý logic trong bảng interactions (LIKE/DISLIKE)
             String newStatus = dao.handleReaction(currentUser.getId(), articleId, type);
             
             Article art = dao.getArticleById(articleId); 
