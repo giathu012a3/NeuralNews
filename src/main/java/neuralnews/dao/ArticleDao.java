@@ -6,6 +6,8 @@ import neuralnews.util.DBConnection;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.LinkedHashMap;
 
 public class ArticleDao {
 
@@ -812,6 +814,25 @@ public class ArticleDao {
             sql.append(" AND DATE(a.created_at) <= ?");
             params.add(dateTo.trim());
         }
+    }
+
+    public java.util.Map<String, Integer> getDailyTraffic(int days) {
+        java.util.Map<String, Integer> stats = new java.util.LinkedHashMap<>();
+        String sql = "SELECT DATE(created_at) as date, COUNT(*) as count " +
+                     "FROM interactions " +
+                     "WHERE type = 'VIEW' " +
+                     "AND created_at >= DATE_SUB(CURDATE(), INTERVAL ? DAY) " +
+                     "GROUP BY DATE(created_at) " +
+                     "ORDER BY date ASC";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, days);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                stats.put(rs.getString("date"), rs.getInt("count"));
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return stats;
     }
 
     // ── Map ResultSet → Article ──────────────────────────────────────────

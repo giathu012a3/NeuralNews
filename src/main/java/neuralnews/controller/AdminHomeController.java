@@ -34,8 +34,10 @@ public class AdminHomeController extends HttpServlet {
         
         // 2. Thống kê người dùng
         int totalUsers = userDao.getTotalUserCount();
+        int journalistApplications = userDao.getTotalUserCount(null, "JOURNALIST", "PENDING");
         request.setAttribute("totalUsers", totalUsers);
-        
+        request.setAttribute("journalistApplications", journalistApplications);
+
         // 3. Thống kê báo cáo vi phạm
         int pendingViolations = reportDao.countPendingReports();
         request.setAttribute("pendingViolations", pendingViolations);
@@ -44,7 +46,11 @@ public class AdminHomeController extends HttpServlet {
         List<Category> categoryStats = categoryDao.getAllCategoryWithArticleCount();
         request.setAttribute("categoryStats", categoryStats);
 
-        // 5. Lấy 5 bài viết mới nhất cho Dashboard
+        // 5. Thống kê lưu lượng 7 ngày qua
+        java.util.Map<String, Integer> trafficStats = articleDao.getDailyTraffic(7);
+        request.setAttribute("trafficStats", trafficStats);
+
+        // 6. Lấy 5 bài viết mới nhất cho Dashboard
         List<Article> recentArticles = articleDao.getAllArticlesFiltered(5, 0, null, null, null);
         request.setAttribute("recentArticles", recentArticles);
 

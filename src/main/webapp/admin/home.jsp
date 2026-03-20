@@ -82,7 +82,7 @@
                             </div>
                             <div>
                                 <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Yêu cầu Nhà báo</p>
-                                <h3 class="text-2xl font-bold text-slate-800 dark:text-white">${pendingArticles}</h3>
+                                <h3 class="text-2xl font-bold text-slate-800 dark:text-white">${journalistApplications}</h3>
                             </div>
                         </div>
                         <!-- Card 4 -->
@@ -101,42 +101,10 @@
                     </div>
                     <!-- Row 2: Traffic and AI Insights -->
                     <div class="grid grid-cols-1 lg:grid-cols-10 gap-6">
-                        <!-- Traffic Chart Mockup -->
                         <div
-                            class="lg:col-span-7 bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-slate-50 dark:border-slate-700">
-                            <div class="flex items-center justify-between mb-8">
+                            class="lg:col-span-6 bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-slate-50 dark:border-slate-700">
+                            <div class="flex items-center justify-between mb-6">
                                 <div>
-                                    <h3 class="text-lg font-bold text-slate-800 dark:text-white">Tổng quan Lưu lượng 24h
-                                    </h3>
-                                    <p class="text-sm text-slate-500 dark:text-slate-400">So sánh giữa Hôm nay và Hôm
-                                        qua</p>
-                                </div>
-                                <div class="flex gap-2">
-                                    <span
-                                        class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary">Hôm
-                                        nay</span>
-                                    <span
-                                        class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-700 text-slate-500">Hôm
-                                        qua</span>
-                                </div>
-                            </div>
-                            <!-- Simple SVG Chart Representation -->
-                            <div class="h-64 w-full relative">
-                                <svg class="w-full h-full" preserveaspectratio="none" viewbox="0 0 1000 200">
-                                    <defs>
-                                        <lineargradient id="chartGradient" x1="0" x2="0" y1="0" y2="1">
-                                            <stop offset="0%" stop-color="#0d7ff2" stop-opacity="0.2"></stop>
-                                            <stop offset="100%" stop-color="#0d7ff2" stop-opacity="0"></stop>
-                                        </lineargradient>
-                                    </defs>
-                                    <path
-                                        d="M0,150 Q100,120 200,160 T400,100 T600,140 T800,80 T1000,110 L1000,200 L0,200 Z"
-                                        fill="url(#chartGradient)"></path>
-                                    <path d="M0,150 Q100,120 200,160 T400,100 T600,140 T800,80 T1000,110" fill="none"
-                                        stroke="#0d7ff2" stroke-width="3"></path>
-                                </svg>
-                                <!-- Grid lines mockup -->
-                                <div
                                     class="absolute inset-0 flex flex-col justify-between pointer-events-none border-b border-slate-100 dark:border-slate-700 pb-2">
                                     <div class="border-t border-slate-100 dark:border-slate-700/50 w-full"></div>
                                     <div class="border-t border-slate-100 dark:border-slate-700/50 w-full"></div>
@@ -171,40 +139,73 @@
                     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
                     <script>
                         document.addEventListener("DOMContentLoaded", function() {
-                            const ctx = document.getElementById('categoryChart').getContext('2d');
+                            // 1. Category Chart
+                            const catCtx = document.getElementById('categoryChart').getContext('2d');
                             const categories = [
                                 <c:forEach var="cat" items="${categoryStats}" varStatus="loop">
                                     '${cat.name}'${!loop.last ? ',' : ''}
                                 </c:forEach>
                             ];
-                            const counts = [
+                            const catCounts = [
                                 <c:forEach var="cat" items="${categoryStats}" varStatus="loop">
                                     ${cat.articleCount}${!loop.last ? ',' : ''}
                                 </c:forEach>
                             ];
 
-                            new Chart(ctx, {
+                            new Chart(catCtx, {
                                 type: 'doughnut',
                                 data: {
                                     labels: categories,
                                     datasets: [{
-                                        data: counts,
-                                        backgroundColor: [
-                                            '#0d7ff2', '#00e396', '#feb019', '#ff4560', 
-                                            '#775dd0', '#546e7a', '#26a69a', '#d10ce8'
-                                        ],
+                                        data: catCounts,
+                                        backgroundColor: ['#0d7ff2', '#00e396', '#feb019', '#ff4560', '#775dd0'],
                                         borderWidth: 0
                                     }]
                                 },
                                 options: {
                                     responsive: true,
                                     maintainAspectRatio: false,
-                                    plugins: {
-                                        legend: {
-                                            display: false
-                                        }
-                                    },
-                                    cutout: '70%'
+                                    plugins: { legend: { display: false } },
+                                    cutout: '75%'
+                                }
+                            });
+
+                            // 2. Traffic Chart
+                            const trafficCtx = document.getElementById('trafficChart').getContext('2d');
+                            const trafficDates = [
+                                <c:forEach var="entry" items="${trafficStats}" varStatus="loop">
+                                    '${entry.key}'${!loop.last ? ',' : ''}
+                                </c:forEach>
+                            ];
+                            const trafficCounts = [
+                                <c:forEach var="entry" items="${trafficStats}" varStatus="loop">
+                                    ${entry.value}${!loop.last ? ',' : ''}
+                                </c:forEach>
+                            ];
+
+                            new Chart(trafficCtx, {
+                                type: 'line',
+                                data: {
+                                    labels: trafficDates,
+                                    datasets: [{
+                                        label: 'Lượt xem',
+                                        data: trafficCounts,
+                                        borderColor: '#0d7ff2',
+                                        backgroundColor: 'rgba(13, 127, 242, 0.1)',
+                                        fill: true,
+                                        tension: 0.4,
+                                        pointRadius: 4,
+                                        pointBackgroundColor: '#0d7ff2'
+                                    }]
+                                },
+                                options: {
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    plugins: { legend: { display: false } },
+                                    scales: {
+                                        y: { beginAtZero: true, grid: { display: false } },
+                                        x: { grid: { display: false } }
+                                    }
                                 }
                             });
                         });
