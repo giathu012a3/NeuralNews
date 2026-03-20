@@ -1,4 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
     <!DOCTYPE html>
     <html lang="en">
 
@@ -56,7 +57,7 @@
                             <div>
                                 <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Người dùng đang hoạt
                                     động</p>
-                                <h3 class="text-2xl font-bold text-slate-800 dark:text-white">12,842</h3>
+                                <h3 class="text-2xl font-bold text-slate-800 dark:text-white">${totalUsers}</h3>
                             </div>
                         </div>
                         <!-- Card 2 -->
@@ -69,7 +70,7 @@
                             <div>
                                 <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Bài viết mới hôm nay
                                 </p>
-                                <h3 class="text-2xl font-bold text-slate-800 dark:text-white">1,452</h3>
+                                <h3 class="text-2xl font-bold text-slate-800 dark:text-white">${totalArticles}</h3>
                             </div>
                         </div>
                         <!-- Card 3 -->
@@ -81,7 +82,7 @@
                             </div>
                             <div>
                                 <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Yêu cầu Nhà báo</p>
-                                <h3 class="text-2xl font-bold text-slate-800 dark:text-white">84</h3>
+                                <h3 class="text-2xl font-bold text-slate-800 dark:text-white">${pendingArticles}</h3>
                             </div>
                         </div>
                         <!-- Card 4 -->
@@ -94,7 +95,7 @@
                             <div>
                                 <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Vi phạm đang chờ xử lý
                                 </p>
-                                <h3 class="text-2xl font-bold text-slate-800 dark:text-white">12</h3>
+                                <h3 class="text-2xl font-bold text-slate-800 dark:text-white">${pendingViolations}</h3>
                             </div>
                         </div>
                     </div>
@@ -210,148 +211,65 @@
                         class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-50 dark:border-slate-700 overflow-hidden">
                         <div
                             class="p-6 border-b border-slate-50 dark:border-slate-700 flex items-center justify-between">
-                            <h3 class="text-lg font-bold text-slate-800 dark:text-white">Thao tác Nhanh: Vi phạm Hàng
-                                đầu</h3>
-                            <button class="text-primary text-sm font-semibold hover:underline">Xem tất cả Vi
-                                phạm</button>
+                            <h3 class="text-lg font-bold text-slate-800 dark:text-white">Bài viết mới cập nhật</h3>
+                            <a href="${pageContext.request.contextPath}/admin/content" class="text-primary text-sm font-semibold hover:underline">Xem tất cả</a>
                         </div>
                         <div class="overflow-x-auto">
                             <table class="w-full text-left">
                                 <thead class="bg-slate-50 dark:bg-slate-700/50">
                                     <tr>
                                         <th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">
-                                            Chủ đề</th>
+                                            Bài viết</th>
                                         <th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">
-                                            Lý do</th>
+                                            Danh mục</th>
                                         <th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">
-                                            Mức độ nghiêm trọng</th>
-                                        <th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">
-                                            Dấu thời gian</th>
-                                        <th
-                                            class="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider text-right">
+                                            Trạng thái</th>
+                                        <th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider text-right">
                                             Hành động</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-slate-50 dark:divide-slate-700">
+                                    <c:forEach var="art" items="${recentArticles}">
                                     <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-700/30 transition-colors">
                                         <td class="px-6 py-4">
                                             <div class="flex items-center gap-3">
-                                                <div
-                                                    class="w-8 h-8 rounded bg-slate-200 dark:bg-slate-700 flex-shrink-0">
-                                                    <img class="w-full h-full object-cover rounded"
-                                                        data-alt="User avatar thumbnail"
-                                                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuAIMiwkUSgzeJwQjnImgm-EtQUStgnx77XaVyk6IYHPqOp0dm7MArK8Jw7O-5W5Y19FcGoIA35dJr6Z0kgbTzlrkQL26UKyUpgHTZNnj8dl2ETxJ_1kcN7J2W0NIK_hu7G22AQDyN34HN0IMEwJyd7WQmpyztp_lt1fqhP6ffdVebb8WfanKR-hDbqiPh-zJtUObWkzP5AtG5DrFUGvU00pu70F-Dtofq_yRSlVbueBpI-6AXsHeMEf3vGQwmO1-ERURjqhpCusHl6e" />
+                                                <div class="w-10 h-10 rounded bg-slate-200 dark:bg-slate-700 flex-shrink-0">
+                                                    <img class="w-full h-full object-cover rounded" src="${art.imageUrl}" onerror="this.src='https://placehold.co/100x100?text=News'" />
                                                 </div>
-                                                <div>
-                                                    <p class="text-sm font-semibold text-slate-800 dark:text-white">
-                                                        Marcus
-                                                        Thorne</p>
-                                                    <p class="text-[10px] text-slate-500">ID: #USR-8821</p>
+                                                <div class="max-w-xs xl:max-w-md">
+                                                    <p class="text-sm font-semibold text-slate-800 dark:text-white truncate">${art.title}</p>
+                                                    <p class="text-[10px] text-slate-500">ID: #${art.id}</p>
                                                 </div>
                                             </div>
                                         </td>
                                         <td class="px-6 py-4">
-                                            <p class="text-sm text-slate-600 dark:text-slate-300">Lan truyền thông tin
-                                                sai lệch
-                                            </p>
+                                            <span class="text-xs font-medium px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                                                ${art.categoryName}
+                                            </span>
                                         </td>
                                         <td class="px-6 py-4">
-                                            <span
-                                                class="px-2 py-1 text-[10px] font-bold rounded-full bg-red-100 text-red-600">NGHIÊM
-                                                TRỌNG</span>
+                                            <c:choose>
+                                                <c:when test="${art.status == 'PUBLISHED'}">
+                                                    <span class="px-2 py-1 text-[10px] font-bold rounded-full bg-green-100 text-green-600">ĐÃ ĐĂNG</span>
+                                                </c:when>
+                                                <c:when test="${art.status == 'PENDING'}">
+                                                    <span class="px-2 py-1 text-[10px] font-bold rounded-full bg-amber-100 text-amber-600">CHỜ DUYỆT</span>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <span class="px-2 py-1 text-[10px] font-bold rounded-full bg-slate-100 text-slate-600">${art.status}</span>
+                                                </c:otherwise>
+                                            </c:choose>
                                         </td>
-                                        <td class="px-6 py-4 text-sm text-slate-500">2 phút trước</td>
                                         <td class="px-6 py-4 text-right">
                                             <div class="flex justify-end gap-2">
-                                                <button
-                                                    class="p-2 bg-primary/10 text-primary hover:bg-primary hover:text-white rounded-lg transition-all">
-                                                    <span class="material-icons text-[18px]">visibility</span>
-                                                </button>
-                                                <button
-                                                    class="p-2 bg-slate-100 dark:bg-slate-700 text-slate-400 hover:text-red-500 rounded-lg transition-all">
-                                                    <span class="material-icons text-[18px]">delete</span>
-                                                </button>
+                                                <a href="${pageContext.request.contextPath}/admin/content?action=edit&id=${art.id}"
+                                                     class="p-2 bg-primary/10 text-primary hover:bg-primary hover:text-white rounded-lg transition-all">
+                                                    <span class="material-icons text-[18px]">edit</span>
+                                                </a>
                                             </div>
                                         </td>
                                     </tr>
-                                    <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-700/30 transition-colors">
-                                        <td class="px-6 py-4">
-                                            <div class="flex items-center gap-3">
-                                                <div
-                                                    class="w-8 h-8 rounded bg-slate-200 dark:bg-slate-700 flex-shrink-0">
-                                                    <img class="w-full h-full object-cover rounded"
-                                                        data-alt="Journalist avatar thumbnail"
-                                                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuC55r-FPmuWNCA53-kd_rt_KLAl5nu4DaqBh0RTF-cYgZxEV2NQeHrabEkBjRzvbBM1edkuSUHwGCS1yceEeNznZZOq85sva-ol4CGokb4XcEx53GR-20x9tDzWWnWePKd5R6HzkUDzU05zc61reG6O6XMxAy7XAZRvYwgDwl-aEnI8DhDUkThHah3waU1liIDvUr2VmJAZhG4HAlgUO7WdaHRn1LjPLYBdd6LMy_dI-6NG2r2FJHbW_vUttZg4hiMUiM68JCyPGg4u" />
-                                                </div>
-                                                <div>
-                                                    <p class="text-sm font-semibold text-slate-800 dark:text-white">
-                                                        Elena
-                                                        Rodriguez</p>
-                                                    <p class="text-[10px] text-slate-500">ID: #JRN-4412</p>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td class="px-6 py-4">
-                                            <p class="text-sm text-slate-600 dark:text-slate-300">Sử dụng nguồn chưa
-                                                được xác minh
-                                            </p>
-                                        </td>
-                                        <td class="px-6 py-4">
-                                            <span
-                                                class="px-2 py-1 text-[10px] font-bold rounded-full bg-amber-100 text-amber-600">TRUNG
-                                                BÌNH</span>
-                                        </td>
-                                        <td class="px-6 py-4 text-sm text-slate-500">14 phút trước</td>
-                                        <td class="px-6 py-4 text-right">
-                                            <div class="flex justify-end gap-2">
-                                                <button
-                                                    class="p-2 bg-primary/10 text-primary hover:bg-primary hover:text-white rounded-lg transition-all">
-                                                    <span class="material-icons text-[18px]">visibility</span>
-                                                </button>
-                                                <button
-                                                    class="p-2 bg-slate-100 dark:bg-slate-700 text-slate-400 hover:text-red-500 rounded-lg transition-all">
-                                                    <span class="material-icons text-[18px]">delete</span>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-700/30 transition-colors">
-                                        <td class="px-6 py-4">
-                                            <div class="flex items-center gap-3">
-                                                <div
-                                                    class="w-8 h-8 rounded bg-slate-200 dark:bg-slate-700 flex-shrink-0">
-                                                    <img class="w-full h-full object-cover rounded"
-                                                        data-alt="User avatar thumbnail"
-                                                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuBg4Auvl_Av2vlLpUiIuU3DAXdNhP_qBaw7mwI2I4nI_-NFZUJMq4w3hVdfWxAFlYA_9gaEwZsI5r2of9VhHiEz6RHtPWn28CQZgtD4itnzML9OjDPTmOJ8XZw_bEwlfkE_JSyBheBbWO4Rhz8Ewqb9bYtxhMAwn9oK4_qQVL38z3ZoA3nHB5WoQqnRoMv942YqihVPWPdlre7IFRxV9wHOu2ljEl9aukMNBomaGNewCmMDiMIOy-GrqBDAUEmqd3iSXpVdF3hfP5lz" />
-                                                </div>
-                                                <div>
-                                                    <p class="text-sm font-semibold text-slate-800 dark:text-white">Sam
-                                                        Wilson</p>
-                                                    <p class="text-[10px] text-slate-500">ID: #USR-9901</p>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td class="px-6 py-4">
-                                            <p class="text-sm text-slate-600 dark:text-slate-300">Cờ quấy rối</p>
-                                        </td>
-                                        <td class="px-6 py-4">
-                                            <span
-                                                class="px-2 py-1 text-[10px] font-bold rounded-full bg-red-100 text-red-600">CAO</span>
-                                        </td>
-                                        <td class="px-6 py-4 text-sm text-slate-500">42 phút trước</td>
-                                        <td class="px-6 py-4 text-right">
-                                            <div class="flex justify-end gap-2">
-                                                <button
-                                                    class="p-2 bg-primary/10 text-primary hover:bg-primary hover:text-white rounded-lg transition-all">
-                                                    <span class="material-icons text-[18px]">visibility</span>
-                                                </button>
-                                                <button
-                                                    class="p-2 bg-slate-100 dark:bg-slate-700 text-slate-400 hover:text-red-500 rounded-lg transition-all">
-                                                    <span class="material-icons text-[18px]">delete</span>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
+                                    </c:forEach>
                                 </tbody>
                             </table>
                         </div>

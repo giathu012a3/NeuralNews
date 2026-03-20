@@ -176,6 +176,10 @@ public class UserDAO {
         return list;
     }
 
+    public int getTotalUserCount() {
+        return getTotalUserCount(null, null, null);
+    }
+
     public int getTotalUserCount(String keyword, String role, String status) {
         StringBuilder sql = new StringBuilder(
                 "SELECT COUNT(*) FROM users u "

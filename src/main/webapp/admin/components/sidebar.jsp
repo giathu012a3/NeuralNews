@@ -8,7 +8,7 @@
             </div>
             <nav class="flex-1 mt-6 px-4 space-y-2"> <a
                     class="${param.activePage == 'dashboard' ? 'sidebar-active' : 'text-slate-400 hover:text-white hover:bg-slate-800'} flex items-center gap-3 px-4 py-3 rounded-lg transition-all"
-                    href="${pageContext.request.contextPath}/admin/home.jsp"> <span
+                    href="${pageContext.request.contextPath}/admin/home"> <span
                         class="material-icons text-[20px]">dashboard</span> <span class="font-medium">Bảng điều
                         khiển</span> </a> <a href="${pageContext.request.contextPath}/admin/users"
                     class="${param.activePage == 'users' ? 'sidebar-active' : 'text-slate-400 hover:text-white hover:bg-slate-800'} flex items-center gap-3 px-4 py-3 rounded-lg transition-all">

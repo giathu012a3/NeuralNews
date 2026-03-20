@@ -14,6 +14,18 @@ import neuralnews.util.DBConnection;
 
 public class ReportDao {
 
+    public int countPendingReports() {
+        String sql = "SELECT COUNT(*) FROM reports WHERE status = 'PENDING'";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) return rs.getInt(1);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
     public List<Report> getAllReports(String targetType, String statusFilter) {
         List<Report> reports = new ArrayList<>();
         String sql = "SELECT " +
