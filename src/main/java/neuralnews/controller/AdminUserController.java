@@ -59,6 +59,7 @@ public class AdminUserController extends HttpServlet {
             response.setContentType("text/csv; charset=UTF-8");
             response.setHeader("Content-Disposition", "attachment; filename=\"users_export.csv\"");
             PrintWriter pw = response.getWriter();
+            pw.write('\ufeff'); // Thêm BOM để Excel nhận diện được UTF-8
             pw.println("ID,Họ và tên,Email,Vai trò,Trạng thái,Ngày tham gia");
             List<User> all = userDao.getAllUsersFiltered(keyword, role, status, sortBy, sortDir, Integer.MAX_VALUE, 0);
             for (User u : all) {

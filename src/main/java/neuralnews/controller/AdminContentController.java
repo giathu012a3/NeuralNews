@@ -111,6 +111,7 @@ public class AdminContentController extends HttpServlet {
             response.setContentType("text/csv; charset=UTF-8");
             response.setHeader("Content-Disposition", "attachment; filename=\"articles.csv\"");
             PrintWriter pw = response.getWriter();
+            pw.write('\ufeff'); // Thêm BOM để các ứng dụng như Excel hiển thị đúng tiếng Việt
             pw.println("ID,Tiêu đề,Tác giả,Danh mục,Trạng thái,Lượt xem,Ngày tạo");
             for (Article a : dao.getAllArticlesFiltered(Integer.MAX_VALUE, 0, keyword, status, categoryId, authorName,
                     sortBy, sortDir)) {
