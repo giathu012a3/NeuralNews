@@ -13,10 +13,7 @@
                         khiển</span> </a> <a href="${pageContext.request.contextPath}/admin/users"
                     class="${param.activePage == 'users' ? 'sidebar-active' : 'text-slate-400 hover:text-white hover:bg-slate-800'} flex items-center gap-3 px-4 py-3 rounded-lg transition-all">
                     <span class="material-icons text-[20px]">people</span> <span class="font-medium">Quản lý Người
-                        dùng</span> </a> <a href="${pageContext.request.contextPath}/admin/permissions.jsp"
-                    class="${param.activePage == 'permissions' ? 'sidebar-active' : 'text-slate-400 hover:text-white hover:bg-slate-800'} flex items-center gap-3 px-4 py-3 rounded-lg transition-all">
-                    <span class="material-icons text-[20px]">verified_user</span> <span class="font-medium">Quyền
-                        hạn</span> </a> <a
+                        dùng</span> </a> <a
                     class="${param.activePage == 'content' ? 'sidebar-active' : 'text-slate-400 hover:text-white hover:bg-slate-800'} flex items-center gap-3 px-4 py-3 rounded-lg transition-all"
                     href="${pageContext.request.contextPath}/admin/content"> <span
                         class="material-icons text-[20px]">article</span> <span class="font-medium">Quản lý Nội
@@ -28,13 +25,10 @@
                     class="${param.activePage == 'violation' ? 'sidebar-active' : 'text-slate-400 hover:text-white hover:bg-slate-800'} flex items-center gap-3 px-4 py-3 rounded-lg transition-all"
                     href="${pageContext.request.contextPath}/admin/violation"> <span
                         class="material-icons text-[20px]">gavel</span> <span class="font-medium">Xử lý Vi phạm</span>
-                </a> <a
-                    class="${param.activePage == 'layout' ? 'sidebar-active' : 'text-slate-400 hover:text-white hover:bg-slate-800'} flex items-center gap-3 px-4 py-3 rounded-lg transition-all"
-                    href="${pageContext.request.contextPath}/admin/layout.jsp"> <span
-                        class="material-icons text-[20px]">palette</span> <span class="font-medium">Tùy chỉnh Giao
-                        diện</span> </a> <a
+                </a>                <a
                     class="${param.activePage == 'ai' ? 'sidebar-active' : 'text-slate-400 hover:text-white hover:bg-slate-800'} flex items-center gap-3 px-4 py-3 rounded-lg transition-all"
-                    href="#"> <span class="material-icons text-[20px]">psychology</span> <span class="font-medium">Cấu
+                    href="${pageContext.request.contextPath}/admin/ai-settings"> <span
+                        class="material-icons text-[20px]">psychology</span> <span class="font-medium">Cấu
                         hình AI</span> </a> <a
                     class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 transition-all text-slate-400 hover:text-white"
                     href="${pageContext.request.contextPath}/logout"> <span
