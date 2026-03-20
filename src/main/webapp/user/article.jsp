@@ -306,47 +306,9 @@
             
 //---------------------------------------------------------------------------------------------------------------------------
             
-            // Lấy categoryId từ object articleDetail mà Controller của bạn đã nạp
-			    const catId = "${not empty art ? art.categoryId : 0}";
-			    let scoredTime = false;
-			    let scoredScroll = false;
-			
-			    // 1. Cộng 1 điểm ngay khi vừa mở bài báo
-			    sendInteraction(1);
-			
-			    // 2. Sau 20 giây ở lại trang, cộng 3 điểm
-			    setTimeout(() => {
-			        if (!scoredTime) {
-			            sendInteraction(3);
-			            scoredTime = true;
-			        }
-			    }, 20000);
-			
-			    // 3. Lướt xuống gần cuối trang (còn 200px nữa là hết), cộng 5 điểm
-			    window.addEventListener('scroll', function() {
-    // Logic cộng điểm khi đọc hết bài
-    if (!scoredScroll && (window.innerHeight + window.scrollY) >= document.body.offsetHeight - 200) {
-        sendInteraction(5);
-        scoredScroll = true;
-    }
-});
-			
-			    function sendInteraction(points) {
-			        const params = new URLSearchParams();
-			        params.append('categoryId', catId);
-			        params.append('score', points);
-
-			        // Dùng EL ${pageContext.request.contextPath} để chắc chắn đường dẫn luôn đúng
-			        fetch('${pageContext.request.contextPath}/update-interest', {
-			            method: 'POST',
-			            body: params
-			        }).then(res => {
-			            if(res.ok) console.log("Đã cộng " + points + " điểm thành công!");
-			        });
-			    }
-			    
 			    setTimeout(() => {
 			        const artId = "${not empty art ? art.id : ''}";
+                    if (!artId) return;
 			        console.log("--- Đã đủ 30 giây! Đang chuẩn bị gửi request tăng view cho ID: " + artId + " ---");
 
 			        const params = new URLSearchParams();
@@ -362,7 +324,7 @@
 			        }).catch(err => {
 			            console.error("--- Lỗi Fetch: ", err);
 			        });
-			    }, 3000);
+			    }, 30000);
 			    
 			    function sendReaction(type) {
 			        // Cách 1: Lấy ID từ đối tượng art (phải đảm bảo art không null)
