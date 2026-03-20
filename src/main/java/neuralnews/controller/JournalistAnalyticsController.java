@@ -70,16 +70,10 @@ public class JournalistAnalyticsController extends HttpServlet {
             double eng = a.getViews() > 0 ? Math.min(100, voteTotal * 100.0 / a.getViews()) : 0;
             a.setEngagementRate(String.format("%.1f%%", eng));
             if (voteTotal == 0) {
-                a.setSentimentBadgeClass("bg-slate-100 text-slate-500 dark:bg-slate-700/50 dark:text-slate-400 ring-slate-500/20");
-                a.setSentimentDotClass("bg-slate-400"); a.setSentimentText("Chưa có vote");
                 a.setTrendIcon("remove"); a.setTrendClass("text-slate-400");
             } else if (likeRatio >= 0.5) {
-                a.setSentimentBadgeClass("bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400 ring-emerald-500/20");
-                a.setSentimentDotClass("bg-emerald-500"); a.setSentimentText("👍 " + likePct + "%");
                 a.setTrendIcon("trending_up"); a.setTrendClass("text-emerald-500");
             } else {
-                a.setSentimentBadgeClass("bg-red-100 text-red-700 dark:bg-red-500/10 dark:text-red-400 ring-red-500/20");
-                a.setSentimentDotClass("bg-red-500"); a.setSentimentText("👎 " + dislikePct + "%");
                 a.setTrendIcon("trending_down"); a.setTrendClass("text-red-500");
             }
         }

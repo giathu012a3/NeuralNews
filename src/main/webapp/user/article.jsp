@@ -47,15 +47,6 @@
                             class="inline-block px-3 py-1 rounded bg-primary/10 text-primary text-[11px] font-bold uppercase tracking-wider">
                             <c:out value="${not empty art.categoryName ? art.categoryName : 'Tin tức'}" />
                         </span>
-                        <c:if test="${not empty art.sentimentLabel}">
-                            <div
-                                class="flex items-center gap-1.5 px-2 py-1 ${not empty art.sentimentBadgeClass ? art.sentimentBadgeClass : 'bg-green-500/10 text-green-500'} rounded text-xs font-medium">
-                                <span class="material-symbols-outlined text-sm">
-                                    <c:out value="${not empty art.trendIcon ? art.trendIcon : 'sentiment_satisfied'}" />
-                                </span>
-                                <span><c:out value="${art.sentimentLabel}" /></span>
-                            </div>
-                        </c:if>
                     </div>
                     <h1
                         class="text-4xl md:text-5xl lg:text-6xl font-black text-slate-900 dark:text-white leading-[1.1] mb-8">
