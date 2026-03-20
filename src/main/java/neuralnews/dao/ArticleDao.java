@@ -220,15 +220,14 @@ public class ArticleDao {
     }
     
     public void incrementViewCount(long articleId, long userId) {
-        String updateSql = "UPDATE articles SET views = views + 1 WHERE id = ?";
         String logSql = "INSERT INTO interactions (user_id, article_id, type) VALUES (?, ?, 'VIEW')";
-
+        
+        // 1. Cập nhật số view tổng và điểm phổ biến (+1)
+        String updateSql = "UPDATE articles SET views = views + 1, popularity_score = popularity_score + 1 WHERE id = ?";
         try (Connection conn = DBConnection.getConnection()) {
             conn.setAutoCommit(false); // Dùng transaction để đảm bảo cả 2 cùng thành công
             
-            // 1. Cập nhật số view tổng và điểm phổ biến (+1)
-            String updateSqlWithPopularity = "UPDATE articles SET views = views + 1, popularity_score = popularity_score + 1 WHERE id = ?";
-            try (PreparedStatement ps1 = conn.prepareStatement(updateSqlWithPopularity)) {
+            try (PreparedStatement ps1 = conn.prepareStatement(updateSql)) {
                 ps1.setLong(1, articleId);
                 ps1.executeUpdate();
             }
@@ -575,7 +574,7 @@ public class ArticleDao {
     }
 
     public boolean updateArticleStatus(long articleId, String status, Long approvedBy) {
-        String sql = "UPDATE articles SET status = ?, approved_by = ? WHERE id = ?";
+        String sql = "UPDATE articles SET status = ?, approved_by = ?, popularity_score = popularity_score + 1 WHERE id = ?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, status);
