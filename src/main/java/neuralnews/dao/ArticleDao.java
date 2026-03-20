@@ -43,6 +43,7 @@ public class ArticleDao {
             SELECT a.*, c.name AS category_name FROM articles a 
             JOIN categories c ON a.category_id = c.id 
             WHERE a.status='PUBLISHED' 
+              AND a.created_at >= (NOW() - INTERVAL 15 DAY)
             ORDER BY a.popularity_score DESC LIMIT ?
         """;
         try (Connection conn = DBConnection.getConnection();
