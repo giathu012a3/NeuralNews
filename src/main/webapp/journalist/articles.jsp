@@ -68,6 +68,28 @@
                 <jsp:param name="pageTitle" value="Quản lý Bài viết" />
             </jsp:include>
 
+            <%-- Notifications (Top-Right) --%>
+            <% if ("true".equals(request.getParameter("submitted"))) { %>
+                <div id="toast-success" class="fixed top-20 right-5 z-[10002] pointer-events-none">
+                    <div class="bg-emerald-500 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 pointer-events-auto animate-in fade-in slide-in-from-top-4 duration-300">
+                        <div>
+                            <p class="font-black tracking-tight text-sm">Gửi thành công!</p>
+                            <p class="text-xs opacity-90">Bài viết của bạn đã được gửi đi và đang chờ duyệt.</p>
+                        </div>
+                    </div>
+                </div>
+            <% } %>
+            <% if (request.getParameter("error") != null) { %>
+                <div id="toast-error" class="fixed top-20 right-5 z-[10002] pointer-events-none">
+                    <div class="bg-red-500 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 pointer-events-auto animate-in fade-in slide-in-from-top-4 duration-300">
+                        <div>
+                            <p class="font-black tracking-tight text-sm">Thất bại!</p>
+                            <p class="text-xs opacity-90">Đã có lỗi xảy ra. Vui lòng thử lại.</p>
+                        </div>
+                    </div>
+                </div>
+            <% } %>
+
             <div class="flex-1 overflow-y-auto">
                 <div class="p-8 max-w-[1200px] mx-auto space-y-6">
 
@@ -398,6 +420,19 @@
             clearTimeout(searchTimer);
             document.getElementById('filterKeywordHidden').value = searchInput.value;
             document.getElementById('filterForm').submit();
+        });
+
+        // Auto-hide toasts
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                const toasts = document.querySelectorAll('#toast-success, #toast-error');
+                toasts.forEach(t => {
+                    t.style.opacity = '0';
+                    t.style.transform = 'translateY(-20px)';
+                    t.style.transition = 'all 0.5s ease-out';
+                    setTimeout(() => t.remove(), 500);
+                });
+            }, 4000);
         });
     </script>
 </body>

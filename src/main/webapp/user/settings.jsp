@@ -20,7 +20,7 @@
             
             <!-- Notifications (Top-Right) -->
             <c:if test="${not empty param.success}">
-                <div id="toast-success" class="fixed top-5 right-5 z-[110] pointer-events-none">
+                <div id="toast-success" class="fixed top-20 right-5 z-[110] pointer-events-none">
                     <div class="bg-emerald-500 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 pointer-events-auto transition-all duration-300">
                         <span class="material-symbols-outlined text-2xl">check_circle</span>
                         <div>
@@ -37,7 +37,7 @@
                 </div>
             </c:if>
             <c:if test="${not empty param.error}">
-                <div id="toast-error" class="fixed top-5 right-5 z-[110] pointer-events-none">
+                <div id="toast-error" class="fixed top-20 right-5 z-[110] pointer-events-none">
                     <div class="bg-red-500 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 pointer-events-auto transition-all duration-300">
                         <span class="material-symbols-outlined text-2xl">error</span>
                         <div>

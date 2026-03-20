@@ -12,7 +12,7 @@
     List<Notification> _notifs = (_uid > 0) ? _notifDao.getNotificationsByUserId(_uid) : new java.util.ArrayList<>();
     int _unreadCount = (_uid > 0) ? _notifDao.getUnreadCount(_uid) : 0;
 %>
-<header class="sticky top-0 z-50 w-full h-16 border-b border-border-light dark:border-border-dark bg-white/95 dark:bg-background-dark/95 backdrop-blur-md transition-all duration-200">
+<header class="sticky top-0 z-[10000] w-full h-16 border-b border-border-light dark:border-border-dark bg-white/95 dark:bg-background-dark/95 backdrop-blur-md transition-all duration-200">
     <div class="max-w-full mx-auto px-8 h-full flex items-center justify-between gap-4">
         <div class="flex items-center gap-6">
             <!-- Back Button -->
@@ -45,15 +45,18 @@
         </div>
 
         <div class="flex items-center gap-3">
+            <!-- Extra Slot for custom buttons -->
+            <div id="headerExtraSlot" class="flex items-center gap-3 mr-2"></div>
+
             <!-- Notifications -->
-            <div class="relative group dropdown-container" id="notifWrapper" tabindex="0">
-                <button class="relative p-1.5 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
+            <div class="relative" id="notifWrapper">
+                <button type="button" onclick="toggleNotifPanel(event)" class="relative p-1.5 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors focus:outline-none">
                     <span class="material-symbols-outlined text-[22px]">notifications</span>
                     <% if (_unreadCount > 0) { %>
                         <span id="notifDot" class="absolute top-1 right-1 size-2 bg-red-500 rounded-full border-2 border-white dark:border-background-dark"></span>
                     <% } %>
                 </button>
-                <div id="notifPanel" class="hidden group-focus-within:block absolute right-0 top-full mt-2 w-80 bg-white dark:bg-slate-900 border border-slate-200 dark:border-border-dark rounded-xl shadow-xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                <div id="notifPanel" class="hidden absolute right-0 top-full mt-2 w-80 bg-white dark:bg-slate-900 border border-slate-200 dark:border-border-dark rounded-xl shadow-xl overflow-hidden z-[10001] animate-in fade-in slide-in-from-top-2 duration-200">
                     <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
                         <div class="flex items-center gap-2">
                             <span class="text-sm font-bold text-slate-900 dark:text-white">Thông báo</span>
@@ -70,10 +73,8 @@
                         <% } else { %>
                             <% for (Notification n : _notifs) { %>
                                 <li class="notif-item <%= !n.isRead()?"unread":"" %> flex items-start gap-3 px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/60 cursor-pointer transition-colors border-l-2 <%= !n.isRead()?"border-primary":"border-transparent" %>" 
-                                    data-id="<%= n.getId() %>" onclick="markRead(this)">
-                                    <div class="size-9 rounded-full <%= n.getBgColor() %> flex items-center justify-center shrink-0 mt-0.5">
-                                        <span class="material-symbols-outlined text-[18px]"><%= n.getIconClass() %></span>
-                                    </div>
+                                    data-id="<%= n.getId() %>" data-url="<%= n.getUrl() %>" onclick="markRead(this)">
+
                                     <div class="flex-1 min-w-0">
                                         <p class="text-xs font-bold text-slate-800 dark:text-white leading-tight"><%= n.getTitle() %></p>
                                         <p class="text-[11px] text-slate-500 mt-1 line-clamp-2"><%= n.getContent() %></p>
@@ -121,7 +122,7 @@
                                 <%= (_u.getRole() != null) ? _u.getRole().getName().toLowerCase() : "nhà báo" %>
                             </p>
                         </div>
-                        <a href="<%= contextPath %>/user/home.jsp" class="flex items-center gap-3 px-4 py-2.5 text-xs font-bold text-slate-600 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                        <a href="<%= contextPath %>/home" class="flex items-center gap-3 px-4 py-2.5 text-xs font-bold text-slate-600 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
                             <span class="material-symbols-outlined text-[18px]">home</span>
                             Về trang chủ
                         </a>
@@ -136,10 +137,7 @@
     </div>
 </header>
 <script>
-    var NOTIF_KEY = 'neural_news_read_notifs';
-    function getReadSet() { try { return JSON.parse(localStorage.getItem(NOTIF_KEY) || '[]'); } catch(e) { return []; } }
-    function saveReadSet(arr) { try { localStorage.setItem(NOTIF_KEY, JSON.stringify(arr)); } catch(e) {} }
-
+    var contextPath = '<%= contextPath %>';
     function updateBadge() {
         var count = document.querySelectorAll('.notif-item.unread').length;
         var dot = document.getElementById('notifDot');
@@ -154,47 +152,82 @@
     }
 
     function markRead(el) {
+        const nurl = el.getAttribute('data-url');
+        let finalUrl = null;
+        if (nurl && nurl !== 'null' && nurl.trim() !== '') {
+            finalUrl = nurl;
+            if (!nurl.startsWith('http')) {
+               finalUrl = contextPath + (nurl.startsWith('/') ? nurl : '/' + nurl);
+            }
+        }
+
         if (el.classList.contains('unread')) {
             el.classList.remove('unread');
             el.style.borderLeftColor = 'transparent';
             el.querySelector('.unread-dot')?.remove();
-            var readIds = getReadSet();
+            
             const nid = el.getAttribute('data-id');
-            if (nid && readIds.indexOf(nid) === -1) {
-                readIds.push(nid);
-                saveReadSet(readIds);
+            if (nid) {
+                fetch(contextPath + '/notification-ajax', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: 'action=markRead&id=' + encodeURIComponent(nid)
+                }).then(() => {
+                    if(finalUrl) window.location.href = finalUrl;
+                }).catch(e => {
+                    console.error(e);
+                    if(finalUrl) window.location.href = finalUrl;
+                });
+            } else {
+                if(finalUrl) window.location.href = finalUrl;
             }
             updateBadge();
+        } else {
+            if(finalUrl) window.location.href = finalUrl;
         }
     }
 
     function markAllRead() {
-        document.querySelectorAll('.notif-item.unread').forEach(markRead);
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-        var readIds = getReadSet();
-        document.querySelectorAll('.notif-item[data-id]').forEach(function(el) {
-            if (readIds.indexOf(el.getAttribute('data-id')) !== -1) {
-                el.classList.remove('unread');
-                el.style.borderLeftColor = 'transparent';
-                el.querySelector('.unread-dot')?.remove();
-            }
+        document.querySelectorAll('.notif-item.unread').forEach(el => {
+            el.classList.remove('unread');
+            el.style.borderLeftColor = 'transparent';
+            el.querySelector('.unread-dot')?.remove();
         });
         updateBadge();
+        
+        fetch(contextPath + '/notification-ajax', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: 'action=markAllRead'
+        }).catch(e => console.error(e));
+    }
+
+    function toggleNotifPanel(e) {
+        if (e) {
+            e.stopPropagation();
+            e.preventDefault();
+        }
+        const panel = document.getElementById('notifPanel');
+        if (panel) {
+            const isHidden = panel.classList.contains('hidden');
+            // Force hide all other dropdowns if any (optional, but good for UX)
+            // For now just toggle this one
+            panel.classList.toggle('hidden');
+        }
+    }
+
+    // Close notifications when clicking outside
+    document.addEventListener('click', (e) => {
+        const panel = document.getElementById('notifPanel');
+        const wrapper = document.getElementById('notifWrapper');
+        if (panel && !panel.classList.contains('hidden')) {
+            if (wrapper && !wrapper.contains(e.target)) {
+                panel.classList.add('hidden');
+            }
+        }
     });
 
-    window.addEventListener('storage', function(e) {
-        if (e.key === NOTIF_KEY) {
-            var readIds = getReadSet();
-            document.querySelectorAll('.notif-item[data-id]').forEach(function(el) {
-                if (readIds.indexOf(el.getAttribute('data-id')) !== -1 && el.classList.contains('unread')) {
-                    el.classList.remove('unread');
-                    el.style.borderLeftColor = 'transparent';
-                    el.querySelector('.unread-dot')?.remove();
-                }
-            });
-            updateBadge();
-        }
+    document.addEventListener('DOMContentLoaded', function() {
+        updateBadge();
     });
 </script>

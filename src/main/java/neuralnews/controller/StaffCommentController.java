@@ -115,7 +115,7 @@ public class StaffCommentController extends HttpServlet {
                     Comment c = dao.getCommentById(commentId);
                     String content = (c != null) ? c.getContent() : "...";
                     reportDao.createReport("COMMENT", commentId, user.getId(), reason, 
-                        "Journalist reported harmful content", "MANUAL_REVIEW", 20, 80, 15, content);
+                        "Journalist reported harmful content", content);
                 }
                 case "hide"    -> dao.updateStatus(commentId, "HIDDEN");
                  case "reply"   -> {
@@ -133,6 +133,8 @@ public class StaffCommentController extends HttpServlet {
         if (page != null && !page.isEmpty())    redirect.append("&page=").append(page);
         if (keyword != null && !keyword.isEmpty()) redirect.append("&keyword=").append(
                 java.net.URLEncoder.encode(keyword, "UTF-8"));
+        
+        redirect.append("&success=true");
 
         response.sendRedirect(redirect.toString());
     }

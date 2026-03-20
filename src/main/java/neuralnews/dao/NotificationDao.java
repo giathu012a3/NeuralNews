@@ -103,7 +103,7 @@ public class NotificationDao {
      * Create notification
      */
     public boolean create(Notification n) {
-        String sql = "INSERT INTO notifications (user_id, title, content, type, is_read, created_at) VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO notifications (user_id, title, content, type, is_read, created_at, url) VALUES (?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setLong(1, n.getUserId());
@@ -112,6 +112,7 @@ public class NotificationDao {
             ps.setString(4, n.getType());
             ps.setBoolean(5, n.isRead());
             ps.setTimestamp(6, n.getCreatedAt() != null ? n.getCreatedAt() : new Timestamp(System.currentTimeMillis()));
+            ps.setString(7, n.getUrl());
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -128,6 +129,7 @@ public class NotificationDao {
         n.setType(rs.getString("type"));
         n.setRead(rs.getBoolean("is_read"));
         n.setCreatedAt(rs.getTimestamp("created_at"));
+        n.setUrl(rs.getString("url"));
         return n;
     }
 }

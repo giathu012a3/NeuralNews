@@ -3,22 +3,6 @@
  * Handles Notifications and AJAX Search
  */
 
-var NOTIF_KEY = 'neural_news_read_notifs';
-
-function getReadSet() { 
-    try { 
-        return JSON.parse(localStorage.getItem(NOTIF_KEY) || '[]'); 
-    } catch(e) { 
-        return []; 
-    } 
-}
-
-function saveReadSet(arr) { 
-    try { 
-        localStorage.setItem(NOTIF_KEY, JSON.stringify(arr)); 
-    } catch(e) {} 
-}
-
 function updateBadge() {
     var count = document.querySelectorAll('.notif-item.unread').length;
     var dot = document.getElementById('notifDot');
@@ -36,51 +20,83 @@ function updateBadge() {
 }
 
 function markRead(el) {
+    const nurl = el.getAttribute('data-url');
+    let finalUrl = null;
+    if (nurl && nurl !== 'null' && nurl.trim() !== '') {
+        finalUrl = nurl;
+        if (!nurl.startsWith('http')) {
+           finalUrl = (window.contextPath || '') + (nurl.startsWith('/') ? nurl : '/' + nurl);
+        }
+    }
+
     if (el.classList.contains('unread')) {
         el.classList.remove('unread');
         el.style.borderLeftColor = 'transparent';
         el.querySelector('.unread-dot')?.remove();
         
-        var readIds = getReadSet();
         const nid = el.getAttribute('data-id');
-        if (nid && readIds.indexOf(nid) === -1) {
-            readIds.push(nid);
-            saveReadSet(readIds);
+        if (nid) {
+            fetch((window.contextPath || '') + '/notification-ajax', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'action=markRead&id=' + encodeURIComponent(nid)
+            }).then(() => {
+                if(finalUrl) window.location.href = finalUrl;
+            }).catch(e => {
+                console.error(e);
+                if(finalUrl) window.location.href = finalUrl;
+            });
+        } else {
+            if(finalUrl) window.location.href = finalUrl;
         }
         updateBadge();
+    } else {
+        if(finalUrl) window.location.href = finalUrl;
     }
 }
 
+function toggleNotifPanel(e) {
+    if (e) {
+        e.stopPropagation();
+        e.preventDefault();
+    }
+    const panel = document.getElementById('notifPanel');
+    if (panel) {
+        panel.classList.toggle('hidden');
+    }
+}
+
+// Close notifications when clicking outside
+document.addEventListener('click', (e) => {
+    const panel = document.getElementById('notifPanel');
+    const wrapper = document.getElementById('notifWrapper');
+    if (panel && !panel.classList.contains('hidden')) {
+        if (wrapper && !wrapper.contains(e.target)) {
+            panel.classList.add('hidden');
+        }
+    }
+});
+
 function markAllRead() {
-    document.querySelectorAll('.notif-item.unread').forEach(markRead);
+    document.querySelectorAll('.notif-item.unread').forEach(el => {
+        el.classList.remove('unread');
+        el.style.borderLeftColor = 'transparent';
+        el.querySelector('.unread-dot')?.remove();
+    });
+    updateBadge();
+    
+    fetch((window.contextPath || '') + '/notification-ajax', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'action=markAllRead'
+    }).catch(e => console.error(e));
 }
 
 // Initializer for Header
 function initHeader(contextPath) {
+    window.contextPath = contextPath;
     // 1. Notifications Logic
-    var readIds = getReadSet();
-    document.querySelectorAll('.notif-item[data-id]').forEach(function(el) {
-        if (readIds.indexOf(el.getAttribute('data-id')) !== -1) {
-            el.classList.remove('unread');
-            el.style.borderLeftColor = 'transparent';
-            el.querySelector('.unread-dot')?.remove();
-        }
-    });
     updateBadge();
-
-    window.addEventListener('storage', function(e) {
-        if (e.key === NOTIF_KEY) {
-            var readIds = getReadSet();
-            document.querySelectorAll('.notif-item[data-id]').forEach(function(el) {
-                if (readIds.indexOf(el.getAttribute('data-id')) !== -1 && el.classList.contains('unread')) {
-                    el.classList.remove('unread');
-                    el.style.borderLeftColor = 'transparent';
-                    el.querySelector('.unread-dot')?.remove();
-                }
-            });
-            updateBadge();
-        }
-    });
 
     // 2. Search AJAX Logic
     const input = document.getElementById('ajaxSearchInput');

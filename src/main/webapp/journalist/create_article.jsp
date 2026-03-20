@@ -1,5 +1,8 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ page import="java.util.List" %>
+<%@ page import="neuralnews.dao.NotificationDao" %>
+<%@ page import="neuralnews.model.Notification" %>
 <%@ page import="neuralnews.model.Article" %>
 <%@ page import="neuralnews.model.User" %>
 <%@ page import="neuralnews.model.Category" %>
@@ -64,10 +67,20 @@
             border: none !important;
             box-shadow: none !important;
         }
+        /* Header action buttons - nằm trong header, bên trái notification */
+        #headerActions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: opacity .3s ease;
+        }
+        body.focus-mode #headerActions {
+            display: none;
+        }
         /* Toolbar cố định trên cùng, full width */
         .tox .tox-editor-header {
             position: fixed !important;
-            top: 96px !important;
+            top: 64px !important;
             left: 288px !important;
             right: 0 !important;
             width: auto !important;
@@ -325,35 +338,20 @@
             <jsp:param name="backUrl" value="${pageContext.request.contextPath}/journalist/articles" />
         </jsp:include>
 
-        <div class="h-10 bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-border-dark flex items-center justify-between px-8 shrink-0 z-20">
-            <div class="flex items-center gap-3">
-                <% if ("true".equals(savedMsg)) { %>
-                    <div class="flex items-center gap-2">
-                        <span class="size-1.5 bg-emerald-500 rounded-full"></span>
-                        <span class="text-[10px] font-bold text-emerald-500 uppercase tracking-widest">Bản nháp đã lưu</span>
-                    </div>
-                <% } else if (errorMsg != null) { %>
-                    <div class="flex items-center gap-2">
-                        <span class="size-1.5 bg-red-500 rounded-full"></span>
-                        <span class="text-[10px] font-bold text-red-400 uppercase tracking-widest">Lỗi: <%= errorMsg %></span>
-                    </div>
-                <% } %>
-            </div>
-            <div class="flex items-center gap-2">
-                <button type="button" onclick="submitForm('draft')"
-                        class="px-3 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-border-dark hover:border-indigo-500/50 text-slate-500 dark:text-slate-400 text-[10px] font-bold rounded transition-all uppercase tracking-widest">
-                    Lưu Bản Nháp
-                </button>
-                <button type="button" onclick="openPreview()"
-                        class="px-3 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-border-dark hover:border-indigo-500/50 text-slate-500 dark:text-slate-400 text-[10px] font-bold rounded transition-all flex items-center gap-1.5 uppercase tracking-widest">
-                    <span class="material-symbols-outlined" style="font-size:13px">visibility</span>
-                    Xem trước
-                </button>
-                <button type="button" onclick="submitForm('submit')"
-                        class="px-4 py-1 bg-primary hover:bg-primary/90 text-white text-[10px] font-bold rounded transition-all uppercase tracking-widest shadow-sm shadow-primary/20">
-                    Gửi để Đánh giá
-                </button>
-            </div>
+        <%-- Action buttons được đặt trong header --%>
+        <div id="headerActions">
+            <button type="button" onclick="submitForm('draft')"
+                    class="px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-border-dark hover:border-indigo-500/50 text-slate-500 dark:text-slate-400 text-[10px] font-bold rounded-md transition-all uppercase tracking-widest">
+                Lưu Nháp
+            </button>
+            <button type="button" onclick="openPreview()"
+                    class="px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-border-dark hover:border-indigo-500/50 text-slate-500 dark:text-slate-400 text-[10px] font-bold rounded-md transition-all flex items-center gap-1 uppercase tracking-widest">
+                Xem trước
+            </button>
+            <button type="button" onclick="submitForm('submit')"
+                    class="px-4 py-1.5 bg-primary hover:bg-primary/90 text-white text-[10px] font-bold rounded-md transition-all uppercase tracking-widest shadow-sm shadow-primary/20">
+                Gửi Đánh giá
+            </button>
         </div>
 
         <%-- Hidden form --%>
@@ -368,7 +366,7 @@
         </form>
 
         <%-- Scroll area — padding-top để tránh toolbar cố định --%>
-        <div class="flex-1 overflow-y-auto editor-container px-8 py-10 lg:px-20 lg:py-12" style="padding-top: 130px;">
+        <div class="flex-1 overflow-y-auto editor-container px-8 py-10 lg:px-20 lg:py-12" style="padding-top: 220px;">
             <div class="max-w-3xl mx-auto space-y-8">
 
                 <%-- Tiêu đề --%>
@@ -517,11 +515,29 @@
 
     // ── Bootstrap ─────────────────────────────────────────────────────────────
     document.addEventListener('DOMContentLoaded', function() {
+        // Di chuyển các nút action vào slot trên header
+        const slot = document.getElementById('headerExtraSlot');
+        const actions = document.getElementById('headerActions');
+        if (slot && actions) {
+            slot.appendChild(actions);
+        }
+
         var iconTheme = document.getElementById('iconTheme');
         // Theme is already applied by head.jsp
         initTinyMCE(document.documentElement.classList.contains('dark'));
         var sum = document.getElementById('summaryInput');
         if (sum) document.getElementById('sumCount').textContent = sum.value.length;
+
+        // Auto-hide toasts
+        setTimeout(() => {
+            const toasts = document.querySelectorAll('#toast-success, #toast-error');
+            toasts.forEach(t => {
+                t.style.opacity = '0';
+                t.style.transform = 'translateY(-20px)';
+                t.style.transition = 'all 0.5s ease-out';
+                setTimeout(() => t.remove(), 500);
+            });
+        }, 4000);
     });
 
     // ── Submit ────────────────────────────────────────────────────────────────
@@ -732,5 +748,27 @@
         document.getElementById('imgPreviewEl').src = '';
     }
 </script>
+
+<%-- Notifications (Top-Right) --%>
+<div id="toast-container" class="fixed top-20 right-5 z-[10002] pointer-events-none space-y-3">
+    <% if ("true".equals(savedMsg)) { %>
+        <div id="toast-success" class="bg-emerald-500 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 pointer-events-auto animate-in fade-in slide-in-from-top-4 duration-300">
+            <span class="material-symbols-outlined text-2xl">check_circle</span>
+            <div>
+                <p class="font-black tracking-tight text-sm">Thành công!</p>
+                <p class="text-xs opacity-90">Bài viết của bạn đã được cập nhật thành công.</p>
+            </div>
+        </div>
+    <% } else if (errorMsg != null) { %>
+        <div id="toast-error" class="bg-red-500 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 pointer-events-auto animate-in fade-in slide-in-from-top-4 duration-300">
+            <span class="material-symbols-outlined text-2xl">error</span>
+            <div>
+                <p class="font-black tracking-tight text-sm">Đã có lỗi xảy ra!</p>
+                <p class="text-xs opacity-90">Không thể thực hiện yêu cầu. Vui lòng thử lại.</p>
+            </div>
+        </div>
+    <% } %>
+</div>
+
 </body>
 </html>

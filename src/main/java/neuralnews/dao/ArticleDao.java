@@ -230,30 +230,38 @@ public class ArticleDao {
     }
     
     public void incrementViewCount(long articleId, long userId) {
-        String logSql = "INSERT INTO interactions (user_id, article_id, type) VALUES (?, ?, 'VIEW')";
-        
-        // 1. Cập nhật số view tổng và điểm phổ biến (+1)
+        // 1. Cập nhật số view tổng và điểm phổ biến (+1) trong bảng articles
         String updateSql = "UPDATE articles SET views = views + 1, popularity_score = popularity_score + 1 WHERE id = ?";
+        
         try (Connection conn = DBConnection.getConnection()) {
-            conn.setAutoCommit(false); // Dùng transaction để đảm bảo cả 2 cùng thành công
+            conn.setAutoCommit(false);
             
             try (PreparedStatement ps1 = conn.prepareStatement(updateSql)) {
                 ps1.setLong(1, articleId);
                 ps1.executeUpdate();
             }
             
-            // 2. Cập nhật lượt xem theo ngày vào bảng tổng hợp daily_traffic (Tối ưu hóa dung lượng)
+            // 2. Cập nhật lượt xem theo ngày vào bảng daily_traffic
             String trafficSql = "INSERT INTO daily_traffic (date, view_count) VALUES (CURDATE(), 1) ON DUPLICATE KEY UPDATE view_count = view_count + 1";
             try (PreparedStatement psTraffic = conn.prepareStatement(trafficSql)) {
                 psTraffic.executeUpdate();
             }
             
             // 3. Ghi nhận nhật ký tương tác chi tiết (chỉ lưu nếu user đã đăng nhập)
+            // SỬA: Xóa lịch sử cũ của bài viết này trước khi ghi nhận mới để tránh bị lặp
             if (userId > 0) {
-                try (PreparedStatement ps2 = conn.prepareStatement(logSql)) {
-                    ps2.setLong(1, userId);
-                    ps2.setLong(2, articleId);
-                    ps2.executeUpdate();
+                String deleteOldViewSql = "DELETE FROM interactions WHERE user_id = ? AND article_id = ? AND type = 'VIEW'";
+                try (PreparedStatement psDel = conn.prepareStatement(deleteOldViewSql)) {
+                    psDel.setLong(1, userId);
+                    psDel.setLong(2, articleId);
+                    psDel.executeUpdate();
+                }
+
+                String insertViewSql = "INSERT INTO interactions (user_id, article_id, type) VALUES (?, ?, 'VIEW')";
+                try (PreparedStatement psIns = conn.prepareStatement(insertViewSql)) {
+                    psIns.setLong(1, userId);
+                    psIns.setLong(2, articleId);
+                    psIns.executeUpdate();
                 }
             }
             

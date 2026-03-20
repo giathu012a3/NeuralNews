@@ -59,7 +59,8 @@ public class StaffArticlecontroller extends HttpServlet {
             redirect.append("status=").append(java.net.URLEncoder.encode(status2, "UTF-8")).append("&");
             redirect.append("category=").append(java.net.URLEncoder.encode(cat, "UTF-8")).append("&");
             redirect.append("dateFrom=").append(java.net.URLEncoder.encode(dfrom, "UTF-8")).append("&");
-            redirect.append("dateTo=").append(java.net.URLEncoder.encode(dto, "UTF-8"));
+            redirect.append("dateTo=").append(java.net.URLEncoder.encode(dto, "UTF-8")).append("&");
+            redirect.append("success=true");
             response.sendRedirect(redirect.toString());
             return;
         }
