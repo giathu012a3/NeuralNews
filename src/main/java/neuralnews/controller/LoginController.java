@@ -47,11 +47,13 @@ public class LoginController extends HttpServlet {
 		}
 
 		// Check account status
-		if ("BANNED".equals(user.getStatus()) || "SUSPENDED".equals(user.getStatus()) || "DELETED".equals(user.getStatus())) {
+		if ("BANNED".equals(user.getStatus()) || "SUSPENDED".equals(user.getStatus())
+				|| "DELETED".equals(user.getStatus())) {
 			response.sendRedirect(contextPath + "/auth/login.jsp?error=banned");
 			return;
 		}
-		// We allow PENDING users to login now, so they can see their application status in profile.
+		// We allow PENDING users to login now, so they can see their application status
+		// in profile.
 
 		// Save user info to session
 		HttpSession session = request.getSession();
@@ -66,7 +68,7 @@ public class LoginController extends HttpServlet {
 		// Redirect by role
 		boolean isAdmin = user.hasRole("ADMIN");
 		if (isAdmin) {
-			response.sendRedirect(contextPath + "/admin/home.jsp");
+			response.sendRedirect(contextPath + "/admin/home");
 		} else {
 			response.sendRedirect(contextPath + "/home");
 		}
@@ -76,6 +78,6 @@ public class LoginController extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		// GET /LoginController -> redirect to login page
-		response.sendRedirect(request.getContextPath() + "/auth/login.jsp");
+		response.sendRedirect(request.getContextPath() + "/auth/login");
 	}
 }

@@ -46,9 +46,19 @@ public class AdminHomeController extends HttpServlet {
         List<Category> categoryStats = categoryDao.getAllCategoryWithArticleCount();
         request.setAttribute("categoryStats", categoryStats);
 
-        // 5. Thống kê lưu lượng 7 ngày qua
-        java.util.Map<String, Integer> trafficStats = articleDao.getDailyTraffic(7);
+        // 5. Thống kê lưu lượng
+        String daysParam = request.getParameter("days");
+        int days = 7; // Mặc định 7 ngày
+        if (daysParam != null && !daysParam.isEmpty()) {
+            try {
+                days = Integer.parseInt(daysParam);
+            } catch (NumberFormatException e) {
+                // Ignore and use default
+            }
+        }
+        java.util.Map<String, Integer> trafficStats = articleDao.getDailyTraffic(days);
         request.setAttribute("trafficStats", trafficStats);
+        request.setAttribute("currentDays", days);
 
         // 6. Lấy 5 bài viết mới nhất cho Dashboard
         List<Article> recentArticles = articleDao.getAllArticlesFiltered(5, 0, null, null, null);

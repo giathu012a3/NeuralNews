@@ -15,14 +15,12 @@ import neuralnews.dao.ArticleDao;
 import neuralnews.dao.CategoryDao;
 import neuralnews.model.Article;
 
-
 @WebServlet("/admin/content")
 public class AdminContentController extends HttpServlet {
     private static final long serialVersionUID = 1L;
     private ArticleDao dao;
     private CategoryDao categoryDao;
     private Gson gson;
-
 
     @Override
     public void init() throws ServletException {
@@ -40,33 +38,45 @@ public class AdminContentController extends HttpServlet {
         request.setCharacterEncoding("UTF-8");
 
         // ── Params lọc ───────────────────────────────────────────────────────
-        String keyword    = request.getParameter("keyword");
-        String status     = request.getParameter("status");
+        String keyword = request.getParameter("keyword");
+        String status = request.getParameter("status");
         String authorName = request.getParameter("authorName");
-        String sortBy     = request.getParameter("sortBy");
-        String sortDir    = request.getParameter("sortDir");
-        String exportCsv  = request.getParameter("export");
+        String sortBy = request.getParameter("sortBy");
+        String sortDir = request.getParameter("sortDir");
+        String exportCsv = request.getParameter("export");
 
         String catIdStr = request.getParameter("categoryId");
         Integer categoryId = null;
         if (catIdStr != null && !catIdStr.isEmpty() && !"ALL".equals(catIdStr)) {
-            try { categoryId = Integer.parseInt(catIdStr); } catch (NumberFormatException e) {}
+            try {
+                categoryId = Integer.parseInt(catIdStr);
+            } catch (NumberFormatException e) {
+            }
         }
-        if ("ALL".equals(status)) status = null;
+        if ("ALL".equals(status))
+            status = null;
 
         // Map sortBy từ UI → column DB
-        if ("date".equals(sortBy))  sortBy = "a.created_at";
-        else if ("views".equals(sortBy)) sortBy = "a.views";
-        else if ("title".equals(sortBy)) sortBy = "a.title";
-        else sortBy = "a.created_at";
+        if ("date".equals(sortBy))
+            sortBy = "a.created_at";
+        else if ("views".equals(sortBy))
+            sortBy = "a.views";
+        else if ("title".equals(sortBy))
+            sortBy = "a.title";
+        else
+            sortBy = "a.created_at";
 
-        if (!"ASC".equalsIgnoreCase(sortDir)) sortDir = "DESC";
+        if (!"ASC".equalsIgnoreCase(sortDir))
+            sortDir = "DESC";
 
         // ── Phân trang ───────────────────────────────────────────────────────
         int pageNum = 1, limit = 10;
         String pageStr = request.getParameter("page");
         if (pageStr != null && !pageStr.isEmpty()) {
-            try { pageNum = Math.max(1, Integer.parseInt(pageStr)); } catch (NumberFormatException e) {}
+            try {
+                pageNum = Math.max(1, Integer.parseInt(pageStr));
+            } catch (NumberFormatException e) {
+            }
         }
         int offset = (pageNum - 1) * limit;
 
@@ -102,15 +112,16 @@ public class AdminContentController extends HttpServlet {
             response.setHeader("Content-Disposition", "attachment; filename=\"articles.csv\"");
             PrintWriter pw = response.getWriter();
             pw.println("ID,Tiêu đề,Tác giả,Danh mục,Trạng thái,Lượt xem,Ngày tạo");
-            for (Article a : dao.getAllArticlesFiltered(Integer.MAX_VALUE, 0, keyword, status, categoryId, authorName, sortBy, sortDir)) {
+            for (Article a : dao.getAllArticlesFiltered(Integer.MAX_VALUE, 0, keyword, status, categoryId, authorName,
+                    sortBy, sortDir)) {
                 pw.printf("\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\"%n",
-                    a.getId(),
-                    esc(a.getTitle()),
-                    esc(a.getAuthorName()),
-                    esc(a.getCategoryName()),
-                    esc(a.getStatus()),
-                    a.getViews(),
-                    a.getCreatedAt() != null ? a.getCreatedAt().toString() : "");
+                        a.getId(),
+                        esc(a.getTitle()),
+                        esc(a.getAuthorName()),
+                        esc(a.getCategoryName()),
+                        esc(a.getStatus()),
+                        a.getViews(),
+                        a.getCreatedAt() != null ? a.getCreatedAt().toString() : "");
             }
             pw.flush();
             return;
@@ -120,11 +131,11 @@ public class AdminContentController extends HttpServlet {
         String requestedWith = request.getHeader("X-Requested-With");
         if (!"XMLHttpRequest".equals(requestedWith)) {
             Map<String, Integer> stats = dao.getArticleStatsByStatus();
-            request.setAttribute("statTotal",     stats.getOrDefault("TOTAL",     0));
-            request.setAttribute("statPending",   stats.getOrDefault("PENDING",   0));
+            request.setAttribute("statTotal", stats.getOrDefault("TOTAL", 0));
+            request.setAttribute("statPending", stats.getOrDefault("PENDING", 0));
             request.setAttribute("statPublished", stats.getOrDefault("PUBLISHED", 0));
-            request.setAttribute("statRejected",  stats.getOrDefault("REJECTED",  0));
-            request.setAttribute("statArchived",  stats.getOrDefault("ARCHIVED",  0));
+            request.setAttribute("statRejected", stats.getOrDefault("REJECTED", 0));
+            request.setAttribute("statArchived", stats.getOrDefault("ARCHIVED", 0));
         }
 
         request.setAttribute("articles", articles);
@@ -134,7 +145,8 @@ public class AdminContentController extends HttpServlet {
         request.setAttribute("limit", limit);
         request.setAttribute("categories", categoryDao.getAllCategory());
 
-        request.setAttribute("currentSortBy",  request.getParameter("sortBy") != null ? request.getParameter("sortBy") : "date");
+        request.setAttribute("currentSortBy",
+                request.getParameter("sortBy") != null ? request.getParameter("sortBy") : "date");
         request.setAttribute("currentSortDir", sortDir);
 
         if ("XMLHttpRequest".equals(requestedWith)) {
@@ -156,7 +168,7 @@ public class AdminContentController extends HttpServlet {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
 
-        String action      = request.getParameter("action");
+        String action = request.getParameter("action");
         String articleIdStr = request.getParameter("articleId");
 
         boolean success = false;
@@ -166,31 +178,45 @@ public class AdminContentController extends HttpServlet {
 
         if ("bulk_approve".equals(action)) {
             String[] ids = request.getParameterValues("articleIds[]");
-            if (ids == null) ids = request.getParameterValues("ids[]");
+            if (ids == null)
+                ids = request.getParameterValues("ids[]");
             if (ids != null && ids.length > 0) {
                 try {
                     int count = 0;
                     for (String idStr : ids) {
-                        if (dao.updateArticleStatus(Long.parseLong(idStr), "PUBLISHED", reviewerId)) count++;
+                        if (dao.updateArticleStatus(Long.parseLong(idStr), "PUBLISHED", reviewerId))
+                            count++;
                     }
                     success = true;
                     message = "Đã duyệt thành công " + count + " bài viết";
-                } catch (Exception e) { e.printStackTrace(); message = "Lỗi khi duyệt hàng loạt"; }
-            } else { message = "Không có bài viết nào được chọn để duyệt."; }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    message = "Lỗi khi duyệt hàng loạt";
+                }
+            } else {
+                message = "Không có bài viết nào được chọn để duyệt.";
+            }
 
         } else if ("bulk_hide".equals(action)) {
             String[] ids = request.getParameterValues("articleIds[]");
-            if (ids == null) ids = request.getParameterValues("ids[]");
+            if (ids == null)
+                ids = request.getParameterValues("ids[]");
             if (ids != null && ids.length > 0) {
                 try {
                     int count = 0;
                     for (String idStr : ids) {
-                        if (dao.updateArticleStatus(Long.parseLong(idStr), "ARCHIVED", reviewerId)) count++;
+                        if (dao.updateArticleStatus(Long.parseLong(idStr), "ARCHIVED", reviewerId))
+                            count++;
                     }
                     success = true;
                     message = "Đã ẩn " + count + " bài viết";
-                } catch (Exception e) { e.printStackTrace(); message = "Lỗi khi ẩn hàng loạt"; }
-            } else { message = "Không có bài viết nào được chọn."; }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    message = "Lỗi khi ẩn hàng loạt";
+                }
+            } else {
+                message = "Không có bài viết nào được chọn.";
+            }
 
         } else if (action != null && articleIdStr != null) {
             try {
@@ -208,8 +234,8 @@ public class AdminContentController extends HttpServlet {
                         String reason = request.getParameter("reason");
                         success = dao.updateArticleStatus(articleId, "REJECTED", reviewerId);
                         message = success
-                            ? "Đã từ chối. Lý do: " + (reason != null ? reason.replace("\"", "'") : "")
-                            : "Thao tác thất bại";
+                                ? "Đã từ chối. Lý do: " + (reason != null ? reason.replace("\"", "'") : "")
+                                : "Thao tác thất bại";
                         break;
                     case "archive":
                         success = dao.updateArticleStatus(articleId, "ARCHIVED", reviewerId);

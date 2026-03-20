@@ -1,0 +1,24 @@
+INSERT INTO neuralnews.articles (title, content, summary, author_id, category_id, status, views, likes_count, dislikes_count, sentiment_label, source_score, popularity_score, published_at, created_at) VALUES 
+('Thế giới AI ngày càng phát triển', 'Nội dung...', 'Tóm tắt...', 3, 5, 'PUBLISHED', 100, 5, 0, 'POSITIVE', 0.9, 0.9, DATE_SUB(NOW(), INTERVAL 11 DAY), DATE_SUB(NOW(), INTERVAL 11 DAY)),
+('Khám phá NeuralNews trong 24h', 'Nội dung...', 'Tóm tắt...', 3, 5, 'PUBLISHED', 150, 10, 1, 'POSITIVE', 0.8, 0.8, DATE_SUB(NOW(), INTERVAL 10 DAY), DATE_SUB(NOW(), INTERVAL 10 DAY)),
+('Tin tức nóng hổi ngày 9', 'Nội dung...', 'Tóm tắt...', 3, 5, 'PUBLISHED', 80, 2, 0, 'NEUTRAL', 0.7, 0.7, DATE_SUB(NOW(), INTERVAL 9 DAY), DATE_SUB(NOW(), INTERVAL 9 DAY)),
+('Bí mật của dữ liệu lớn', 'Nội dung...', 'Tóm tắt...', 3, 5, 'PUBLISHED', 200, 15, 2, 'POSITIVE', 0.9, 0.9, DATE_SUB(NOW(), INTERVAL 9 DAY), DATE_SUB(NOW(), INTERVAL 9 DAY)),
+('Hành trình của một nhà báo', 'Nội dung...', 'Tóm tắt...', 3, 1, 'PUBLISHED', 60, 3, 0, 'NEUTRAL', 0.6, 0.6, DATE_SUB(NOW(), INTERVAL 8 DAY), DATE_SUB(NOW(), INTERVAL 8 DAY)),
+('Công nghệ 4.0 và đời sống', 'Nội dung...', 'Tóm tắt...', 3, 2, 'PUBLISHED', 90, 4, 1, 'POSITIVE', 0.7, 0.7, DATE_SUB(NOW(), INTERVAL 8 DAY), DATE_SUB(NOW(), INTERVAL 8 DAY)),
+('Chương trình thực tế ảo mới', 'Nội dung...', 'Tóm tắt...', 3, 3, 'PUBLISHED', 110, 6, 0, 'POSITIVE', 0.8, 0.8, DATE_SUB(NOW(), INTERVAL 7 DAY), DATE_SUB(NOW(), INTERVAL 7 DAY)),
+('Web Development năm 2026', 'Nội dung...', 'Tóm tắt...', 3, 4, 'PUBLISHED', 300, 25, 3, 'POSITIVE', 0.9, 0.9, DATE_SUB(NOW(), INTERVAL 7 DAY), DATE_SUB(NOW(), INTERVAL 7 DAY)),
+('Thống kê thú vị về người dùng', 'Nội dung...', 'Tóm tắt...', 3, 5, 'PUBLISHED', 45, 1, 0, 'NEUTRAL', 0.5, 0.5, DATE_SUB(NOW(), INTERVAL 6 DAY), DATE_SUB(NOW(), INTERVAL 6 DAY)),
+('Sự lên ngôi của chatbot AI', 'Nội dung...', 'Tóm tắt...', 3, 5, 'PUBLISHED', 180, 12, 1, 'POSITIVE', 0.85, 0.85, DATE_SUB(NOW(), INTERVAL 6 DAY), DATE_SUB(NOW(), INTERVAL 6 DAY)),
+('Tương lai của báo điện tử', 'Nội dung...', 'Tóm tắt...', 3, 1, 'PUBLISHED', 75, 5, 0, 'POSITIVE', 0.7, 0.7, DATE_SUB(NOW(), INTERVAL 5 DAY), DATE_SUB(NOW(), INTERVAL 5 DAY)),
+('An toàn thông tin mạng', 'Nội dung...', 'Tóm tắt...', 3, 2, 'PUBLISHED', 130, 8, 2, 'NEUTRAL', 0.75, 0.75, DATE_SUB(NOW(), INTERVAL 5 DAY), DATE_SUB(NOW(), INTERVAL 5 DAY)),
+('Du lịch ảo lên ngôi', 'Nội dung...', 'Tóm tắt...', 3, 3, 'PUBLISHED', 160, 11, 0, 'POSITIVE', 0.8, 0.8, DATE_SUB(NOW(), INTERVAL 4 DAY), DATE_SUB(NOW(), INTERVAL 4 DAY)),
+('Blockchain không chỉ là tiền ảo', 'Nội dung...', 'Tóm tắt...', 3, 4, 'PUBLISHED', 210, 18, 1, 'POSITIVE', 0.9, 0.9, DATE_SUB(NOW(), INTERVAL 4 DAY), DATE_SUB(NOW(), INTERVAL 4 DAY)),
+('Thiết kế UI/UX hiện đại', 'Nội dung...', 'Tóm tắt...', 3, 5, 'PUBLISHED', 95, 7, 0, 'POSITIVE', 0.7, 0.7, DATE_SUB(NOW(), INTERVAL 3 DAY), DATE_SUB(NOW(), INTERVAL 3 DAY)),
+('Tối ưu hiệu năng ứng dụng Java', 'Nội dung...', 'Tóm tắt...', 3, 5, 'PUBLISHED', 140, 9, 1, 'NEUTRAL', 0.8, 0.8, DATE_SUB(NOW(), INTERVAL 3 DAY), DATE_SUB(NOW(), INTERVAL 3 DAY)),
+('Kỹ nguyên của xe điện', 'Nội dung...', 'Tóm tắt...', 3, 1, 'PUBLISHED', 190, 14, 2, 'POSITIVE', 0.85, 0.85, DATE_SUB(NOW(), INTERVAL 2 DAY), DATE_SUB(NOW(), INTERVAL 2 DAY)),
+('Giáo dục trực tuyến chuyển mình', 'Nội dung...', 'Tóm tắt...', 3, 2, 'PUBLISHED', 125, 6, 0, 'POSITIVE', 0.7, 0.7, DATE_SUB(NOW(), INTERVAL 2 DAY), DATE_SUB(NOW(), INTERVAL 2 DAY)),
+('Thể thao điện tử rực lửa', 'Nội dung...', 'Tóm tắt...', 3, 3, 'PUBLISHED', 250, 20, 3, 'POSITIVE', 0.95, 0.95, DATE_SUB(NOW(), INTERVAL 1 DAY), DATE_SUB(NOW(), INTERVAL 1 DAY)),
+('Góc nhìn chuyên gia về AI', 'Nội dung...', 'Tóm tắt...', 3, 4, 'PUBLISHED', 320, 30, 4, 'POSITIVE', 0.98, 0.98, DATE_SUB(NOW(), INTERVAL 1 DAY), DATE_SUB(NOW(), INTERVAL 1 DAY));
+
+INSERT INTO neuralnews.interactions (user_id, article_id, type, created_at) VALUES 
+(3, 1, 'VIEW', DATE_SUB(NOW(), INTERVAL 10 DAY)), (3, 2, 'VIEW', DATE_SUB(NOW(), INTERVAL 10 DAY)), (3, 3, 'VIEW', DATE_SUB(NOW(), INTERVAL 9 DAY)), (3, 4, 'VIEW', DATE_SUB(NOW(), INTERVAL 9 DAY)), (3, 5, 'VIEW', DATE_SUB(NOW(), INTERVAL 8 DAY)), (3, 1, 'VIEW', DATE_SUB(NOW(), INTERVAL 8 DAY)), (3, 2, 'VIEW', DATE_SUB(NOW(), INTERVAL 7 DAY)), (3, 3, 'VIEW', DATE_SUB(NOW(), INTERVAL 7 DAY)), (3, 4, 'VIEW', DATE_SUB(NOW(), INTERVAL 6 DAY)), (3, 5, 'VIEW', DATE_SUB(NOW(), INTERVAL 6 DAY)), (3, 1, 'VIEW', DATE_SUB(NOW(), INTERVAL 5 DAY)), (3, 2, 'VIEW', DATE_SUB(NOW(), INTERVAL 5 DAY)), (3, 3, 'VIEW', DATE_SUB(NOW(), INTERVAL 4 DAY)), (3, 4, 'VIEW', DATE_SUB(NOW(), INTERVAL 4 DAY)), (3, 5, 'VIEW', DATE_SUB(NOW(), INTERVAL 3 DAY)), (3, 1, 'VIEW', DATE_SUB(NOW(), INTERVAL 3 DAY)), (3, 2, 'VIEW', DATE_SUB(NOW(), INTERVAL 2 DAY)), (3, 3, 'VIEW', DATE_SUB(NOW(), INTERVAL 2 DAY)), (3, 4, 'VIEW', DATE_SUB(NOW(), INTERVAL 1 DAY)), (3, 5, 'VIEW', DATE_SUB(NOW(), INTERVAL 1 DAY)), (3, 1, 'VIEW', NOW());

@@ -106,8 +106,16 @@
                             class="lg:col-span-7 bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-slate-50 dark:border-slate-700">
                             <div class="flex items-center justify-between mb-6">
                                 <div>
-                                    <h3 class="font-bold text-slate-800 dark:text-white">Tổng quan Lưu lượng 7 ngày qua</h3>
-                                    <p class="text-xs text-slate-500">Dựa trên số lượt xem thực tế</p>
+                                    <h3 class="font-bold text-slate-800 dark:text-white">Tổng quan Lưu lượng ${currentDays != null ? currentDays : 7} ngày qua</h3>
+                                    <p class="text-xs text-slate-500">Dựa trên số lượt xem thực tế theo từng ngày</p>
+                                </div>
+                                <div>
+                                    <select onchange="window.location.href='${pageContext.request.contextPath}/admin/home?days=' + this.value"
+                                            class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-sm px-3 py-1.5 focus:ring-primary focus:border-primary outline-none cursor-pointer">
+                                        <option value="7" ${currentDays == 7 ? 'selected' : ''}>7 Ngày</option>
+                                        <option value="30" ${currentDays == 30 ? 'selected' : ''}>30 Ngày</option>
+                                        <option value="365" ${currentDays == 365 ? 'selected' : ''}>1 Năm</option>
+                                    </select>
                                 </div>
                             </div>
                             <div class="h-64 relative">

@@ -225,7 +225,13 @@ public class ArticleDao {
                 ps1.executeUpdate();
             }
             
-            // 2. Ghi nhật ký vào bảng interactions (chỉ ghi nếu user đã đăng nhập)
+            // 2. Cập nhật lượt xem theo ngày vào bảng tổng hợp daily_traffic (Tối ưu hóa dung lượng)
+            String trafficSql = "INSERT INTO daily_traffic (date, view_count) VALUES (CURDATE(), 1) ON DUPLICATE KEY UPDATE view_count = view_count + 1";
+            try (PreparedStatement psTraffic = conn.prepareStatement(trafficSql)) {
+                psTraffic.executeUpdate();
+            }
+            
+            // 3. Ghi nhận nhật ký tương tác chi tiết (chỉ lưu nếu user đã đăng nhập)
             if (userId > 0) {
                 try (PreparedStatement ps2 = conn.prepareStatement(logSql)) {
                     ps2.setLong(1, userId);
@@ -818,15 +824,20 @@ public class ArticleDao {
 
     public java.util.Map<String, Integer> getDailyTraffic(int days) {
         java.util.Map<String, Integer> stats = new java.util.LinkedHashMap<>();
-        String sql = "SELECT DATE(created_at) as date, COUNT(*) as count " +
-                     "FROM interactions " +
-                     "WHERE type = 'VIEW' " +
-                     "AND created_at >= DATE_SUB(CURDATE(), INTERVAL ? DAY) " +
-                     "GROUP BY DATE(created_at) " +
+        
+        // Populate default 0 for all days to ensure no gaps in the chart
+        java.time.LocalDate today = java.time.LocalDate.now();
+        for (int i = days - 1; i >= 0; i--) {
+            stats.put(today.minusDays(i).toString(), 0);
+        }
+
+        String sql = "SELECT date, view_count as count " +
+                     "FROM daily_traffic " +
+                     "WHERE date >= DATE_SUB(CURDATE(), INTERVAL ? DAY) " +
                      "ORDER BY date ASC";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, days);
+            ps.setInt(1, days - 1);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 stats.put(rs.getString("date"), rs.getInt("count"));
