@@ -16,8 +16,6 @@ public class Article {
     private int views;
     private int likesCount;
     private int dislikesCount;
-    private String sentimentLabel;
-    private double sourceScore;
     private double popularityScore;
     private Timestamp publishedAt;
     private Timestamp createdAt;
@@ -32,9 +30,6 @@ public class Article {
     private String reviewerName;
     private String readingTime;
     private String engagementRate;
-    private String sentimentBadgeClass;
-    private String sentimentDotClass;
-    private String sentimentText;
     private String trendIcon;
     private String trendClass;
 
@@ -164,21 +159,6 @@ public class Article {
         this.dislikesCount = dislikesCount;
     }
     
-    public String getSentimentLabel() {
-        return sentimentLabel;
-    }
-
-    public void setSentimentLabel(String sentimentLabel) {
-        this.sentimentLabel = sentimentLabel;
-    }
-
-    public double getSourceScore() {
-        return sourceScore;
-    }
-
-    public void setSourceScore(double sourceScore) {
-        this.sourceScore = sourceScore;
-    }
 
     public double getPopularityScore() {
         return popularityScore;
@@ -271,14 +251,6 @@ public class Article {
     public String getEngagementRate() { return engagementRate; }
     public void setEngagementRate(String engagementRate) { this.engagementRate = engagementRate; }
 
-    public String getSentimentBadgeClass() { return sentimentBadgeClass; }
-    public void setSentimentBadgeClass(String sentimentBadgeClass) { this.sentimentBadgeClass = sentimentBadgeClass; }
-
-    public String getSentimentDotClass() { return sentimentDotClass; }
-    public void setSentimentDotClass(String sentimentDotClass) { this.sentimentDotClass = sentimentDotClass; }
-
-    public String getSentimentText() { return sentimentText; }
-    public void setSentimentText(String sentimentText) { this.sentimentText = sentimentText; }
 
     public String getTrendIcon() { return trendIcon; }
     public void setTrendIcon(String trendIcon) { this.trendIcon = trendIcon; }
