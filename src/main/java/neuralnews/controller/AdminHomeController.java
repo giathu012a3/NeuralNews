@@ -10,7 +10,9 @@ import java.util.List;
 import neuralnews.dao.ArticleDao;
 import neuralnews.dao.UserDAO;
 import neuralnews.dao.ReportDao;
+import neuralnews.dao.CategoryDao;
 import neuralnews.model.Article;
+import neuralnews.model.Category;
 import neuralnews.model.Report;
 
 @WebServlet("/admin/home")
@@ -23,6 +25,7 @@ public class AdminHomeController extends HttpServlet {
         ArticleDao articleDao = new ArticleDao();
         UserDAO userDao = new UserDAO();
         ReportDao reportDao = new ReportDao();
+        CategoryDao categoryDao = new CategoryDao();
 
         // 1. Thống kê bài viết
         java.util.Map<String, Integer> articleStats = articleDao.getArticleStatsByStatus();
@@ -37,7 +40,11 @@ public class AdminHomeController extends HttpServlet {
         int pendingViolations = reportDao.countPendingReports();
         request.setAttribute("pendingViolations", pendingViolations);
 
-        // 4. Lấy 5 bài viết mới nhất cho Dashboard
+        // 4. Thống kê bài viết theo danh mục (cho biểu đồ)
+        List<Category> categoryStats = categoryDao.getAllCategoryWithArticleCount();
+        request.setAttribute("categoryStats", categoryStats);
+
+        // 5. Lấy 5 bài viết mới nhất cho Dashboard
         List<Article> recentArticles = articleDao.getAllArticlesFiltered(5, 0, null, null, null);
         request.setAttribute("recentArticles", recentArticles);
 

@@ -147,64 +147,68 @@
                                 <span>00:00</span><span>04:00</span><span>08:00</span><span>12:00</span><span>16:00</span><span>20:00</span><span>23:59</span>
                             </div>
                         </div>
-                        <!-- AI Smart Insights Widget -->
+                        <!-- Category Distribution Chart -->
                         <div
-                            class="lg:col-span-3 ai-gradient-border rounded-xl shadow-lg p-6 flex flex-col overflow-hidden dark:bg-slate-800">
-                            <div class="flex items-center gap-2 mb-6">
-                                <span class="material-icons text-primary">auto_awesome</span>
-                                <h3 class="font-bold text-slate-800 dark:text-white">Thông tin Thông minh AI</h3>
+                            class="lg:col-span-3 bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-slate-50 dark:border-slate-700 flex flex-col items-center">
+                            <h3 class="font-bold text-slate-800 dark:text-white mb-6 self-start">Tỉ lệ Danh mục</h3>
+                            <div class="w-full h-64 relative">
+                                <canvas id="categoryChart"></canvas>
                             </div>
-                            <div class="space-y-6">
-                                <div>
-                                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Đang
-                                        thịnh hành
-                                    </p>
-                                    <div class="flex flex-wrap gap-2">
-                                        <span
-                                            class="px-3 py-1 bg-slate-100 dark:bg-slate-700 rounded-full text-xs font-medium text-slate-600 dark:text-slate-300">#Election2024</span>
-                                        <span
-                                            class="px-3 py-1 bg-slate-100 dark:bg-slate-700 rounded-full text-xs font-medium text-slate-600 dark:text-slate-300">#AIRevolution</span>
-                                        <span
-                                            class="px-3 py-1 bg-slate-100 dark:bg-slate-700 rounded-full text-xs font-medium text-slate-600 dark:text-slate-300">#ClimateTech</span>
-                                        <span
-                                            class="px-3 py-1 bg-slate-100 dark:bg-slate-700 rounded-full text-xs font-medium text-slate-600 dark:text-slate-300">#GlobalTrade</span>
-                                    </div>
-                                </div>
-                                <div class="border-t border-slate-100 dark:border-slate-700 pt-6">
-                                    <div class="flex items-center justify-between mb-3">
-                                        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Cảnh báo
-                                            Spam
-                                        </p>
-                                        <span
-                                            class="text-[10px] bg-red-100 text-red-600 px-2 py-0.5 rounded-full font-bold">RỦI
-                                            RO CAO</span>
-                                    </div>
-                                    <ul class="space-y-3">
-                                        <li class="flex items-start gap-3">
-                                            <div class="mt-1 w-2 h-2 rounded-full bg-red-500"></div>
-                                            <div>
-                                                <p class="text-xs font-semibold text-slate-700 dark:text-slate-200">Đã
-                                                    phát hiện mẫu bot</p>
-                                                <p class="text-[10px] text-slate-500">Nguồn: 192.168.1.42 (Nga)</p>
-                                            </div>
-                                        </li>
-                                        <li class="flex items-start gap-3">
-                                            <div class="mt-1 w-2 h-2 rounded-full bg-amber-500"></div>
-                                            <div>
-                                                <p class="text-xs font-semibold text-slate-700 dark:text-slate-200">Phù
-                                                    hợp sao chép nội dung</p>
-                                                <p class="text-[10px] text-slate-500">84% tương đồng với AP News</p>
-                                            </div>
-                                        </li>
-                                    </ul>
-                                </div>
-                                <button
-                                    class="mt-4 w-full py-3 bg-primary text-white rounded-lg text-sm font-bold shadow-md shadow-primary/30 hover:bg-primary/90 transition-all flex items-center justify-center gap-2">
-                                    <span class="material-icons text-[18px]">bolt</span>
-                                    Chạy phân tích sâu
-                                </button>
+                            <div class="mt-4 grid grid-cols-2 gap-4 w-full">
+                                <c:forEach var="cat" items="${categoryStats}" varStatus="loop">
+                                    <c:if test="${loop.index < 4}">
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-3 h-3 rounded-full" style="background-color: ${loop.index == 0 ? '#0d7ff2' : (loop.index == 1 ? '#00e396' : (loop.index == 2 ? '#feb019' : '#ff4560'))}"></div>
+                                            <span class="text-xs text-slate-500 truncate">${cat.name}</span>
+                                        </div>
+                                    </c:if>
+                                </c:forEach>
                             </div>
                         </div>
+                    </div>
+
+                    <!-- Chart.js Script -->
+                    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+                    <script>
+                        document.addEventListener("DOMContentLoaded", function() {
+                            const ctx = document.getElementById('categoryChart').getContext('2d');
+                            const categories = [
+                                <c:forEach var="cat" items="${categoryStats}" varStatus="loop">
+                                    '${cat.name}'${!loop.last ? ',' : ''}
+                                </c:forEach>
+                            ];
+                            const counts = [
+                                <c:forEach var="cat" items="${categoryStats}" varStatus="loop">
+                                    ${cat.articleCount}${!loop.last ? ',' : ''}
+                                </c:forEach>
+                            ];
+
+                            new Chart(ctx, {
+                                type: 'doughnut',
+                                data: {
+                                    labels: categories,
+                                    datasets: [{
+                                        data: counts,
+                                        backgroundColor: [
+                                            '#0d7ff2', '#00e396', '#feb019', '#ff4560', 
+                                            '#775dd0', '#546e7a', '#26a69a', '#d10ce8'
+                                        ],
+                                        borderWidth: 0
+                                    }]
+                                },
+                                options: {
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    plugins: {
+                                        legend: {
+                                            display: false
+                                        }
+                                    },
+                                    cutout: '70%'
+                                }
+                            });
+                        });
+                    </script>
                     </div>
                     <!-- Row 3: Quick Action Table -->
                     <div
