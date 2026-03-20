@@ -463,9 +463,10 @@ public class ArticleDao {
 
     public Article getById(long id) {
         String sql = """
-            SELECT a.*, c.name AS category_name
+            SELECT a.*, c.name AS category_name, u.full_name AS author_name, u.avatar_url AS author_avatar
             FROM articles a
             LEFT JOIN categories c ON a.category_id = c.id
+            LEFT JOIN users u ON a.author_id = u.id
             WHERE a.id = ?
         """;
         try (Connection conn = DBConnection.getConnection();
@@ -916,7 +917,9 @@ public class ArticleDao {
         a.setPopularityScore(rs.getDouble("popularity_score"));
         a.setPublishedAt(rs.getTimestamp("published_at"));
         a.setCreatedAt(rs.getTimestamp("created_at"));
-        a.setCategoryName(rs.getString("category_name"));
+        try { a.setCategoryName(rs.getString("category_name")); } catch (Exception ignored) {}
+        try { a.setAuthorName(rs.getString("author_name")); } catch (Exception ignored) {}
+        try { a.setAuthorAvatar(rs.getString("author_avatar")); } catch (Exception ignored) {}
         return a;
     }
 }

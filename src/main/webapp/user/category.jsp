@@ -79,7 +79,7 @@
                             Bộ lọc Nâng cao
                         </button>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div id="category-articles-list" class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     
                     <%
 						if (listArt != null && !listArt.isEmpty()) {
@@ -146,9 +146,9 @@
                         <% } %>
 
                     </div>
-                    <button
+                    <button id="btn-load-more"
                         class="w-full py-4 mt-4 text-sm font-bold text-primary border border-primary/20 rounded-xl hover:bg-primary/5 transition-all flex items-center justify-center gap-2">
-                        Tải thêm bài viết Công nghệ
+                        Tải thêm bài viết <%= catName %>
                         <span class="material-symbols-outlined text-lg">expand_more</span>
                     </button>
                 </div>
@@ -244,6 +244,82 @@
             </main>
             <jsp:include page="components/footer.jsp" />
         </div>
+
+        <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const ctxPath = '${pageContext.request.contextPath}';
+            const catId = '<%= request.getParameter("id") %>';
+            const btnLoadMore = document.getElementById('btn-load-more');
+            const articlesList = document.getElementById('category-articles-list');
+            
+            let offset = 20; // Ban đầu đã load 20 bài
+            const limit = 10;
+
+            function getImageUrl(img) {
+                if (!img) return ctxPath + '/uploads/images/placeholder.jpg';
+                if (img.startsWith('http')) return img;
+                let path = img.startsWith('/') ? img : '/' + img;
+                return ctxPath + path;
+            }
+
+            if(btnLoadMore) {
+                btnLoadMore.addEventListener('click', function() {
+                    const originalText = btnLoadMore.innerHTML;
+                    btnLoadMore.innerHTML = 'Đang tải...';
+                    btnLoadMore.disabled = true;
+
+                    fetch(ctxPath + '/home-ajax?action=loadMoreLatest&offset=' + offset + '&limit=' + limit + '&catId=' + catId)
+                        .then(res => res.json())
+                        .then(data => {
+                            if(data.length > 0) {
+                                let html = '';
+                                data.forEach(art => {
+                                    let ds = art.createdAt ? new Date(art.createdAt).toLocaleDateString('vi-VN') : '';
+                                    
+                                    html += `
+                                    <article onclick="window.location.href='\${ctxPath}/user/article?id=\${art.id}'"
+                                        class="bg-white dark:bg-surface-dark rounded-xl border border-slate-100 dark:border-border-dark overflow-hidden hover:shadow-md transition-all group cursor-pointer">
+                                        <div class="h-48 overflow-hidden relative">
+                                            <div class="absolute top-3 left-3 z-10">
+                                                <span class="px-2 py-1 rounded bg-black/60 backdrop-blur-md text-white text-[10px] font-bold uppercase tracking-wider">\${art.categoryName || 'Tin tức'}</span>
+                                            </div>
+                                            <div class="w-full h-full bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
+                                                style="background-image: url('\${getImageUrl(art.imageUrl)}');">
+                                            </div>
+                                        </div>
+                                        <div class="p-4">
+                                            <h3 class="text-base font-bold text-slate-900 dark:text-white mb-2 line-clamp-2 group-hover:text-primary transition-colors">
+                                                \${art.title}</h3>
+                                            <p class="text-slate-500 dark:text-slate-400 text-xs line-clamp-2 mb-4">\${art.summary}</p>
+                                            <div class="flex items-center justify-between text-[10px] text-slate-400 font-bold uppercase tracking-widest pt-3 border-t border-slate-50 dark:border-slate-800">
+                                                <span>\${ds}</span>
+                                                <button class="text-slate-400 hover:text-primary"><span class="material-symbols-outlined text-lg">bookmark</span></button>
+                                            </div>
+                                        </div>
+                                    </article>`;
+                                });
+                                articlesList.insertAdjacentHTML('beforeend', html);
+                                offset += limit;
+                                btnLoadMore.innerHTML = originalText;
+                                btnLoadMore.disabled = false;
+                                
+                                if (data.length < limit) {
+                                    btnLoadMore.style.display = 'none';
+                                }
+                            } else {
+                                btnLoadMore.innerHTML = 'Đã hết bài viết';
+                                btnLoadMore.disabled = true;
+                            }
+                        })
+                        .catch(err => {
+                            console.error(err);
+                            btnLoadMore.innerHTML = 'Lỗi khi tải, thử lại';
+                            btnLoadMore.disabled = false;
+                        });
+                });
+            }
+        });
+        </script>
     </body>
 
     </html>

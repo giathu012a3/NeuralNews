@@ -22,6 +22,7 @@ public class Article {
     private String categoryName;
 
     private String authorName;
+    private String authorAvatar;
     private String statusLabel;
     private String statusBadgeClass;
     private String statusDotClass;
@@ -205,6 +206,14 @@ public class Article {
 
     public void setAuthorName(String authorName) {
         this.authorName = authorName;
+    }
+
+    public String getAuthorAvatar() {
+        return authorAvatar;
+    }
+
+    public void setAuthorAvatar(String authorAvatar) {
+        this.authorAvatar = authorAvatar;
     }
 
     public String getStatusBadgeClass() {

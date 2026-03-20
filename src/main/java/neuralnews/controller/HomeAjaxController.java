@@ -28,8 +28,12 @@ public class HomeAjaxController extends HttpServlet {
             if ("loadMoreLatest".equals(action)) {
                 int limit = Integer.parseInt(request.getParameter("limit"));
                 int offset = Integer.parseInt(request.getParameter("offset"));
-                // 4 is the number of featured articles to skip, offset is dynamic
-                List<Article> articles = articleDao.getArticlesCommon(limit, offset, 0);
+                int catId = 0;
+                String catIdStr = request.getParameter("catId");
+                if (catIdStr != null && !catIdStr.isEmpty()) {
+                	catId = Integer.parseInt(catIdStr);
+                }
+                List<Article> articles = articleDao.getArticlesCommon(limit, offset, catId);
                 response.getWriter().write(gson.toJson(articles));
             } else if ("getFeatured".equals(action)) {
                 String type = request.getParameter("type");

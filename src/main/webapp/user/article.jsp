@@ -56,9 +56,17 @@
                         class="flex flex-wrap items-center justify-between gap-4 pb-8 border-b border-slate-200 dark:border-slate-800">
                         <div class="flex items-center gap-4">
                             <div class="size-10 rounded-full bg-slate-200 overflow-hidden">
-                                <div class="size-full bg-cover bg-center"
-                                    style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCqHJoDOZXEs2I-dWg4cNlhnZWUAg-oBJGZBmq-PpFoJ50SV0NIa98rHAwe3bxy50vyDTw8NHXXjoiNAgpWnLDQFnXhwjbF1AjVEqM11aGgAOtWj5SSP8yDkoQK1AtowhO1u68BOZOlFIT9MNofGpAlZ3JqZTUDZnPnJXrW2cjFXP9ywq1Un_lnbETpHo9rOZaGlocLFlhstxpM83Zzw8q542F04tYAv4jhfi5wKUicr1qd6_Lz2OKuF66ucETPy-Se0VxXmBa0LSQo');">
-                                </div>
+                                <c:choose>
+                                    <c:when test="${not empty art.authorAvatar}">
+                                        <img src="${art.authorAvatar.startsWith('http') ? art.authorAvatar : pageContext.request.contextPath.concat(art.authorAvatar)}" 
+                                             class="size-full object-cover" alt="Author Avatar">
+                                    </c:when>
+                                    <c:otherwise>
+                                        <div class="size-full bg-slate-300 flex items-center justify-center">
+                                            <span class="material-symbols-outlined text-slate-500">person</span>
+                                        </div>
+                                    </c:otherwise>
+                                </c:choose>
                             </div>
                             <div>
                                 <p class="text-sm font-bold text-slate-900 dark:text-white">
