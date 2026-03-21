@@ -17,7 +17,8 @@ public class ArticleDao {
         String sql = """
             SELECT a.*, c.name AS category_name FROM articles a 
             JOIN categories c ON a.category_id = c.id 
-            WHERE a.status='PUBLISHED' 
+            WHERE a.status='PUBLISHED'
+
         """;
         if (categoryId > 0) sql += "AND a.category_id=? ";
         sql += "ORDER BY a.published_at DESC LIMIT ? OFFSET ?";
