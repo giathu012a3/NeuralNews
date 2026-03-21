@@ -545,6 +545,8 @@ public class ArticleDao {
         map.put("PUBLISHED", 0);
         map.put("REJECTED", 0);
         map.put("ARCHIVED", 0);
+        map.put("TODAY_NEW", 0);
+        // Đếm theo status (bỏ DRAFT)
         String sql = "SELECT status, COUNT(*) AS cnt FROM articles WHERE status != 'DRAFT' GROUP BY status";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
@@ -557,6 +559,13 @@ public class ArticleDao {
                 total += cnt;
             }
             map.put("TOTAL", total);
+        } catch (Exception e) { e.printStackTrace(); }
+        // Đếm riêng bài tạo hôm nay (mọi status trừ DRAFT)
+        String sqlToday = "SELECT COUNT(*) FROM articles WHERE DATE(created_at) = CURDATE() AND status != 'DRAFT'";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sqlToday);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) map.put("TODAY_NEW", rs.getInt(1));
         } catch (Exception e) { e.printStackTrace(); }
         return map;
     }

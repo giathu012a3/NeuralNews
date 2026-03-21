@@ -31,6 +31,7 @@ public class AdminHomeController extends HttpServlet {
         java.util.Map<String, Integer> articleStats = articleDao.getArticleStatsByStatus();
         request.setAttribute("totalArticles", articleStats.get("TOTAL"));
         request.setAttribute("pendingArticles", articleStats.get("PENDING"));
+        request.setAttribute("todayArticles", articleStats.get("TODAY_NEW"));
         
         // 2. Thống kê người dùng
         int totalUsers = userDao.getTotalUserCount();

@@ -54,7 +54,7 @@
                             <div>
                                 <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Bài viết mới hôm nay
                                 </p>
-                                <h3 class="text-2xl font-bold text-slate-800 dark:text-white">${totalArticles}</h3>
+                                <h3 class="text-2xl font-bold text-slate-800 dark:text-white">${todayArticles}</h3>
                             </div>
                         </div>
                         <!-- Card 3 -->
