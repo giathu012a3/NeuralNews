@@ -6,8 +6,10 @@ import jakarta.servlet.http.*;
 import java.io.IOException;
 import java.io.PrintWriter;
 import neuralnews.dao.ArticleDao;
-import neuralnews.model.User;
+import neuralnews.dao.NotificationDao;
 import neuralnews.model.Article;
+import neuralnews.model.Notification;
+import neuralnews.model.User;
 
 @WebServlet("/handle-reaction")
 public class ReactionController extends HttpServlet {
@@ -87,20 +89,27 @@ public class ReactionController extends HttpServlet {
             Article art = dao.getArticleById(articleId); 
 
             if (art != null) {
-                // Tạo thông báo nếu lượt tương tác là LIKE (và người like không phải tác giả)
-                if ("LIKE".equals(newStatus) && art.getAuthorId() != currentUser.getId()) {
+                if (art.getAuthorId() != currentUser.getId()) {
                     String userNameStr = (String) session.getAttribute("userName");
-                    if (userNameStr == null) userNameStr = "Độc giả";
+                    if (userNameStr == null) userNameStr = "Doc gia";
 
-                    neuralnews.model.Notification noti = new neuralnews.model.Notification();
+                    Notification noti = new Notification();
                     noti.setUserId(art.getAuthorId());
-                    noti.setTitle("Lượt Thích Mới");
-                    noti.setContent(userNameStr + " vừa nhấn Thích bài viết '" + art.getTitle() + "'.");
-                    noti.setType("LIKE");
                     noti.setUrl("/user/article?id=" + articleId);
                     
-                    neuralnews.dao.NotificationDao notiDao = new neuralnews.dao.NotificationDao();
-                    notiDao.create(noti);
+                    NotificationDao notiDao = new NotificationDao();
+
+                    if ("LIKE".equals(newStatus)) {
+                        noti.setTitle("Luot Thich Moi");
+                        noti.setContent(userNameStr + " vua nhan Thich bai viet '" + art.getTitle() + "'.");
+                        noti.setType("LIKE");
+                        notiDao.create(noti);
+                    } else if ("DISLIKE".equals(newStatus)) {
+                        noti.setTitle("Luot Khong Thich");
+                        noti.setContent(userNameStr + " vua nhan Khong Thich bài viết '" + art.getTitle() + "'.");
+                        noti.setType("DISLIKE");
+                        notiDao.create(noti);
+                    }
                 }
 
                 String json = String.format(

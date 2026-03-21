@@ -121,6 +121,8 @@ public class Notification {
             return "comment";
         if ("LIKE".equalsIgnoreCase(type))
             return "thumb_up";
+        if ("DISLIKE".equalsIgnoreCase(type))
+            return "thumb_down";
         if ("SYSTEM".equalsIgnoreCase(type))
             return "info";
         return "notifications";
@@ -133,6 +135,8 @@ public class Notification {
             return "bg-amber-100 dark:bg-amber-900/40 text-amber-600";
         if ("LIKE".equalsIgnoreCase(type))
             return "bg-pink-100 dark:bg-pink-900/40 text-pink-600";
+        if ("DISLIKE".equalsIgnoreCase(type))
+            return "bg-slate-100 dark:bg-slate-900/40 text-slate-600";
         if ("SYSTEM".equalsIgnoreCase(type))
             return "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600";
         return "bg-slate-100 dark:bg-slate-800 text-slate-500";

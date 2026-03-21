@@ -406,18 +406,13 @@
                         }
                     }
                 </script>
-                <script>
-            // Hide notifications after 5 seconds
             setTimeout(() => {
-                const toasts = document.querySelectorAll('[id^="toast-"], .animate-in');
+                const toasts = document.querySelectorAll('[id^="toast-"]');
                 toasts.forEach(toast => {
-                    if(!toast.id.startsWith('toast-js-')) {
-                        toast.classList.add('opacity-0', 'translate-y-10', 'transition-all', 'duration-500');
-                        setTimeout(() => toast.remove(), 500);
-                    }
+                    toast.classList.add('opacity-0', 'translate-y-10', 'transition-all', 'duration-500');
+                    setTimeout(() => toast.remove(), 500);
                 });
             }, 5000);
-        </script>
             </body>
 
             </html>

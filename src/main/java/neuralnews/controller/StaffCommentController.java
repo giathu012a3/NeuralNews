@@ -62,7 +62,7 @@ public class StaffCommentController extends HttpServlet {
             setStatusStyle(c);
             setFormattedTime(c);
             setUserAvatar(c);
-            List<Comment> replies = dao.getReplies(c.getId());
+            List<Comment> replies = dao.getReplies(c.getId(), user.getId());
             for (Comment r : replies) {
                 setStatusStyle(r);
                 setFormattedTime(r);
@@ -122,7 +122,7 @@ public class StaffCommentController extends HttpServlet {
                     String content    = request.getParameter("replyContent");
                     String articleStr = request.getParameter("articleId");
                     if (content != null && !content.isBlank() && articleStr != null)
-                        dao.addReply(Long.parseLong(articleStr), user.getId(), commentId, content.trim());
+                        dao.addComment(Long.parseLong(articleStr), user.getId(), commentId, content.trim());
                 }
             }
         }

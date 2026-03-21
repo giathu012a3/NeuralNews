@@ -211,7 +211,7 @@
                                         <div class="px-8 py-4 bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 font-bold rounded-xl backdrop-blur-md">Bạn đã là Nhà báo</div>
                                     </c:when>
                                     <c:otherwise>
-                                        <button onclick="document.getElementById('upgradeModal').classList.remove('hidden')"
+                                        <button type="button" onclick="openUpgradeModal()"
                                             class="w-full md:w-auto px-10 py-4 bg-white text-primary-dark font-black text-lg rounded-xl shadow-xl shadow-black/20 hover:bg-cyan-50 hover:text-primary hover:shadow-cyan-400/20 hover:scale-105 active:scale-95 transition-all duration-300">Đăng ký ngay</button>
                                         <p class="text-xs text-blue-200/60 font-medium">Nộp đơn mất &lt; 5 phút</p>
                                     </c:otherwise>
@@ -224,27 +224,29 @@
             <jsp:include page="components/footer.jsp" />
         </div>
 
-        <div id="upgradeModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 hidden">
-            <div class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm shadow-2xl" onclick="this.parentElement.classList.add('hidden')"></div>
-            <div class="bg-white dark:bg-slate-900 w-full max-w-lg rounded-2xl shadow-2xl relative overflow-hidden z-10 animate-in fade-in zoom-in duration-300">
-                <div class="bg-gradient-to-r from-slate-900 to-primary p-6 text-white text-center">
-                    <h2 class="text-2xl font-black">Đăng ký Cộng tác viên</h2>
-                    <p class="text-blue-100/70 text-sm mt-1">Cung cấp thông tin để chúng tôi xem xét hồ sơ của bạn</p>
+        <div id="upgradeModal" class="fixed inset-0 z-[120] hidden overflow-y-auto">
+            <div class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm transition-opacity" onclick="closeUpgradeModal()"></div>
+            <div class="flex min-h-full items-center justify-center p-4">
+                <div class="bg-white dark:bg-slate-900 w-full max-w-lg rounded-2xl shadow-2xl relative overflow-hidden z-10" onclick="event.stopPropagation()">
+                    <div class="bg-gradient-to-r from-slate-900 to-primary p-6 text-white text-center">
+                        <h2 class="text-2xl font-black">Đăng ký Cộng tác viên</h2>
+                        <p class="text-blue-100/70 text-sm mt-1">Cung cấp thông tin để chúng tôi xem xét hồ sơ của bạn</p>
+                    </div>
+                    <form action="${pageContext.request.contextPath}/JournalistUpgradeController" method="post" class="p-6 space-y-5">
+                        <div class="space-y-1.5">
+                            <label class="text-xs font-bold text-slate-400 uppercase tracking-widest">Kinh nghiệm viết lách (năm)</label>
+                            <input type="number" name="experience" min="0" required class="w-full h-12 px-4 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary transition-all text-slate-900 dark:text-white" placeholder="Ví dụ: 3">
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="text-xs font-bold text-slate-400 uppercase tracking-widest">Giới thiệu ngắn / Link Portfolio</label>
+                            <textarea name="bio" required rows="4" class="w-full p-4 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary transition-all text-slate-900 dark:text-white resize-none" placeholder="Mô tả các lĩnh vực bạn am hiểu hoặc dẫn link bài viết tiêu biểu..."></textarea>
+                        </div>
+                        <div class="flex gap-4 pt-2">
+                            <button type="button" onclick="closeUpgradeModal()" class="flex-1 h-12 text-sm font-bold text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors">Hủy</button>
+                            <button type="submit" class="flex-1 h-12 bg-primary text-white font-bold rounded-xl shadow-lg shadow-primary/20 hover:bg-primary-dark transition-all">Gửi yêu cầu</button>
+                        </div>
+                    </form>
                 </div>
-                <form action="${pageContext.request.contextPath}/JournalistUpgradeController" method="post" class="p-6 space-y-5">
-                    <div class="space-y-1.5">
-                        <label class="text-xs font-bold text-slate-400 uppercase tracking-widest">Kinh nghiệm viết lách (năm)</label>
-                        <input type="number" name="experience" min="0" required class="w-full h-12 px-4 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary transition-all text-slate-900 dark:text-white" placeholder="Ví dụ: 3">
-                    </div>
-                    <div class="space-y-1.5">
-                        <label class="text-xs font-bold text-slate-400 uppercase tracking-widest">Giới thiệu ngắn / Link Portfolio</label>
-                        <textarea name="bio" required rows="4" class="w-full p-4 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary transition-all text-slate-900 dark:text-white resize-none" placeholder="Mô tả các lĩnh vực bạn am hiểu hoặc dán link bài viết tiêu biểu..."></textarea>
-                    </div>
-                    <div class="flex gap-4 pt-2">
-                        <button type="button" onclick="document.getElementById('upgradeModal').classList.add('hidden')" class="flex-1 h-12 text-sm font-bold text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors">Hủy</button>
-                        <button type="submit" class="flex-1 h-12 bg-primary text-white font-bold rounded-xl shadow-lg shadow-primary/20 hover:bg-primary-dark transition-all">Gửi yêu cầu</button>
-                    </div>
-                </form>
             </div>
         </div>
 
@@ -282,6 +284,16 @@
                 document.body.classList.remove('overflow-hidden');
             }
 
+            function openUpgradeModal() {
+                document.getElementById('upgradeModal').classList.remove('hidden');
+                document.body.classList.add('overflow-hidden');
+            }
+ 
+            function closeUpgradeModal() {
+                document.getElementById('upgradeModal').classList.add('hidden');
+                document.body.classList.remove('overflow-hidden');
+            }
+
             function confirmIdentityBeforeDelete() {
                 const form = document.getElementById('settingsForm');
                 const actionInput = document.createElement('input');
@@ -294,7 +306,7 @@
 
             // Hide notifications after 5 seconds
             setTimeout(() => {
-                const toasts = document.querySelectorAll('[id^="toast-"], .animate-in');
+                const toasts = document.querySelectorAll('[id^="toast-"]');
                 toasts.forEach(toast => {
                     toast.classList.add('opacity-0', 'translate-y-10', 'transition-all', 'duration-500');
                     setTimeout(() => toast.remove(), 500);
