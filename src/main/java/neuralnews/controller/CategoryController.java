@@ -16,7 +16,7 @@ import neuralnews.model.Category;
 import neuralnews.model.User;
 import neuralnews.model.Article;
 
-@WebServlet(urlPatterns = {"/home", ""})
+@WebServlet(urlPatterns = {"/home", "", "/category"})
 public class CategoryController extends HttpServlet {
     
     @Override

@@ -86,8 +86,7 @@
 						    Article firstArt = listArt.get(0);
 						%>
                     
-                        <!-- Content Articles would go here, for now using static HTML from template -->
-                        <article onclick="window.location.href='user/article?id=<%= firstArt.getId() %>'"
+                        <article onclick="window.location.href='<%= request.getContextPath() %>/user/article?id=<%= firstArt.getId() %>'"
                             class="md:col-span-2 flex flex-col md:flex-row gap-6 bg-white dark:bg-surface-dark p-4 rounded-xl border border-slate-100 dark:border-border-dark hover:shadow-lg transition-all group cursor-pointer">
                             <div class="md:w-1/2 h-64 shrink-0 rounded-lg overflow-hidden">
                                 <div class="w-full h-full bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
@@ -96,9 +95,7 @@
                             </div>
                             <div class="flex flex-col justify-between py-2">
                                 <div>
-                                    <span
-                                        class="inline-block px-2 py-0.5 rounded bg-blue-100 dark:bg-blue-900/30 text-primary dark:text-blue-400 text-[10px] font-bold uppercase tracking-wider mb-3">AI
-                                        &amp; Robotics</span>
+                                    <span class="inline-block px-2 py-0.5 rounded bg-blue-100 dark:bg-blue-900/30 text-primary dark:text-blue-400 text-[10px] font-bold uppercase tracking-wider mb-3"><%= catName %></span>
                                     <h2
                                         class="text-2xl font-bold text-slate-900 dark:text-white mb-3 group-hover:text-primary transition-colors leading-tight">
                                         <%= firstArt.getTitle() %></h2>
@@ -114,16 +111,14 @@
                         </article>
                         <% } %>
                         
-                        <% for (int i = 1; i < listArt.size(); i++) { 
+                        <% if (listArt != null) { for (int i = 1; i < listArt.size(); i++) { 
     						Article art = listArt.get(i); %>
     						
-                        <article onclick="window.location.href='user/article?id=<%= art.getId() %>'"
+                        <article onclick="window.location.href='<%= request.getContextPath() %>/user/article?id=<%= art.getId() %>'"
                             class="bg-white dark:bg-surface-dark rounded-xl border border-slate-100 dark:border-border-dark overflow-hidden hover:shadow-md transition-all group cursor-pointer">
                             <div class="h-48 overflow-hidden relative">
                                 <div class="absolute top-3 left-3 z-10">
-                                    <span
-                                        class="px-2 py-1 rounded bg-black/60 backdrop-blur-md text-white text-[10px] font-bold uppercase tracking-wider">Di
-                                        động</span>
+                                    <span class="px-2 py-1 rounded bg-black/60 backdrop-blur-md text-white text-[10px] font-bold uppercase tracking-wider"><%= art.getCategoryName() != null ? art.getCategoryName() : catName %></span>
                                 </div>
                                 <div class="w-full h-full bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
                                     style="background-image: url('<%= art.getDisplayImageUrl(request.getContextPath()) %>');">
@@ -143,6 +138,14 @@
                             </div>
                         </article>
                         
+                        <% } } %>
+
+                        <% if (listArt == null || listArt.isEmpty()) { %>
+                        <div class="md:col-span-2 flex flex-col items-center justify-center py-20 text-center">
+                            <span class="material-symbols-outlined text-[64px] text-slate-300 dark:text-slate-700 mb-4">article</span>
+                            <h3 class="text-lg font-bold text-slate-600 dark:text-slate-400">Chưa có bài viết nào</h3>
+                            <p class="text-sm text-slate-400 mt-2">Danh mục này chưa có bài viết được đăng.</p>
+                        </div>
                         <% } %>
 
                     </div>
