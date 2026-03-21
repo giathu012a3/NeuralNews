@@ -66,9 +66,10 @@ public class LoginController extends HttpServlet {
 		session.setAttribute("avatarUrl", user.getAvatarUrl());
 
 		// Redirect by role
-		boolean isAdmin = user.hasRole("ADMIN");
-		if (isAdmin) {
+		if (user.hasRole("ADMIN")) {
 			response.sendRedirect(contextPath + "/admin/home");
+		} else if (user.hasRole("JOURNALIST")) {
+			response.sendRedirect(contextPath + "/journalist/home");
 		} else {
 			response.sendRedirect(contextPath + "/home");
 		}

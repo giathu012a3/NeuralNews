@@ -4,6 +4,10 @@
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 
+<c:if test="${empty requestScope.dashboardDataLoaded}">
+    <c:redirect url="/journalist/home" />
+</c:if>
+
 <c:set var="topArticles" value="${requestScope.topArticles}" />
 
                 <c:set var="u" value="${sessionScope.currentUser}" />

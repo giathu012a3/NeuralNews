@@ -150,7 +150,7 @@
                                         </c:when>
                                         <c:when test="${sessionScope.userRole eq 'JOURNALIST'}">
                                             <a class="flex items-center justify-between px-4 py-2.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
-                                                href="${pageContext.request.contextPath}/journalist/home.jsp">
+                                                href="${pageContext.request.contextPath}/journalist/home">
                                                 <div class="flex items-center gap-3">
                                                     <span class="material-symbols-outlined text-xl text-slate-400">dashboard_customize</span>
                                                     Bảng điều khiển Nhà báo
