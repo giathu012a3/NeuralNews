@@ -19,9 +19,7 @@ public class StaffCommentController extends HttpServlet {
 
     private static final int PAGE_SIZE = 10;
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // GET — hiển thị danh sách bình luận (có hỗ trợ search, sort, phân trang)
-    // ─────────────────────────────────────────────────────────────────────────
+    // GET: Hiển thị danh sách bình luận (search, sort, phân trang)
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -34,21 +32,21 @@ public class StaffCommentController extends HttpServlet {
             return;
         }
 
-        // ── Sort ─────────────────────────────────────────────────────────────
+        // Sort
         String sort = request.getParameter("sort");
         if (!"oldest".equals(sort)) sort = "latest";
 
-        // ── Keyword search ───────────────────────────────────────────────────
+        // Keyword search
         String keyword = request.getParameter("keyword");
         if (keyword != null && keyword.trim().isEmpty()) keyword = null;
 
-        // ── Phân trang ───────────────────────────────────────────────────────
+        // Phân trang
         int page = 1;
         try {
             page = Math.max(1, Integer.parseInt(request.getParameter("page")));
         } catch (Exception ignored) {}
 
-        // ── Query DB ─────────────────────────────────────────────────────────
+        // Query database
         CommentDao dao    = new CommentDao();
         int total         = dao.countCommentsByAuthor(user.getId(), keyword);
         int totalPages    = Math.max(1, (int) Math.ceil((double) total / PAGE_SIZE));
@@ -57,7 +55,7 @@ public class StaffCommentController extends HttpServlet {
         List<Comment> comments = dao.getCommentsByAuthor(
                 user.getId(), (page - 1) * PAGE_SIZE, PAGE_SIZE, sort, keyword);
 
-        // ── Trang trí mỗi comment (status, time, avatar, replies) ────────────
+        // Xử lý thông tin hiển thị (status, time, avatar, replies)
         for (Comment c : comments) {
             setStatusStyle(c);
             setFormattedTime(c);
@@ -71,7 +69,7 @@ public class StaffCommentController extends HttpServlet {
             c.setReplies(replies);
         }
 
-        // ── Set attributes cho JSP ───────────────────────────────────────────
+        // Set attributes cho JSP
         request.setAttribute("comments",      comments);
         request.setAttribute("totalComments", total);
         request.setAttribute("currentPage",   page);
@@ -82,9 +80,7 @@ public class StaffCommentController extends HttpServlet {
         request.getRequestDispatcher("/journalist/comments.jsp").forward(request, response);
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // POST — xử lý action: spam, hide, delete, restore, reply
-    // ─────────────────────────────────────────────────────────────────────────
+    // POST: Xử lý các tác vụ quản lý bình luận (hide, spam, reply)
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -122,7 +118,7 @@ public class StaffCommentController extends HttpServlet {
                     String content    = request.getParameter("replyContent");
                     String articleStr = request.getParameter("articleId");
                     if (content != null && !content.isBlank() && articleStr != null)
-                        dao.addReply(Long.parseLong(articleStr), user.getId(), commentId, content.trim());
+                        dao.addComment(Long.parseLong(articleStr), user.getId(), commentId, content.trim());
                 }
             }
         }
@@ -139,9 +135,7 @@ public class StaffCommentController extends HttpServlet {
         response.sendRedirect(redirect.toString());
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // HELPERS
-    // ─────────────────────────────────────────────────────────────────────────
+    // Helper methods functions
 
     private void setStatusStyle(Comment c) {
         switch (c.getStatus() == null ? "" : c.getStatus()) {

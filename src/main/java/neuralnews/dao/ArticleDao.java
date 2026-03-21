@@ -201,7 +201,6 @@ public class ArticleDao {
 
     private void updateCount(Connection conn, long artId, String type, int value) throws SQLException {
         String column = type.equalsIgnoreCase("LIKE") ? "likes_count" : "dislikes_count";
-        // Logic: Like +1 đồng thời popularity +5. Undo Like (value=-1) thì trừ lại.
         String sql = "UPDATE articles SET " + column + " = " + column + " + ?, popularity_score = popularity_score + ? WHERE id = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, value);
@@ -230,7 +229,6 @@ public class ArticleDao {
     }
     
     public void incrementViewCount(long articleId, long userId) {
-        // 1. Cập nhật số view tổng và điểm phổ biến (+1) trong bảng articles
         String updateSql = "UPDATE articles SET views = views + 1, popularity_score = popularity_score + 1 WHERE id = ?";
         
         try (Connection conn = DBConnection.getConnection()) {
@@ -240,15 +238,12 @@ public class ArticleDao {
                 ps1.setLong(1, articleId);
                 ps1.executeUpdate();
             }
-            
-            // 2. Cập nhật lượt xem theo ngày vào bảng daily_traffic
+        
             String trafficSql = "INSERT INTO daily_traffic (date, view_count) VALUES (CURDATE(), 1) ON DUPLICATE KEY UPDATE view_count = view_count + 1";
             try (PreparedStatement psTraffic = conn.prepareStatement(trafficSql)) {
                 psTraffic.executeUpdate();
             }
             
-            // 3. Ghi nhận nhật ký tương tác chi tiết (chỉ lưu nếu user đã đăng nhập)
-            // SỬA: Xóa lịch sử cũ của bài viết này trước khi ghi nhận mới để tránh bị lặp
             if (userId > 0) {
                 String deleteOldViewSql = "DELETE FROM interactions WHERE user_id = ? AND article_id = ? AND type = 'VIEW'";
                 try (PreparedStatement psDel = conn.prepareStatement(deleteOldViewSql)) {
@@ -275,7 +270,6 @@ public class ArticleDao {
         return getById(id);
     }
 
-    // -- Admin Methods --
     public List<Article> getAllArticlesFiltered(int limit, int offset,
             String keyword, String status, Integer categoryId,
             String authorName, String sortBy, String sortDir) {
@@ -337,7 +331,6 @@ public class ArticleDao {
         return list;
     }
 
-    // Overload giữ tương thích ngược với code cũ
     public List<Article> getAllArticlesFiltered(int limit, int offset, String keyword, String status, Integer categoryId) {
         return getAllArticlesFiltered(limit, offset, keyword, status, categoryId, null, "a.created_at", "DESC");
     }
@@ -634,11 +627,6 @@ public class ArticleDao {
         return list;
     }
 
-    // -- Profile Methods --
-
-    /**
-     * Đếm số bài viết user đã lưu (interactions loại SAVE).
-     */
     public int countSavedByUser(long userId) {
         String sql = "SELECT COUNT(*) FROM interactions WHERE user_id = ? AND type = 'BOOKMARK'";
         try (Connection conn = DBConnection.getConnection();
@@ -650,9 +638,6 @@ public class ArticleDao {
         return 0;
     }
 
-    /**
-     * Đếm số bài viết user đã đọc (interactions loại VIEW).
-     */
     public int countReadByUser(long userId) {
         String sql = "SELECT COUNT(*) FROM interactions WHERE user_id = ? AND type = 'VIEW'";
         try (Connection conn = DBConnection.getConnection();
@@ -725,10 +710,6 @@ public class ArticleDao {
     }
 
 
-    /**
-     * Lấy bài viết mới trong các chủ đề user quan tâm, dùng cho thông báo profile.
-     * Trả về List<String[]> với mỗi phần tử: [message, timeAgo]
-     */
     public List<String[]> getRecentArticlesForUser(long userId, int limit) {
         List<String[]> list = new ArrayList<>();
         String sql = """
@@ -857,7 +838,7 @@ public class ArticleDao {
     }
 
 
-    // ── Helper: append filters ──────────────────────────────────────────
+    // APPEND FILTERS HELPER
     private void appendFilters(StringBuilder sql, List<Object> params,
                                 String keyword, String status,
                                 String category, String dateFrom, String dateTo) {
@@ -907,7 +888,7 @@ public class ArticleDao {
         return stats;
     }
 
-    // ── Map ResultSet → Article ──────────────────────────────────────────
+    // MAP RESULTSET TO ARTICLE
     private Article mapArticle(ResultSet rs) throws Exception {
         Article a = new Article();
         a.setId(rs.getLong("id"));

@@ -9,9 +9,7 @@ import java.util.List;
 
 public class CommentDao {
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // COUNT
-    // ─────────────────────────────────────────────────────────────────────────
+    // COUNT METHODS
 
     public int countCommentsByAuthor(long authorId) {
         return countCommentsByAuthor(authorId, null);
@@ -54,9 +52,7 @@ public class CommentDao {
         return 0;
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // GET LIST (for journalist/admin views)
-    // ─────────────────────────────────────────────────────────────────────────
+    // GET LIST (Staff views)
 
     public List<Comment> getCommentsByAuthor(long authorId, int offset, int limit, String sort) {
         return getCommentsByAuthor(authorId, offset, limit, sort, null);
@@ -96,13 +92,9 @@ public class CommentDao {
         return list;
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // GET BY ARTICLE (for user-facing article page)
-    // ─────────────────────────────────────────────────────────────────────────
+    // GET LIST (Public views)
 
     public List<Comment> getCommentsByArticle(long articleId, long currentUserId) {
-        // c.* includes likes_count if the column exists.
-        // Run: ALTER TABLE comments ADD COLUMN IF NOT EXISTS likes_count INT DEFAULT 0;
         String sql = "SELECT c.*,"
                    + " u.id AS user_id, u.full_name AS user_name, u.avatar_url AS user_avatar,"
                    + " a.id AS article_id, a.title AS article_title,"
@@ -145,16 +137,44 @@ public class CommentDao {
             ps.setLong(1, currentUserId);
             ps.setLong(2, parentId);
             ResultSet rs = ps.executeQuery();
-            while (rs.next()) list.add(mapRow(rs));
+            while (rs.next()) {
+                Comment c = mapRow(rs);
+                c.setReplies(getReplies(c.getId(), currentUserId));
+                list.add(c);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
         return list;
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // ADD / LIKE
-    // ─────────────────────────────────────────────────────────────────────────
+    /**
+     * Lấy tất cả reply (bao gồm cả bị ẩn/spam) cho Dashboard quản lý
+     */
+    public List<Comment> getReplies(long parentId) {
+        String sql = "SELECT c.*, u.full_name AS user_name, a.title AS article_title"
+                   + " FROM comments c"
+                   + " JOIN users u ON c.user_id = u.id"
+                   + " JOIN articles a ON c.article_id = a.id"
+                   + " WHERE c.parent_id = ?"
+                   + " ORDER BY c.created_at ASC";
+        List<Comment> list = new ArrayList<>();
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, parentId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Comment c = mapRow(rs);
+                c.setReplies(getReplies(c.getId()));
+                list.add(c);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    // ACTIONS (Add / Like)
 
     public boolean addComment(long articleId, long userId, Long parentId, String content) {
         String sql = "INSERT INTO comments (content, article_id, user_id, parent_id, status, likes_count) VALUES (?, ?, ?, ?, 'NEUTRAL', 0)";
@@ -238,9 +258,7 @@ public class CommentDao {
         }
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // DELETE / UPDATE STATUS
-    // ─────────────────────────────────────────────────────────────────────────
+    // MANAGEMENT (Delete / Update)
 
     public boolean deleteComment(long commentId) {
         String sql = "DELETE FROM comments WHERE id = ?";
@@ -322,9 +340,7 @@ public class CommentDao {
         return null;
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // HELPER
-    // ─────────────────────────────────────────────────────────────────────────
+    // HELPER METHODS
 
     private Comment mapRow(ResultSet rs) throws SQLException {
         Comment c = new Comment();
