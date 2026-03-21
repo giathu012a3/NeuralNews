@@ -45,7 +45,7 @@
 
             <!-- Notifications (Top-Right) -->
             <c:if test="${not empty param.success}">
-                <div id="toast-success" class="fixed top-5 right-5 z-[110] pointer-events-none">
+                <div id="toast-success" class="fixed top-24 right-5 z-[110] pointer-events-none">
                     <div class="bg-emerald-500 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 pointer-events-auto transition-all duration-300">
                         <span class="material-symbols-outlined text-2xl">check_circle</span>
                         <div>
@@ -56,7 +56,7 @@
                 </div>
             </c:if>
             <c:if test="${not empty param.error}">
-                <div id="toast-error" class="fixed top-5 right-5 z-[110] pointer-events-none">
+                <div id="toast-error" class="fixed top-24 right-5 z-[110] pointer-events-none">
                     <div class="bg-red-500 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 pointer-events-auto transition-all duration-300">
                         <span class="material-symbols-outlined text-2xl">error</span>
                         <div>
@@ -144,7 +144,7 @@
                                 <c:choose>
                                     <c:when test="${not empty savedArticles}">
                                         <c:forEach var="article" items="${savedArticles}">
-                                            <div onclick="window.location.href='${ctx}/article?id=${article.id}'" 
+                                            <div onclick="window.location.href='${ctx}/user/article?id=${article.id}'" 
                                                  class="article-card group cursor-pointer bg-white dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/60 rounded-2xl overflow-hidden hover:shadow-2xl hover:shadow-primary/5 transition-all duration-500 flex flex-col">
                                                 <div class="img-wrapper relative aspect-video overflow-hidden shrink-0">
                                                     <div class="size-full bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
@@ -362,7 +362,7 @@
                 const colorClass = type === 'success' ? 'bg-emerald-500' : 'bg-red-500';
                 const iconName   = type === 'success' ? 'check_circle'   : 'error';
                 const toastHtml =
-                    '<div id="' + toastId + '" class="fixed top-5 right-5 z-[150] pointer-events-none">' +
+                    '<div id="' + toastId + '" class="fixed top-24 right-5 z-[150] pointer-events-none">' +
                         '<div class="' + colorClass + ' text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 pointer-events-auto transition-all duration-300 animate-in fade-in slide-in-from-top-4">' +
                             '<span class="material-symbols-outlined text-2xl">' + iconName + '</span>' +
                             '<div>' +

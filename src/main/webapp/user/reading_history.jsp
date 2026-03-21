@@ -43,7 +43,7 @@
 
                     <!-- Notifications (Top-Right) -->
                     <c:if test="${not empty param.success}">
-                        <div id="toast-success" class="fixed top-5 right-5 z-[110] pointer-events-none">
+                        <div id="toast-success" class="fixed top-24 right-5 z-[110] pointer-events-none">
                             <div class="bg-emerald-500 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 pointer-events-auto transition-all duration-300">
                                 <span class="material-symbols-outlined text-2xl">check_circle</span>
                                 <div>
@@ -54,7 +54,7 @@
                         </div>
                     </c:if>
                     <c:if test="${not empty param.error}">
-                        <div id="toast-error" class="fixed top-5 right-5 z-[110] pointer-events-none">
+                        <div id="toast-error" class="fixed top-24 right-5 z-[110] pointer-events-none">
                             <div class="bg-red-500 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 pointer-events-auto transition-all duration-300">
                                 <span class="material-symbols-outlined text-2xl">error</span>
                                 <div>
@@ -320,7 +320,7 @@
                             const colorClass = type === 'success' ? 'bg-emerald-500' : 'bg-red-500';
                             const iconName   = type === 'success' ? 'check_circle'   : 'error';
                             const toastHtml =
-                                '<div id="' + toastId + '" class="fixed top-5 right-5 z-[150] pointer-events-none">' +
+                                '<div id="' + toastId + '" class="fixed top-24 right-5 z-[150] pointer-events-none">' +
                                     '<div class="' + colorClass + ' text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 pointer-events-auto transition-all duration-300 animate-in fade-in slide-in-from-top-4">' +
                                         '<span class="material-symbols-outlined text-2xl">' + iconName + '</span>' +
                                         '<div>' +
