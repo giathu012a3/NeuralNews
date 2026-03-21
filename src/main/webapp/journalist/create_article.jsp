@@ -1,45 +1,40 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
-<%@ page import="java.util.List" %>
-<%@ page import="neuralnews.dao.NotificationDao" %>
-<%@ page import="neuralnews.model.Notification" %>
-<%@ page import="neuralnews.model.Article" %>
-<%@ page import="neuralnews.model.User" %>
-<%@ page import="neuralnews.model.Category" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
+<%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 
-<%
-    List<Category> categories = (List<Category>) request.getAttribute("categories");
-    if (categories == null) {
-        request.getRequestDispatcher("/journalist/create-article").forward(request, response);
-        return;
-    }
-    User currentUser = (User) request.getAttribute("currentUser");
-    Article article  = (Article) request.getAttribute("article");
+<c:set var="categories" value="${requestScope.categories}" />
+<c:if test="${empty categories}">
+    <jsp:forward page="/journalist/create-article" />
+</c:if>
 
-    String savedMsg  = request.getParameter("saved");
-    String errorMsg  = request.getParameter("error");
+<c:set var="u" value="${requestScope.currentUser}" />
+<c:set var="art" value="${requestScope.article}" />
+<c:set var="artId" value="${not empty art ? art.id : 0}" />
+<c:set var="artTitle" value="${not empty art.title ? art.title : ''}" />
+<c:set var="artContent" value="${not empty art.content ? art.content : ''}" />
+<c:set var="artSummary" value="${not empty art.summary ? art.summary : ''}" />
+<c:set var="artImage" value="${not empty art.imageUrl ? art.imageUrl : ''}" />
+<c:set var="artCatId" value="${not empty art ? art.categoryId : 0}" />
 
-    String artTitle   = article != null && article.getTitle()    != null ? article.getTitle()    : "";
-    String artContent = article != null && article.getContent()  != null ? article.getContent()  : "";
-    String artSummary = article != null && article.getSummary()  != null ? article.getSummary()  : "";
-    String artImage   = article != null && article.getImageUrl() != null ? article.getImageUrl() : "";
-    int    artCatId   = article != null ? article.getCategoryId() : 0;
-    long   artId      = article != null ? article.getId()         : 0;
-    String contextPath = request.getContextPath();
-    String artImageDisplay = artImage;
-    if (artImageDisplay != null && !artImageDisplay.isBlank() && !artImageDisplay.startsWith("http")) {
-        if (!artImageDisplay.startsWith(contextPath + "/")) {
-            if (artImageDisplay.startsWith("/")) artImageDisplay = contextPath + artImageDisplay;
-            else artImageDisplay = contextPath + "/" + artImageDisplay;
-        }
-    }
-%>
+<c:set var="ctx" value="${pageContext.request.contextPath}" />
+<c:set var="artImageDisplay" value="${artImage}" />
+<c:if test="${not empty artImageDisplay and !fn:startsWith(artImageDisplay, 'http')}">
+    <c:choose>
+        <c:when test="${fn:startsWith(artImageDisplay, '/')}">
+            <c:set var="artImageDisplay" value="${ctx}${artImageDisplay}" />
+        </c:when>
+        <c:otherwise>
+            <c:set var="artImageDisplay" value="${ctx}/${artImageDisplay}" />
+        </c:otherwise>
+    </c:choose>
+</c:if>
 
 <!DOCTYPE html>
 <html class="dark" lang="vi">
 <head>
     <jsp:include page="components/head.jsp" />
-    <title><%= artId > 0 ? "Chỉnh sửa bài viết" : "Tạo bài viết mới" %></title>
+    <title>${artId > 0 ? "Chỉnh sửa bài viết" : "Tạo bài viết mới"}</title>
     <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.4/tinymce.min.js"></script>
     <style>
@@ -223,10 +218,10 @@
                 </div>
                 <div>
                     <p class="text-[11px] font-bold tracking-widest text-slate-700 dark:text-slate-100 uppercase leading-none">
-                        <%= artId > 0 ? "Chỉnh Sửa" : "Tạo Bài Viết" %>
+                        ${artId > 0 ? "Chỉnh Sửa" : "Tạo Bài Viết"}
                     </p>
                     <p class="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5 leading-none">
-                        <%= artId > 0 ? "Cập nhật nội dung" : "Bài viết mới" %>
+                        ${artId > 0 ? "Cập nhật nội dung" : "Bài viết mới"}
                     </p>
                 </div>
             </div>
@@ -249,11 +244,11 @@
                     <select id="categorySelect"
                             class="s-input w-full appearance-none bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-border-dark rounded-lg pl-3 pr-8 py-2.5 text-xs text-slate-800 dark:text-slate-200 transition-all cursor-pointer outline-none">
                         <option value="">-- Chọn danh mục --</option>
-                        <% for (Category cat : categories) { %>
-                        <option value="<%= cat.getId() %>" <%= cat.getId() == artCatId ? "selected" : "" %>>
-                            <%= cat.getName() %>
-                        </option>
-                        <% } %>
+                        <c:forEach var="cat" items="${categories}">
+                            <option value="${cat.id}" ${cat.id == artCatId ? 'selected' : ''}>
+                                ${cat.name}
+                            </option>
+                        </c:forEach>
                     </select>
                     <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" style="font-size:16px">expand_more</span>
                 </div>
@@ -291,11 +286,11 @@
 
                 <%-- Input ẩn để giữ path ảnh (không cho nhập URL thủ công nữa) --%>
                 <input id="imageUrlInput" type="hidden"
-                       value="<%= artImage %>"/>
+                       value="${artImage}"/>
 
                 <%-- Preview --%>
-                <div id="imgPreviewBox" class="mt-2 rounded-lg overflow-hidden border border-slate-200 dark:border-border-dark relative group/img <%= artImage.isEmpty() ? "hidden" : "" %>">
-                    <img id="imgPreviewEl" src="<%= artImageDisplay %>" alt="Preview"
+                <div id="imgPreviewBox" class="mt-2 rounded-lg overflow-hidden border border-slate-200 dark:border-border-dark relative group/img ${empty artImage ? 'hidden' : ''}">
+                    <img id="imgPreviewEl" src="${artImageDisplay}" alt="Preview"
                          onclick="openLightbox(this.src)"
                          class="w-full h-28 object-cover cursor-zoom-in"
                          onerror="document.getElementById('imgPreviewBox').classList.add('hidden')" />
@@ -320,9 +315,9 @@
                 <textarea id="summaryInput" rows="5" maxlength="300"
                           placeholder="Nhập tóm tắt ngắn gọn về nội dung bài viết..."
                           oninput="document.getElementById('sumCount').textContent=this.value.length"
-                          class="s-input w-full bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-border-dark rounded-lg px-3 py-2.5 text-xs text-slate-800 dark:text-slate-200 resize-none transition-all leading-relaxed"><%= artSummary %></textarea>
+                          class="s-input w-full bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-border-dark rounded-lg px-3 py-2.5 text-xs text-slate-800 dark:text-slate-200 resize-none transition-all leading-relaxed">${artSummary}</textarea>
                 <p class="text-[10px] text-slate-500 mt-1 text-right">
-                    <span id="sumCount"><%= artSummary.length() %></span>&nbsp;/&nbsp;300
+                    <span id="sumCount">${fn:length(artSummary)}</span>&nbsp;/&nbsp;300
                 </p>
             </section>
 
@@ -334,7 +329,7 @@
 
         <%-- Header --%>
         <jsp:include page="components/header.jsp">
-            <jsp:param name="pageTitle" value="<%= artId > 0 ? \"Chỉnh sửa Bài viết\" : \"Tạo Bài viết Mới\" %>" />
+            <jsp:param name="pageTitle" value="${artId > 0 ? 'Chỉnh sửa Bài viết' : 'Tạo Bài viết Mới'}" />
             <jsp:param name="backUrl" value="${pageContext.request.contextPath}/journalist/articles" />
         </jsp:include>
 
@@ -355,8 +350,8 @@
         </div>
 
         <%-- Hidden form --%>
-        <form id="articleForm" method="post" action="${pageContext.request.contextPath}/journalist/create-article" style="display:none">
-            <input type="hidden" name="articleId"  id="f_articleId" value="<%= artId > 0 ? artId : "" %>" />
+        <form id="articleForm" method="post" action="${ctx}/journalist/create-article" style="display:none">
+            <input type="hidden" name="articleId"  id="f_articleId" value="${artId > 0 ? artId : ''}" />
             <input type="hidden" name="title"      id="f_title" />
             <input type="hidden" name="content"    id="f_content" />
             <input type="hidden" name="summary"    id="f_summary" />
@@ -374,21 +369,21 @@
                        class="w-full bg-transparent border-none focus:ring-0 text-4xl lg:text-5xl font-bold placeholder-slate-700 dark:text-white leading-tight outline-none"
                        placeholder="Nhập tiêu đề bài viết..."
                        type="text"
-                       value="<%= artTitle %>" />
+                       value="${artTitle}" />
 
                 <%-- Author --%>
-                <div class="flex items-center gap-3 py-3 border-y border-slate-100 dark:border-border-dark">
-                    <div class="size-8 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-400 font-bold text-sm ring-1 ring-indigo-500/25 shrink-0">
-                        <%= currentUser != null ? currentUser.getFullName().substring(0,1).toUpperCase() : "?" %>
+                <div class="flex items-center gap-3 py-4 border-y border-slate-100 dark:border-slate-800/60">
+                    <div class="size-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm ring-1 ring-primary/20 shrink-0">
+                        ${not empty u ? fn:substring(u.fullName, 0, 1) : '?'}
                     </div>
                     <div>
-                        <p class="text-xs font-semibold text-slate-300"><%= currentUser != null ? currentUser.getFullName() : "" %></p>
-                        <p class="text-[10px] text-slate-500 uppercase tracking-wider">Biên tập viên</p>
+                        <p class="text-xs font-bold text-slate-900 dark:text-white">${u.fullName}</p>
+                        <p class="text-[10px] text-slate-500 uppercase tracking-widest font-medium mt-0.5">Phóng viên / Biên tập</p>
                     </div>
                 </div>
 
                 <%-- TinyMCE --%>
-                <textarea id="contentEditor" name="content"><%= artContent.isBlank() ? "" : artContent.replace("<", "\u003C") %></textarea>
+                <textarea id="contentEditor" name="content">${not empty artContent ? artContent : ''}</textarea>
 
             </div>
         </div>
@@ -440,10 +435,10 @@
             <h1 id="previewTitle" class="text-3xl font-bold text-slate-100 mb-6 leading-tight"></h1>
             <div class="flex items-center gap-3 pb-6 mb-6 border-b border-slate-700/50">
                 <div class="size-8 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-400 font-bold text-sm ring-1 ring-indigo-500/25 shrink-0">
-                    <%= currentUser != null ? currentUser.getFullName().substring(0,1).toUpperCase() : "?" %>
+                    ${not empty u ? fn:substring(fn:toUpperCase(u.fullName), 0, 1) : '?'}
                 </div>
                 <div>
-                    <p class="text-xs font-semibold text-slate-300"><%= currentUser != null ? currentUser.getFullName() : "" %></p>
+                    <p class="text-xs font-semibold text-slate-300">${not empty u ? u.fullName : ''}</p>
                     <p class="text-[10px] text-slate-500 uppercase tracking-wider">Biên tập viên</p>
                 </div>
             </div>
@@ -749,25 +744,26 @@
     }
 </script>
 
-<%-- Notifications (Top-Right) --%>
-<div id="toast-container" class="fixed top-20 right-5 z-[10002] pointer-events-none space-y-3">
-    <% if ("true".equals(savedMsg)) { %>
-        <div id="toast-success" class="bg-emerald-500 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 pointer-events-auto animate-in fade-in slide-in-from-top-4 duration-300">
+<%-- Notifications --%>
+<div id="toast-container" class="fixed top-24 right-6 z-[10002] pointer-events-none space-y-3">
+    <c:if test="${param.saved == 'true'}">
+        <div id="toast-success" class="bg-emerald-500 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 pointer-events-auto animate-in fade-in slide-in-from-top-4 duration-500">
             <span class="material-symbols-outlined text-2xl">check_circle</span>
             <div>
                 <p class="font-black tracking-tight text-sm">Thành công!</p>
-                <p class="text-xs opacity-90">Bài viết của bạn đã được cập nhật thành công.</p>
+                <p class="text-xs opacity-90">Bài viết đã được cập nhật thành công.</p>
             </div>
         </div>
-    <% } else if (errorMsg != null) { %>
-        <div id="toast-error" class="bg-red-500 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 pointer-events-auto animate-in fade-in slide-in-from-top-4 duration-300">
+    </c:if>
+    <c:if test="${not empty param.error}">
+        <div id="toast-error" class="bg-red-500 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 pointer-events-auto animate-in fade-in slide-in-from-top-4 duration-500">
             <span class="material-symbols-outlined text-2xl">error</span>
             <div>
-                <p class="font-black tracking-tight text-sm">Đã có lỗi xảy ra!</p>
-                <p class="text-xs opacity-90">Không thể thực hiện yêu cầu. Vui lòng thử lại.</p>
+                <p class="font-black tracking-tight text-sm">Thất bại!</p>
+                <p class="text-xs opacity-90">Có lỗi xảy ra: <c:out value="${param.error}" /></p>
             </div>
         </div>
-    <% } %>
+    </c:if>
 </div>
 
 </body>

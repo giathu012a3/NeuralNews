@@ -1,22 +1,23 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
+<%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
+
 <jsp:useBean id="articleDao" class="neuralnews.dao.ArticleDao" />
-<c:set var="currentPage" value="${empty param.page ? 1 : param.page}" />
+
+<c:set var="u" value="${sessionScope.currentUser}" />
+<c:set var="currentPage" value="${not empty param.page ? param.page : 1}" />
 <c:set var="limit" value="10" />
 <c:set var="offset" value="${(currentPage - 1) * limit}" />
-<c:set var="savedArticles" value="${articleDao.getSavedArticlesByUser(sessionScope.userId, limit, offset)}" />
-<c:set var="totalItems" value="${articleDao.getTotalSavedArticlesByUser(sessionScope.userId)}" />
-<%
-    Object totalObj = pageContext.getAttribute("totalItems");
-    Object limitObj = pageContext.getAttribute("limit");
-    int total = totalObj != null ? Integer.parseInt(totalObj.toString()) : 0;
-    int lim = limitObj != null ? Integer.parseInt(limitObj.toString()) : 1;
-    int pages = (lim > 0) ? (int) Math.ceil((double) total / lim) : 0;
-    pageContext.setAttribute("totalPages", pages);
-%>
-    <!DOCTYPE html>
-    <html class="dark" lang="en">
-    <html class="dark" lang="en">
+<c:set var="savedArticles" value="${articleDao.getSavedArticlesByUser(u.id, limit, offset)}" />
+<c:set var="totalItems" value="${articleDao.getTotalSavedArticlesByUser(u.id)}" />
+<c:set var="totalPages" value="${totalItems > 0 ? (totalItems + limit - 1) / limit : 0}" />
+<fmt:parseNumber var="totalPages" integerOnly="true" value="${totalPages}" />
+
+<c:set var="ctx" value="${pageContext.request.contextPath}" />
+
+<!DOCTYPE html>
+<html class="dark" lang="vi">
 
     <head>
         <title>Bài viết đã lưu - Bảng điều khiển Người dùng NexusAI</title>
@@ -143,40 +144,47 @@
                                 <c:choose>
                                     <c:when test="${not empty savedArticles}">
                                         <c:forEach var="article" items="${savedArticles}">
-                                            <div onclick="window.location.href='${pageContext.request.contextPath}/article?id=${article.id}'" 
-                                                 class="article-card group cursor-pointer bg-white dark:bg-background-dark/30 border border-slate-200 dark:border-border-dark rounded-xl overflow-hidden hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 flex flex-col">
+                                            <div onclick="window.location.href='${ctx}/article?id=${article.id}'" 
+                                                 class="article-card group cursor-pointer bg-white dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/60 rounded-2xl overflow-hidden hover:shadow-2xl hover:shadow-primary/5 transition-all duration-500 flex flex-col">
                                                 <div class="img-wrapper relative aspect-video overflow-hidden shrink-0">
-                                                    <div class="size-full bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
-                                                        style="background-image: url('${pageContext.request.contextPath}/${article.imageUrl != null ? article.imageUrl : 'assets/images/placeholder.jpg'}');">
+                                                    <div class="size-full bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
+                                                        style="background-image: url('${article.getDisplayImageUrl(ctx)}');">
                                                     </div>
                                                     <div class="absolute bottom-3 left-3 block-grid-only">
-                                                        <span class="px-2.5 py-1 bg-primary text-white text-[10px] font-bold uppercase tracking-wider rounded-md">
+                                                        <span class="px-2.5 py-1 bg-primary text-white text-[10px] font-black uppercase tracking-wider rounded-md border border-white/20 shadow-lg">
                                                             ${article.categoryName}
                                                         </span>
                                                     </div>
                                                 </div>
-                                                <div class="content-wrapper p-4 flex-1 flex flex-col space-y-2">
-                                                    <div class="flex items-center gap-2 mb-1 block-list-only">
-                                                        <span class="px-2 py-0.5 bg-blue-500/10 text-blue-500 text-[10px] font-bold uppercase rounded">
+                                                <div class="content-wrapper p-5 flex-1 flex flex-col">
+                                                    <div class="flex items-center gap-2 mb-2 block-list-only">
+                                                        <span class="px-2 py-0.5 bg-primary/10 text-primary text-[10px] font-black uppercase tracking-widest rounded-md border border-primary/10">
                                                             ${article.categoryName}
                                                         </span>
-                                                        <span class="text-xs text-slate-400">• Đã lưu: ${article.createdAt}</span>
+                                                        <span class="text-[10px] text-slate-400 font-bold uppercase tracking-widest flex items-center gap-1">
+                                                            <span class="material-symbols-outlined text-[14px]">save</span>
+                                                            ${article.createdAt}
+                                                        </span>
                                                     </div>
-                                                    <div class="flex items-center gap-2 text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest block-grid-only">
+                                                    <div class="flex items-center gap-2 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.15em] mb-2 block-grid-only">
                                                         <span class="material-symbols-outlined text-[14px]">calendar_today</span>
                                                         <span>${article.createdAt}</span>
                                                     </div>
-                                                    <h4 class="text-base font-bold text-slate-900 dark:text-white leading-tight line-clamp-2 group-hover:text-primary transition-colors">
+                                                    <h4 class="text-lg font-black text-slate-900 dark:text-white leading-tight line-clamp-2 group-hover:text-primary transition-colors tracking-tight">
                                                         ${article.title}
                                                     </h4>
-                                                    <div class="text-sm text-slate-500 dark:text-slate-400 line-clamp-2 mt-1">
+                                                    <p class="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 mt-2 italic flex-1">
                                                         ${article.summary}
-                                                    </div>
-                                                    <div class="action-wrapper pt-2 mt-auto flex items-center justify-between w-full">
-                                                        <button onclick="event.stopPropagation(); openConfirmModal(this, '${article.id}')" title="Bỏ lưu" class="remove-bookmark-btn p-2 text-primary hover:text-red-500 transition-colors bg-primary/10 dark:bg-primary/20 rounded-full flex items-center justify-center">
-                                                            <span class="material-symbols-outlined fill-1">bookmark</span>
+                                                    </p>
+                                                    <div class="action-wrapper pt-4 mt-auto flex items-center justify-between w-full">
+                                                        <button onclick="event.stopPropagation(); openConfirmModal(this, '${article.id}')" 
+                                                                class="size-10 text-primary hover:text-white hover:bg-red-500 transition-all bg-primary/5 dark:bg-primary/10 rounded-xl flex items-center justify-center group/btn shadow-sm"
+                                                                title="Bỏ lưu">
+                                                            <span class="material-symbols-outlined fill-1 group-hover/btn:rotate-12 transition-transform">bookmark</span>
                                                         </button>
-                                                        
+                                                        <div class="block-list-only">
+                                                            <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">chevron_right</span>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -211,56 +219,50 @@
                             </div>
                         </div>
                     </div>
-                    <div class="bg-gradient-to-r from-slate-900 to-primary-dark border border-white/10 rounded-2xl p-8 relative overflow-hidden group mt-6">
-                        <div class="absolute top-0 right-0 p-12 opacity-10 pointer-events-none group-hover:scale-110 transition-transform duration-700">
-                            <span class="material-symbols-outlined text-[160px]">edit_note</span>
+                    <div class="bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 border border-white/10 rounded-3xl p-8 lg:p-12 relative overflow-hidden group mt-6 shadow-2xl shadow-indigo-500/10">
+                        <%-- Accent glow --%>
+                        <div class="absolute -top-24 -right-24 size-96 bg-primary/20 rounded-full blur-[100px] pointer-events-none"></div>
+                        <div class="absolute -bottom-24 -left-24 size-96 bg-indigo-500/10 rounded-full blur-[100px] pointer-events-none"></div>
+                        
+                        <div class="absolute top-0 right-0 p-12 opacity-5 pointer-events-none group-hover:scale-110 transition-transform duration-1000">
+                            <span class="material-symbols-outlined text-[200px] text-white">news</span>
                         </div>
+
                         <div class="relative z-10">
-                            <div class="flex flex-col md:flex-row md:items-center justify-between gap-8">
-                                <div class="max-w-xl">
-                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-primary/20 backdrop-blur-md text-blue-400 text-[10px] font-bold uppercase tracking-widest rounded-full mb-4 border border-primary/30">
-                                        <span class="material-symbols-outlined text-[14px]">stars</span>
-                                        Chương trình Người sáng tạo Nexus
-                                    </span>
-                                    <h2 class="text-3xl md:text-4xl font-black text-white mb-4 tracking-tight">Trở thành Nhà báo Nexus</h2>
-                                    <p class="text-lg text-blue-100/90 mb-2 font-medium">Tiếp cận hàng triệu độc giả với nền tảng tin tức thế hệ mới của chúng tôi.</p>
-                                    <ul class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-blue-100/70 mb-6">
-                                        <li class="flex items-center gap-2">
-                                            <span class="material-symbols-outlined text-primary text-[18px]">check_circle</span>
-                                            Công cụ viết &amp; nghiên cứu AI
-                                        </li>
-                                        <li class="flex items-center gap-2">
-                                            <span class="material-symbols-outlined text-primary text-[18px]">check_circle</span>
-                                            Kiếm tiền từ báo cáo của bạn
-                                        </li>
-                                        <li class="flex items-center gap-2">
-                                            <span class="material-symbols-outlined text-primary text-[18px]">check_circle</span>
-                                            Truy cập nguồn cấp dữ liệu toàn cầu
-                                        </li>
-                                        <li class="flex items-center gap-2">
-                                            <span class="material-symbols-outlined text-primary text-[18px]">check_circle</span>
-                                            Tương tác trực tiếp với khán giả
-                                        </li>
-                                    </ul>
+                            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-12">
+                                <div class="max-w-2xl">
+                                    <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-primary/20 backdrop-blur-xl text-primary-light text-[10px] font-black uppercase tracking-[0.2em] rounded-full mb-6 border border-primary/20 shadow-lg shadow-primary/20">
+                                        <span class="material-symbols-outlined text-[14px]">verified</span>
+                                        Cơ hội nghề nghiệp
+                                    </div>
+                                    <h2 class="text-4xl md:text-5xl font-black text-white mb-6 tracking-tight leading-[1.1]">
+                                        Kế khai tiếng nói của bạn <br/>
+                                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">cùng Nexus AI.</span>
+                                    </h2>
+                                    <p class="text-lg text-slate-300 mb-8 font-medium leading-relaxed">Tham gia mạng lưới hơn 500 nhà báo chuyên nghiệp và cộng tác viên để cùng xây dựng nền tảng tin tức thông minh nhất thế giới.</p>
                                 </div>
-                                <div class="shrink-0 flex flex-col items-center gap-4">
+                                
+                                <div class="shrink-0 flex flex-col items-center gap-6">
                                     <c:choose>
                                         <c:when test="${userStatus == 'PENDING'}">
-                                            <div class="px-8 py-4 bg-amber-500/20 border border-amber-500/30 text-amber-400 font-bold rounded-xl backdrop-blur-md">
-                                                Đang chờ phê duyệt...
+                                            <div class="px-10 py-5 bg-amber-500/10 border border-amber-500/30 text-amber-500 font-black rounded-2xl backdrop-blur-xl flex flex-col items-center gap-2">
+                                                <span class="material-symbols-outlined animate-spin">sync</span>
+                                                Đang chờ duyệt hồ sơ
                                             </div>
                                         </c:when>
                                         <c:when test="${userRole == 'JOURNALIST' || userRole == 'ADMIN'}">
-                                            <div class="px-8 py-4 bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 font-bold rounded-xl backdrop-blur-md">
-                                                Bạn đã là Nhà báo
+                                            <div class="px-10 py-6 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-black rounded-2xl backdrop-blur-xl flex flex-col items-center gap-1">
+                                                <span class="material-symbols-outlined text-3xl">workspace_premium</span>
+                                                Cấp độ Chuyên gia
                                             </div>
                                         </c:when>
                                         <c:otherwise>
-                                            <button onclick="document.getElementById('upgradeModal').classList.remove('hidden')"
-                                                class="w-full md:w-auto px-10 py-4 bg-white text-primary-dark font-black text-lg rounded-xl shadow-xl shadow-black/20 hover:bg-cyan-50 hover:text-primary hover:shadow-cyan-400/20 hover:scale-105 active:scale-95 transition-all duration-300">
-                                                Đăng ký ngay
+                                            <button type="button" onclick="document.getElementById('upgradeModal').classList.remove('hidden')"
+                                                class="group relative px-12 py-5 bg-white text-slate-900 font-black text-xl rounded-2xl shadow-[0_0_30px_-5px_rgba(255,255,255,0.3)] hover:shadow-primary/40 hover:-translate-y-1 active:scale-95 transition-all duration-300 overflow-hidden">
+                                                <span class="relative z-10">Gửi đơn ngay</span>
+                                                <div class="absolute inset-0 bg-gradient-to-r from-blue-50 to-indigo-50 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                                             </button>
-                                            <p class="text-xs text-blue-200/60 font-medium">Nộp đơn mất &lt; 5 phút</p>
+                                            <p class="text-[11px] text-slate-500 font-bold uppercase tracking-widest">Phản hồi hồ sơ trong 24h</p>
                                         </c:otherwise>
                                     </c:choose>
                                 </div>
@@ -315,22 +317,22 @@
 
                 if(mode === 'grid') {
                     container.className = 'layout-grid grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6';
-                    if(btnGrid) btnGrid.className = 'flex items-center justify-center size-10 rounded-lg bg-primary text-white transition-all';
-                    if(btnList) btnList.className = 'flex items-center justify-center size-10 rounded-lg bg-white dark:bg-surface-dark border border-slate-200 dark:border-border-dark text-slate-400 hover:text-primary transition-all';
+                    if(btnGrid) btnGrid.className = 'flex items-center justify-center size-10 rounded-xl bg-primary text-white shadow-lg shadow-primary/20 transition-all';
+                    if(btnList) btnList.className = 'flex items-center justify-center size-10 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-400 hover:text-primary transition-all';
                     
-                    cards.forEach(c => c.className = 'article-card group cursor-pointer bg-white dark:bg-background-dark/30 border border-slate-200 dark:border-border-dark rounded-xl overflow-hidden hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 flex flex-col');
+                    cards.forEach(c => c.className = 'article-card group cursor-pointer bg-white dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/60 rounded-2xl overflow-hidden hover:shadow-2xl hover:shadow-primary/5 transition-all duration-500 flex flex-col');
                     imgWrappers.forEach(w => w.className = 'img-wrapper relative aspect-video overflow-hidden shrink-0');
-                    contentWrappers.forEach(w => w.className = 'content-wrapper p-4 flex-1 flex flex-col space-y-2');
-                    actionWrappers.forEach(w => w.className = 'action-wrapper pt-2 mt-auto flex items-center justify-between w-full border-t border-slate-100 dark:border-slate-800');
+                    contentWrappers.forEach(w => w.className = 'content-wrapper p-5 flex-1 flex flex-col');
+                    actionWrappers.forEach(w => w.className = 'action-wrapper pt-4 mt-auto flex items-center justify-between w-full');
                 } else {
-                    container.className = 'layout-list space-y-4';
-                    if(btnList) btnList.className = 'flex items-center justify-center size-10 rounded-lg bg-primary text-white transition-all';
-                    if(btnGrid) btnGrid.className = 'flex items-center justify-center size-10 rounded-lg bg-white dark:bg-surface-dark border border-slate-200 dark:border-border-dark text-slate-400 hover:text-primary transition-all';
+                    container.className = 'layout-list space-y-5';
+                    if(btnList) btnList.className = 'flex items-center justify-center size-10 rounded-xl bg-primary text-white shadow-lg shadow-primary/20 transition-all';
+                    if(btnGrid) btnGrid.className = 'flex items-center justify-center size-10 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-400 hover:text-primary transition-all';
                     
-                    cards.forEach(c => c.className = 'article-card group cursor-pointer flex flex-col md:flex-row md:items-center gap-4 p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-xl transition-all border border-transparent hover:border-slate-100 dark:hover:border-slate-700 bg-white dark:bg-background-dark/30 md:bg-transparent md:dark:bg-transparent');
-                    imgWrappers.forEach(w => w.className = 'img-wrapper size-full md:w-40 md:h-28 rounded-lg shrink-0 overflow-hidden relative');
-                    contentWrappers.forEach(w => w.className = 'content-wrapper flex-1 min-w-0 flex flex-col justify-center gap-1');
-                    actionWrappers.forEach(w => w.className = 'action-wrapper flex items-center justify-between md:justify-end gap-3 shrink-0 mt-2 md:mt-0 pt-0 border-t-0');
+                    cards.forEach(c => c.className = 'article-card group cursor-pointer flex flex-col md:flex-row md:items-center gap-5 p-4 bg-white dark:bg-slate-900/50 hover:bg-slate-50 dark:hover:bg-slate-800/80 rounded-2xl transition-all border border-slate-100 dark:border-slate-800/60 hover:border-primary/20 hover:shadow-xl');
+                    imgWrappers.forEach(w => w.className = 'img-wrapper size-full md:w-48 md:h-32 rounded-xl shrink-0 overflow-hidden relative shadow-sm');
+                    contentWrappers.forEach(w => w.className = 'content-wrapper flex-1 min-w-0 flex flex-col justify-center');
+                    actionWrappers.forEach(w => w.className = 'action-wrapper flex items-center justify-between md:justify-end gap-3 shrink-0 mt-3 md:mt-0 pt-0 border-t-0');
                 }
             }
             
@@ -342,10 +344,8 @@
             function openConfirmModal(btn, articleId) {
                 const modal = document.getElementById('confirmModal');
                 const confirmBtn = document.getElementById('modalConfirmBtn');
-                
                 modal.classList.remove('hidden');
                 document.body.classList.add('overflow-hidden');
-                
                 confirmBtn.onclick = () => {
                     closeConfirmModal();
                     unsaveArticle(btn, articleId);
@@ -363,7 +363,7 @@
                 const iconName   = type === 'success' ? 'check_circle'   : 'error';
                 const toastHtml =
                     '<div id="' + toastId + '" class="fixed top-5 right-5 z-[150] pointer-events-none">' +
-                        '<div class="' + colorClass + ' text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 pointer-events-auto transition-all duration-300">' +
+                        '<div class="' + colorClass + ' text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 pointer-events-auto transition-all duration-300 animate-in fade-in slide-in-from-top-4">' +
                             '<span class="material-symbols-outlined text-2xl">' + iconName + '</span>' +
                             '<div>' +
                                 '<p class="font-black tracking-tight text-sm">' + title + '</p>' +
@@ -383,7 +383,7 @@
 
             async function unsaveArticle(btn, articleId) {
                 try {
-                    const response = await fetch(`${pageContext.request.contextPath}/api/bookmark?articleId=` + articleId + `&action=remove`, {
+                    const response = await fetch(`${ctx}/api/bookmark?articleId=` + articleId + `&action=remove`, {
                         method: 'POST'
                     });
                     
@@ -393,7 +393,7 @@
                             showToast('success', 'Thành công!', 'Đã bỏ lưu bài viết.');
                             const card = btn.closest('.article-card');
                             if (card) {
-                                card.classList.add('opacity-0', 'scale-95');
+                                card.classList.add('opacity-0', 'scale-95', 'duration-300');
                                 setTimeout(() => {
                                     card.remove();
                                     const container = document.getElementById('article-container');
@@ -402,19 +402,14 @@
                                     }
                                 }, 300);
                             }
-                        } else {
-                            showToast('error', 'Lỗi!', 'Không thể bỏ lưu bài viết.');
                         }
-                    } else {
-                        showToast('error', 'Lỗi!', 'Lỗi kết nối máy chủ.');
                     }
                 } catch (error) {
                     console.error('Error:', error);
-                    showToast('error', 'Lỗi!', 'Đã có lỗi không mong muốn xảy ra.');
                 }
             }
-        </script>
-        <script>
+
+            // Auto-hide existing toasts
             setTimeout(() => {
                 const toasts = document.querySelectorAll('[id^="toast-"]');
                 toasts.forEach(toast => {
@@ -424,5 +419,4 @@
             }, 5000);
         </script>
     </body>
-
-    </html>
+</html>

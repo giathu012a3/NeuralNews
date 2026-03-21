@@ -32,6 +32,7 @@ public class AdminHomeController extends HttpServlet {
         request.setAttribute("totalArticles", articleStats.get("TOTAL"));
         request.setAttribute("pendingArticles", articleStats.get("PENDING"));
         request.setAttribute("todayArticles", articleStats.get("TODAY_NEW"));
+        request.setAttribute("totalLikes", articleDao.getTotalLikesCount());
         
         // 2. Thống kê người dùng
         int totalUsers = userDao.getTotalUserCount();
@@ -58,7 +59,9 @@ public class AdminHomeController extends HttpServlet {
             }
         }
         java.util.Map<String, Integer> trafficStats = articleDao.getDailyTraffic(days);
+        java.util.Map<String, Integer> likeStats = articleDao.getDailyLikes(days);
         request.setAttribute("trafficStats", trafficStats);
+        request.setAttribute("likeStats", likeStats);
         request.setAttribute("currentDays", days);
 
         // 6. Lấy 5 bài viết mới nhất cho Dashboard

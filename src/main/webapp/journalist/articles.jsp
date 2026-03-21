@@ -1,61 +1,19 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" pageEncoding="UTF-8" %>
-<%@ page import="java.util.List" %>
-<%@ page import="neuralnews.model.Article" %>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
+<%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 
-<%
-    // ── Nếu vào thẳng JSP (không qua Servlet) → redirect sang Servlet,
-    //    giữ nguyên toàn bộ query string (page, keyword, status, ...)
-    List<Article> articles = (List<Article>) request.getAttribute("articles");
-    if (articles == null) {
-        String qs = request.getQueryString();
-        String redirectUrl = request.getContextPath() + "/journalist/articles"
-                             + (qs != null && !qs.isEmpty() ? "?" + qs : "");
-        response.sendRedirect(redirectUrl);
-        return;
-    }
-%>
+<c:set var="ctx" value="${pageContext.request.contextPath}" />
+<c:set var="hasActiveFilter" value="${not empty filterKeyword or (not empty filterStatus and filterStatus != 'ALL') or (not empty filterCategory and filterCategory != 'ALL') or not empty filterDateFrom or not empty filterDateTo}" />
+<c:set var="startIndex" value="${totalArticles == 0 ? 0 : (currentPage - 1) * pageSize + 1}" />
+<c:set var="endIndex" value="${currentPage * pageSize > totalArticles ? totalArticles : currentPage * pageSize}" />
 
 <!DOCTYPE html>
-<html class="dark" lang="en">
-
+<html class="dark" lang="vi">
 <head>
     <jsp:include page="components/head.jsp" />
-    <title>Thư viện Quản lý Bài viết của tôi - Newsroom</title>
+    <title>Quản lý Bài viết</title>
 </head>
-
-<%
-    int totalArticles = (Integer) request.getAttribute("totalArticles");
-    int totalPages    = (Integer) request.getAttribute("totalPages");
-    int currentPage   = (Integer) request.getAttribute("currentPage");
-    int pageSize      = (Integer) request.getAttribute("pageSize");
-
-    String filterKeyword  = (String) request.getAttribute("filterKeyword");
-    String filterStatus   = (String) request.getAttribute("filterStatus");
-    String filterCategory = (String) request.getAttribute("filterCategory");
-    String filterDateFrom = (String) request.getAttribute("filterDateFrom");
-    String filterDateTo   = (String) request.getAttribute("filterDateTo");
-
-    @SuppressWarnings("unchecked")
-    List<String> categories = (List<String>) request.getAttribute("categories");
-
-    int startIndex = totalArticles == 0 ? 0 : (currentPage - 1) * pageSize + 1;
-    int endIndex   = Math.min(currentPage * pageSize, totalArticles);
-
-    boolean hasActiveFilter = !filterKeyword.isEmpty()
-        || (!filterStatus.isEmpty()   && !filterStatus.equals("ALL"))
-        || (!filterCategory.isEmpty() && !filterCategory.equals("ALL"))
-        || !filterDateFrom.isEmpty()  || !filterDateTo.isEmpty();
-
-    // Base URL luôn trỏ về Servlet
-    String servletUrl = request.getContextPath() + "/journalist/articles";
-
-    String filterQS = "keyword="  + java.net.URLEncoder.encode(filterKeyword,  "UTF-8")
-                    + "&status="   + java.net.URLEncoder.encode(filterStatus,   "UTF-8")
-                    + "&category=" + java.net.URLEncoder.encode(filterCategory, "UTF-8")
-                    + "&dateFrom=" + java.net.URLEncoder.encode(filterDateFrom, "UTF-8")
-                    + "&dateTo="   + java.net.URLEncoder.encode(filterDateTo,   "UTF-8");
-%>
-
 <body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen">
     <div class="flex h-screen overflow-hidden">
         <jsp:include page="components/sidebar.jsp">
@@ -68,8 +26,8 @@
                 <jsp:param name="pageTitle" value="Quản lý Bài viết" />
             </jsp:include>
 
-            <%-- Notifications (Top-Right) --%>
-            <% if ("true".equals(request.getParameter("submitted"))) { %>
+            <%-- Toasts --%>
+            <c:if test="${param.submitted == 'true'}">
                 <div id="toast-success" class="fixed top-20 right-5 z-[10002] pointer-events-none">
                     <div class="bg-emerald-500 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 pointer-events-auto animate-in fade-in slide-in-from-top-4 duration-300">
                         <div>
@@ -78,8 +36,8 @@
                         </div>
                     </div>
                 </div>
-            <% } %>
-            <% if (request.getParameter("error") != null) { %>
+            </c:if>
+            <c:if test="${not empty param.error}">
                 <div id="toast-error" class="fixed top-20 right-5 z-[10002] pointer-events-none">
                     <div class="bg-red-500 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 pointer-events-auto animate-in fade-in slide-in-from-top-4 duration-300">
                         <div>
@@ -88,42 +46,42 @@
                         </div>
                     </div>
                 </div>
-            <% } %>
+            </c:if>
 
             <div class="flex-1 overflow-y-auto">
                 <div class="p-8 max-w-[1200px] mx-auto space-y-6">
 
-                    <%-- ═══ HEADER + ACTIONS ═════════════════════════════════ --%>
+                    <%-- HEADER + ACTIONS --%>
                         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
                             <div class="flex items-center gap-4">
                                 <div>
                                     <h3 class="text-xl font-bold">Bài viết của tôi</h3>
                                     <p class="text-slate-500 dark:text-slate-400 text-xs mt-1">
-                                        Quản lý <span class="text-slate-900 dark:text-white font-semibold"><%= totalArticles %></span> bài viết của bạn
+                                        Quản lý <span class="text-slate-900 dark:text-white font-semibold">${totalArticles}</span> bài viết của bạn
                                     </p>
                                 </div>
                                 <div class="h-8 w-px bg-slate-200 dark:bg-border-dark hidden sm:block"></div>
-                                <form method="get" action="<%= servletUrl %>" id="headerSearchForm" class="relative group">
-                                    <input type="hidden" name="status"   value="<%= filterStatus %>">
-                                    <input type="hidden" name="category" value="<%= filterCategory %>">
-                                    <input type="hidden" name="dateFrom" value="<%= filterDateFrom %>">
-                                    <input type="hidden" name="dateTo"   value="<%= filterDateTo %>">
+                                <form method="get" action="${ctx}/journalist/articles" id="headerSearchForm" class="relative group">
+                                    <input type="hidden" name="status"   value="${filterStatus}">
+                                    <input type="hidden" name="category" value="${filterCategory}">
+                                    <input type="hidden" name="dateFrom" value="${filterDateFrom}">
+                                    <input type="hidden" name="dateTo"   value="${filterDateTo}">
                                     <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg transition-colors group-focus-within:text-primary">search</span>
-                                    <input id="headerKeyword" name="keyword" value="<%= filterKeyword %>"
+                                    <input id="headerKeyword" name="keyword" value="${filterKeyword}"
                                         class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-border-dark rounded-xl py-2 pl-10 pr-4 w-72 focus:ring-2 focus:ring-primary/20 focus:border-primary text-xs transition-all shadow-sm"
                                         placeholder="Tìm bài viết..." type="text" />
                                 </form>
                             </div>
                         <div class="flex items-center gap-3">
                             <button onclick="toggleFilterPanel()"
-                                class="flex items-center gap-2 px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-border-dark hover:border-primary/50 rounded-lg text-xs font-semibold transition-all shadow-sm<%= hasActiveFilter ? " ring-2 ring-primary/40" : "" %>">
+                                class="flex items-center gap-2 px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-border-dark hover:border-primary/50 rounded-lg text-xs font-semibold transition-all shadow-sm${hasActiveFilter ? ' ring-2 ring-primary/40' : ''}">
                                 <span class="material-symbols-outlined text-sm">tune</span>
                                 Bộ lọc Nâng cao
-                                <% if (hasActiveFilter) { %>
-                                <span class="size-1.5 rounded-full bg-primary inline-block"></span>
-                                <% } %>
+                                <c:if test="${hasActiveFilter}">
+                                    <span class="size-1.5 rounded-full bg-primary inline-block"></span>
+                                </c:if>
                             </button>
-                            <a href="${pageContext.request.contextPath}/journalist/create-article"
+                            <a href="${ctx}/journalist/create-article"
                                 class="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg text-xs font-semibold transition-all shadow-sm">
                                 <span class="material-symbols-outlined text-sm">add</span>
                                 Tạo Bài viết Mới
@@ -131,34 +89,34 @@
                         </div>
                     </div>
 
-                    <%-- ═══ PANEL BỘ LỌC NÂNG CAO ════════════════════════════ --%>
-                    <div id="filterPanel" class="<%= hasActiveFilter ? "" : "hidden" %> bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-border-dark shadow-sm overflow-hidden">
+                    <%-- PANEL BỘ LỌC NÂNG CAO --%>
+                    <div id="filterPanel" class="${hasActiveFilter ? '' : 'hidden'} bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-border-dark shadow-sm overflow-hidden">
                         <div class="px-6 py-3.5 border-b border-slate-100 dark:border-border-dark/50 flex items-center justify-between">
                             <span class="text-xs font-bold text-slate-600 dark:text-slate-300 flex items-center gap-2">
                                 <span class="material-symbols-outlined text-sm text-primary">filter_list</span>
                                 Bộ lọc Nâng cao
                             </span>
-                            <% if (hasActiveFilter) { %>
-                            <a href="<%= servletUrl %>"
-                               class="text-xs text-red-500 hover:text-red-400 font-semibold flex items-center gap-1 transition-colors">
-                                <span class="material-symbols-outlined text-sm">close</span>
-                                Xoá bộ lọc
-                            </a>
-                            <% } %>
+                            <c:if test="${hasActiveFilter}">
+                                <a href="${ctx}/journalist/articles"
+                                   class="text-xs text-red-500 hover:text-red-400 font-semibold flex items-center gap-1 transition-colors">
+                                    <span class="material-symbols-outlined text-sm">close</span>
+                                    Xoá bộ lọc
+                                </a>
+                            </c:if>
                         </div>
-                        <form method="get" action="<%= servletUrl %>" id="filterForm">
-                            <input type="hidden" name="keyword" id="filterKeywordHidden" value="<%= filterKeyword %>">
+                        <form method="get" action="${ctx}/journalist/articles" id="filterForm">
+                            <input type="hidden" name="keyword" id="filterKeywordHidden" value="${filterKeyword}">
                             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 p-5">
 
                                 <div class="space-y-1.5">
                                     <label class="text-[11px] font-semibold text-slate-400 uppercase tracking-wide">Trạng thái</label>
                                     <select name="status"
                                         class="w-full bg-slate-100 dark:bg-slate-800 border-none rounded-lg px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-primary outline-none transition-all">
-                                        <option value="ALL" <%= filterStatus.isEmpty() || filterStatus.equals("ALL") ? "selected" : "" %>>Tất cả trạng thái</option>
-                                        <option value="PUBLISHED" <%= "PUBLISHED".equals(filterStatus) ? "selected" : "" %>>Đã xuất bản</option>
-                                        <option value="DRAFT"     <%= "DRAFT".equals(filterStatus)     ? "selected" : "" %>>Bản nháp</option>
-                                        <option value="PENDING"   <%= "PENDING".equals(filterStatus)   ? "selected" : "" %>>Đang chờ duyệt</option>
-                                        <option value="REJECTED"  <%= "REJECTED".equals(filterStatus)  ? "selected" : "" %>>Bị từ chối</option>
+                                        <option value="ALL" ${filterStatus == 'ALL' or empty filterStatus ? 'selected' : ''}>Tất cả trạng thái</option>
+                                        <option value="PUBLISHED" ${filterStatus == 'PUBLISHED' ? 'selected' : ''}>Đã xuất bản</option>
+                                        <option value="DRAFT"     ${filterStatus == 'DRAFT' ? 'selected' : ''}>Bản nháp</option>
+                                        <option value="PENDING"   ${filterStatus == 'PENDING' ? 'selected' : ''}>Đang chờ duyệt</option>
+                                        <option value="REJECTED"  ${filterStatus == 'REJECTED' ? 'selected' : ''}>Bị từ chối</option>
                                     </select>
                                 </div>
 
@@ -166,28 +124,28 @@
                                     <label class="text-[11px] font-semibold text-slate-400 uppercase tracking-wide">Danh mục</label>
                                     <select name="category"
                                         class="w-full bg-slate-100 dark:bg-slate-800 border-none rounded-lg px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-primary outline-none transition-all">
-                                        <option value="ALL" <%= filterCategory.isEmpty() || filterCategory.equals("ALL") ? "selected" : "" %>>Tất cả danh mục</option>
-                                        <% if (categories != null) { for (String cat : categories) { %>
-                                        <option value="<%= cat %>" <%= cat.equals(filterCategory) ? "selected" : "" %>><%= cat %></option>
-                                        <% } } %>
+                                        <option value="ALL" ${filterCategory == 'ALL' or empty filterCategory ? 'selected' : ''}>Tất cả danh mục</option>
+                                        <c:forEach var="cat" items="${categories}">
+                                            <option value="${cat}" ${cat == filterCategory ? 'selected' : ''}>${cat}</option>
+                                        </c:forEach>
                                     </select>
                                 </div>
 
                                 <div class="space-y-1.5">
                                     <label class="text-[11px] font-semibold text-slate-400 uppercase tracking-wide">Từ ngày</label>
-                                    <input type="date" name="dateFrom" value="<%= filterDateFrom %>"
+                                    <input type="date" name="dateFrom" value="${filterDateFrom}"
                                         class="w-full bg-slate-100 dark:bg-slate-800 border-none rounded-lg px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-primary outline-none transition-all" />
                                 </div>
 
                                 <div class="space-y-1.5">
                                     <label class="text-[11px] font-semibold text-slate-400 uppercase tracking-wide">Đến ngày</label>
-                                    <input type="date" name="dateTo" value="<%= filterDateTo %>"
+                                    <input type="date" name="dateTo" value="${filterDateTo}"
                                         class="w-full bg-slate-100 dark:bg-slate-800 border-none rounded-lg px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-primary outline-none transition-all" />
                                 </div>
 
                             </div>
                             <div class="px-5 pb-4 flex justify-end gap-2">
-                                <a href="<%= servletUrl %>"
+                                <a href="${ctx}/journalist/articles"
                                    class="px-4 py-1.5 rounded-lg border border-slate-200 dark:border-border-dark hover:bg-slate-50 dark:hover:bg-slate-800 text-xs font-semibold transition-all">
                                     Đặt lại
                                 </a>
@@ -215,169 +173,212 @@
                                 </thead>
                                 <tbody class="divide-y divide-slate-100 dark:divide-border-dark/30">
 
-                                <% if (articles.isEmpty()) { %>
-                                    <tr>
-                                        <td colspan="5" class="table-cell text-center text-slate-400 py-12">
-                                            <% if (hasActiveFilter) { %>
-                                            Không tìm thấy bài viết nào phù hợp.
-                                            <% } else { %>
-                                            Chưa có bài viết nào.
-                                            <% } %>
-                                        </td>
-                                    </tr>
-                                <% } else { %>
-                                    <% for (Article a : articles) { %>
-                                    <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
+                                <c:choose>
+                                    <c:when test="${empty articles}">
+                                        <tr>
+                                            <td colspan="5" class="table-cell text-center text-slate-400 py-12">
+                                                <c:out value="${hasActiveFilter ? 'Không tìm thấy bài viết nào phù hợp.' : 'Chưa có bài viết nào.'}" />
+                                            </td>
+                                        </tr>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <c:forEach var="a" items="${articles}">
+                                            <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
+                                                <td class="table-cell">
+                                                    <div class="flex items-center gap-3">
+                                                        <div class="size-12 rounded-lg bg-slate-200 dark:bg-slate-800 overflow-hidden shrink-0">
+                                                            <img alt="${a.title}" class="size-full object-cover opacity-80" src="${a.getDisplayImageUrl(ctx)}" />
+                                                        </div>
+                                                        <div class="min-w-0">
+                                                            <p class="font-bold text-slate-900 dark:text-white truncate">${a.title}</p>
+                                                            <p class="text-[11px] text-slate-400 font-medium">
+                                                                <c:out value="${not empty a.categoryName ? a.categoryName : 'Chưa phân loại'}" />
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td class="table-cell">
+                                                    <div class="badge-base ${a.getStatusBadgeClass()} ring-1 ring-inset w-fit">
+                                                        <span class="size-1.5 rounded-full ${a.getStatusDotClass()}"></span>
+                                                        <c:choose>
+                                                            <c:when test="${a.status == 'PUBLISHED'}">Đã xuất bản</c:when>
+                                                            <c:when test="${a.status == 'PENDING'}">Chờ duyệt</c:when>
+                                                            <c:when test="${a.status == 'DRAFT'}">Bản nháp</c:when>
+                                                            <c:when test="${a.status == 'REJECTED'}">Bị từ chối</c:when>
+                                                            <c:otherwise>${a.getStatusLabel()}</c:otherwise>
+                                                        </c:choose>
+                                                    </div>
+                                                </td>
+                                                <td class="table-cell font-medium">${a.formattedViews}</td>
+                                                <td class="table-cell text-slate-500 text-xs">
+                                                    <c:choose>
+                                                        <c:when test="${not empty a.createdAt}">
+                                                            <fmt:formatDate value="${a.createdAt}" pattern="dd/MM/yyyy" />
+                                                        </c:when>
+                                                        <c:otherwise>&#8212;</c:otherwise>
+                                                    </c:choose>
+                                                </td>
+                                                <td class="table-cell">
+                                                    <div class="flex items-center justify-end gap-1">
+                                                        <c:set var="st" value="${not empty a.status ? a.status : ''}" />
+                                                        <c:set var="isPublished" value="${st == 'PUBLISHED'}" />
+                                                        <c:set var="isRejected" value="${st == 'REJECTED'}" />
 
-                                        <td class="table-cell">
-                                            <div class="flex items-center gap-3">
-                                                <div class="size-12 rounded-lg bg-slate-200 dark:bg-slate-800 overflow-hidden shrink-0">
-                                                    <% String imgUrl = a.getDisplayImageUrl(request.getContextPath()); %>
-                                                    <img alt="<%= a.getTitle() %>"
-                                                        class="size-full object-cover opacity-80"
-                                                        src="<%= imgUrl %>" />
-                                                </div>
-                                                <div class="min-w-0">
-                                                    <p class="font-bold text-slate-900 dark:text-white truncate">
-                                                        <%= a.getTitle() %>
-                                                    </p>
-                                                    <p class="text-[11px] text-slate-400 font-medium">
-                                                        <%= a.getCategoryName() != null ? a.getCategoryName() : "Chưa phân loại" %>
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </td>
+                                                        <%-- Nút Chỉnh sửa: ẩn khi PUBLISHED --%>
+                                                        <c:if test="${!isPublished}">
+                                                            <a href="${ctx}/journalist/create-article?id=${a.id}"
+                                                                class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-400 hover:text-primary transition-colors"
+                                                                title="Chỉnh sửa">
+                                                                <span class="material-symbols-outlined text-xl">edit</span>
+                                                            </a>
+                                                        </c:if>
 
-                                        <td class="table-cell">
-                                            <div class="badge-base <%= a.getStatusBadgeClass() %> ring-1 ring-inset w-fit">
-                                                <span class="size-1.5 rounded-full <%= a.getStatusDotClass() %>"></span>
-                                                <%= a.getStatusLabel() %>
-                                            </div>
-                                        </td>
+                                                        <%-- Nút Xem: luôn hiển thị --%>
+                                                        <a href="${ctx}/user/article?id=${a.id}"
+                                                            class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-400 hover:text-slate-200 transition-colors"
+                                                            title="Xem bài viết">
+                                                            <span class="material-symbols-outlined text-xl">visibility</span>
+                                                        </a>
 
-                                        <td class="table-cell font-medium">
-                                            <%= a.getFormattedViews() %>
-                                        </td>
+                                                        <c:if test="${isPublished}">
+                                                            <c:url var="archiveUrl" value="/journalist/articles">
+                                                                <c:param name="action" value="archive" />
+                                                                <c:param name="id" value="${a.id}" />
+                                                                <c:param name="page" value="${currentPage}" />
+                                                                <c:param name="keyword" value="${filterKeyword}" />
+                                                                <c:param name="status" value="${filterStatus}" />
+                                                                <c:param name="category" value="${filterCategory}" />
+                                                                <c:param name="dateFrom" value="${filterDateFrom}" />
+                                                                <c:param name="dateTo" value="${filterDateTo}" />
+                                                            </c:url>
+                                                            <a href="${archiveUrl}"
+                                                                class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-400 hover:text-amber-500 transition-colors"
+                                                                title="Lưu trữ bài viết"
+                                                                onclick="return confirm('Bạn có chắc muốn lưu trữ bài viết này?')">
+                                                                <span class="material-symbols-outlined text-xl">archive</span>
+                                                            </a>
+                                                        </c:if>
 
-                                        <td class="table-cell text-slate-500 text-xs">
-                                            <%
-                                                if (a.getCreatedAt() != null) {
-                                                    java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd/MM/yyyy");
-                                                    out.print(sdf.format(a.getCreatedAt()));
-                                                } else {
-                                                    out.print("&#8212;");
-                                                }
-                                            %>
-                                        </td>
-
-                                        <td class="table-cell">
-                                            <div class="flex items-center justify-end gap-1">
-                                                <%
-                                                    String st = a.getStatus() != null ? a.getStatus() : "";
-                                                    boolean isPublished = "PUBLISHED".equals(st);
-                                                    boolean isRejected  = "REJECTED".equals(st);
-                                                %>
-
-                                                <%-- Nút Chỉnh sửa: ẩn khi PUBLISHED --%>
-                                                <% if (!isPublished) { %>
-                                                <a href="${pageContext.request.contextPath}/journalist/create-article?id=<%= a.getId() %>"
-                                                    class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-400 hover:text-primary transition-colors"
-                                                    title="Chỉnh sửa">
-                                                    <span class="material-symbols-outlined text-xl">edit</span>
-                                                </a>
-                                                <% } %>
-
-                                                <%-- Nút Xem: luôn hiển thị --%>
-                                                <a href="${pageContext.request.contextPath}/user/article?id=<%= a.getId() %>"
-                                                    class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-400 hover:text-slate-200 transition-colors"
-                                                    title="Xem bài viết">
-                                                    <span class="material-symbols-outlined text-xl">visibility</span>
-                                                </a>
-
-                                                <%-- Nút Lưu trữ: chỉ hiện khi PUBLISHED --%>
-                                                <% if (isPublished) { %>
-                                                <a href="${pageContext.request.contextPath}/journalist/articles?action=archive&id=<%= a.getId() %>&page=<%= currentPage %>&<%= filterQS %>"
-                                                    class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-400 hover:text-amber-500 transition-colors"
-                                                    title="Lưu trữ bài viết"
-                                                    onclick="return confirm('Bạn có chắc muốn lưu trữ bài viết này?')">
-                                                    <span class="material-symbols-outlined text-xl">archive</span>
-                                                </a>
-                                                <% } %>
-
-                                                <%-- Nút Xóa: hiện khi DRAFT / REJECTED / PENDING --%>
-                                                <% if (isRejected || "DRAFT".equals(st) || "PENDING".equals(st)) { %>
-                                                <a href="${pageContext.request.contextPath}/journalist/articles?action=delete&id=<%= a.getId() %>&page=<%= currentPage %>&<%= filterQS %>"
-                                                    class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-400 hover:text-red-500 transition-colors"
-                                                    title="Xóa bài viết"
-                                                    onclick="return confirm('Bạn có chắc muốn xóa bài viết này? Hành động không thể hoàn tác.')">
-                                                    <span class="material-symbols-outlined text-xl">delete</span>
-                                                </a>
-                                                <% } %>
-
-                                            </div>
-                                        </td>
-
-                                    </tr>
-                                    <% } %>
-                                <% } %>
+                                                        <c:if test="${isRejected or st == 'DRAFT' or st == 'PENDING'}">
+                                                            <c:url var="deleteUrl" value="/journalist/articles">
+                                                                <c:param name="action" value="delete" />
+                                                                <c:param name="id" value="${a.id}" />
+                                                                <c:param name="page" value="${currentPage}" />
+                                                                <c:param name="keyword" value="${filterKeyword}" />
+                                                                <c:param name="status" value="${filterStatus}" />
+                                                                <c:param name="category" value="${filterCategory}" />
+                                                                <c:param name="dateFrom" value="${filterDateFrom}" />
+                                                                <c:param name="dateTo" value="${filterDateTo}" />
+                                                            </c:url>
+                                                            <a href="${deleteUrl}"
+                                                                class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-400 hover:text-red-500 transition-colors"
+                                                                title="Xóa bài viết"
+                                                                onclick="return confirm('Bạn có chắc muốn xóa bài viết này? Hành động không thể hoàn tác.')">
+                                                                <span class="material-symbols-outlined text-xl">delete</span>
+                                                            </a>
+                                                        </c:if>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </c:forEach>
+                                    </c:otherwise>
+                                </c:choose>
 
                                 </tbody>
                             </table>
                         </div>
                     </div>
 
-                    <%-- ═══ PAGINATION ════════════════════════════════════════ --%>
+                    <%-- PAGINATION --%>
                     <div class="flex items-center justify-between py-6 border-t border-slate-200 dark:border-border-dark">
                         <p class="text-xs font-medium text-slate-500 dark:text-slate-400">
-                            Hiển thị
-                            <span class="text-slate-900 dark:text-white">
-                                <% if (totalArticles == 0) { %>0<% } else { %><%= startIndex %>&#8211;<%= endIndex %><% } %>
-                            </span>
-                            trong <span class="text-slate-900 dark:text-white"><%= totalArticles %></span> bài viết
+                            Hiển thị <span class="text-slate-900 dark:text-white">${totalArticles == 0 ? 0 : startIndex}&#8211;${endIndex}</span> trong <span class="text-slate-900 dark:text-white">${totalArticles}</span> bài viết
                         </p>
 
                         <div class="flex items-center gap-1.5">
+                            <c:set var="wStart" value="${currentPage - 2 > 1 ? currentPage - 2 : 1}" />
+                            <c:set var="wEnd" value="${currentPage + 2 < totalPages ? currentPage + 2 : totalPages}" />
+
                             <%-- Nút Trước --%>
-                            <% if (currentPage <= 1) { %>
-                            <button disabled class="px-3 py-1.5 rounded-md border border-slate-200 dark:border-border-dark disabled:opacity-40 transition-all text-xs font-semibold">Trước</button>
-                            <% } else { %>
-                            <a href="<%= servletUrl %>?page=<%= currentPage - 1 %>&<%= filterQS %>"
-                               class="px-3 py-1.5 rounded-md border border-slate-200 dark:border-border-dark hover:bg-slate-50 dark:hover:bg-slate-800 transition-all text-xs font-semibold">Trước</a>
-                            <% } %>
+                            <c:choose>
+                                <c:when test="${currentPage <= 1}">
+                                    <button disabled class="px-3 py-1.5 rounded-md border border-slate-200 dark:border-border-dark disabled:opacity-40 transition-all text-xs font-semibold">Trước</button>
+                                </c:when>
+                                <c:otherwise>
+                                    <c:url var="prevPageUrl" value="/journalist/articles">
+                                        <c:param name="page" value="${currentPage - 1}" />
+                                        <c:param name="keyword" value="${filterKeyword}" />
+                                        <c:param name="status" value="${filterStatus}" />
+                                        <c:param name="category" value="${filterCategory}" />
+                                        <c:param name="dateFrom" value="${filterDateFrom}" />
+                                        <c:param name="dateTo" value="${filterDateTo}" />
+                                    </c:url>
+                                    <a href="${prevPageUrl}" class="px-3 py-1.5 rounded-md border border-slate-200 dark:border-border-dark hover:bg-slate-50 dark:hover:bg-slate-800 transition-all text-xs font-semibold">Trước</a>
+                                </c:otherwise>
+                            </c:choose>
 
-                            <%-- Số trang (sliding window) --%>
-                            <%
-                                int wStart = Math.max(1, currentPage - 2);
-                                int wEnd   = Math.min(totalPages, currentPage + 2);
-                            %>
-                            <% if (wStart > 1) { %>
-                            <a href="<%= servletUrl %>?page=1&<%= filterQS %>"
-                               class="px-4 py-1.5 rounded-md border border-slate-200 dark:border-border-dark hover:bg-slate-50 dark:hover:bg-slate-800 transition-all text-xs font-semibold">1</a>
-                            <% if (wStart > 2) { %><span class="px-1 text-slate-400 text-xs">&#8230;</span><% } %>
-                            <% } %>
+                            <c:if test="${wStart > 1}">
+                                <c:url var="firstPageUrl" value="/journalist/articles">
+                                    <c:param name="page" value="1" />
+                                    <c:param name="keyword" value="${filterKeyword}" />
+                                    <c:param name="status" value="${filterStatus}" />
+                                    <c:param name="category" value="${filterCategory}" />
+                                    <c:param name="dateFrom" value="${filterDateFrom}" />
+                                    <c:param name="dateTo" value="${filterDateTo}" />
+                                </c:url>
+                                <a href="${firstPageUrl}" class="px-4 py-1.5 rounded-md border border-slate-200 dark:border-border-dark hover:bg-slate-50 dark:hover:bg-slate-800 transition-all text-xs font-semibold">1</a>
+                                <c:if test="${wStart > 2}"><span class="px-1 text-slate-400 text-xs">&#8230;</span></c:if>
+                            </c:if>
 
-                            <% for (int p = wStart; p <= wEnd; p++) { %>
-                            <% if (p == currentPage) { %>
-                            <button class="px-4 py-1.5 rounded-md bg-primary/10 text-primary text-xs font-bold"><%= p %></button>
-                            <% } else { %>
-                            <a href="<%= servletUrl %>?page=<%= p %>&<%= filterQS %>"
-                               class="px-4 py-1.5 rounded-md border border-slate-200 dark:border-border-dark hover:bg-slate-50 dark:hover:bg-slate-800 transition-all text-xs font-semibold"><%= p %></a>
-                            <% } %>
-                            <% } %>
+                            <c:forEach begin="${wStart}" end="${wEnd}" var="p">
+                                <c:choose>
+                                    <c:when test="${p == currentPage}">
+                                        <button class="px-4 py-1.5 rounded-md bg-primary/10 text-primary text-xs font-bold">${p}</button>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <c:url var="pageUrl" value="/journalist/articles">
+                                            <c:param name="page" value="${p}" />
+                                            <c:param name="keyword" value="${filterKeyword}" />
+                                            <c:param name="status" value="${filterStatus}" />
+                                            <c:param name="category" value="${filterCategory}" />
+                                            <c:param name="dateFrom" value="${filterDateFrom}" />
+                                            <c:param name="dateTo" value="${filterDateTo}" />
+                                        </c:url>
+                                        <a href="${pageUrl}" class="px-4 py-1.5 rounded-md border border-slate-200 dark:border-border-dark hover:bg-slate-50 dark:hover:bg-slate-800 transition-all text-xs font-semibold">${p}</a>
+                                    </c:otherwise>
+                                </c:choose>
+                            </c:forEach>
 
-                            <% if (wEnd < totalPages) { %>
-                            <% if (wEnd < totalPages - 1) { %><span class="px-1 text-slate-400 text-xs">&#8230;</span><% } %>
-                            <a href="<%= servletUrl %>?page=<%= totalPages %>&<%= filterQS %>"
-                               class="px-4 py-1.5 rounded-md border border-slate-200 dark:border-border-dark hover:bg-slate-50 dark:hover:bg-slate-800 transition-all text-xs font-semibold"><%= totalPages %></a>
-                            <% } %>
+                            <c:if test="${wEnd < totalPages}">
+                                <c:if test="${wEnd < totalPages - 1}"><span class="px-1 text-slate-400 text-xs">&#8230;</span></c:if>
+                                <c:url var="lastPageUrl" value="/journalist/articles">
+                                    <c:param name="page" value="${totalPages}" />
+                                    <c:param name="keyword" value="${filterKeyword}" />
+                                    <c:param name="status" value="${filterStatus}" />
+                                    <c:param name="category" value="${filterCategory}" />
+                                    <c:param name="dateFrom" value="${filterDateFrom}" />
+                                    <c:param name="dateTo" value="${filterDateTo}" />
+                                </c:url>
+                                <a href="${lastPageUrl}" class="px-4 py-1.5 rounded-md border border-slate-200 dark:border-border-dark hover:bg-slate-50 dark:hover:bg-slate-800 transition-all text-xs font-semibold">${totalPages}</a>
+                            </c:if>
 
                             <%-- Nút Tiếp --%>
-                            <% if (currentPage >= totalPages) { %>
-                            <button disabled class="px-3 py-1.5 rounded-md border border-slate-200 dark:border-border-dark disabled:opacity-40 transition-all text-xs font-semibold">Tiếp</button>
-                            <% } else { %>
-                            <a href="<%= servletUrl %>?page=<%= currentPage + 1 %>&<%= filterQS %>"
-                               class="px-3 py-1.5 rounded-md border border-slate-200 dark:border-border-dark hover:bg-slate-50 dark:hover:bg-slate-800 transition-all text-xs font-semibold">Tiếp</a>
-                            <% } %>
+                            <c:choose>
+                                <c:when test="${currentPage >= totalPages}">
+                                    <button disabled class="px-3 py-1.5 rounded-md border border-slate-200 dark:border-border-dark disabled:opacity-40 transition-all text-xs font-semibold">Tiếp</button>
+                                </c:when>
+                                <c:otherwise>
+                                    <c:url var="nextPageUrl" value="/journalist/articles">
+                                        <c:param name="page" value="${currentPage + 1}" />
+                                        <c:param name="keyword" value="${filterKeyword}" />
+                                        <c:param name="status" value="${filterStatus}" />
+                                        <c:param name="category" value="${filterCategory}" />
+                                        <c:param name="dateFrom" value="${filterDateFrom}" />
+                                        <c:param name="dateTo" value="${filterDateTo}" />
+                                    </c:url>
+                                    <a href="${nextPageUrl}" class="px-3 py-1.5 rounded-md border border-slate-200 dark:border-border-dark hover:bg-slate-50 dark:hover:bg-slate-800 transition-all text-xs font-semibold">Tiếp</a>
+                                </c:otherwise>
+                            </c:choose>
                         </div>
                     </div>
 
@@ -391,11 +392,9 @@
             document.getElementById('filterPanel').classList.toggle('hidden');
         }
 
-        // ── Realtime search debounce 400ms ────────────────────────────────
         let searchTimer = null;
         const searchInput = document.getElementById('headerKeyword');
 
-        // Tự động focus lại và đặt con trỏ cuối chuỗi sau khi reload
         if (searchInput && searchInput.value.length > 0) {
             searchInput.focus();
             const len = searchInput.value.length;
@@ -406,12 +405,12 @@
             clearTimeout(searchTimer);
             const keyword = this.value.trim();
             searchTimer = setTimeout(function () {
-                window.location.href = '<%= servletUrl %>?page=1'
+                window.location.href = '${ctx}/journalist/articles?page=1'
                     + '&keyword='  + encodeURIComponent(keyword)
-                    + '&status='   + encodeURIComponent('<%= filterStatus %>')
-                    + '&category=' + encodeURIComponent('<%= filterCategory %>')
-                    + '&dateFrom=' + encodeURIComponent('<%= filterDateFrom %>')
-                    + '&dateTo='   + encodeURIComponent('<%= filterDateTo %>');
+                    + '&status='   + encodeURIComponent('${filterStatus}')
+                    + '&category=' + encodeURIComponent('${filterCategory}')
+                    + '&dateFrom=' + encodeURIComponent('${filterDateFrom}')
+                    + '&dateTo='   + encodeURIComponent('${filterDateTo}');
             }, 400);
         });
 
@@ -422,7 +421,6 @@
             document.getElementById('filterForm').submit();
         });
 
-        // Auto-hide toasts
         document.addEventListener('DOMContentLoaded', function() {
             setTimeout(() => {
                 const toasts = document.querySelectorAll('#toast-success, #toast-error');

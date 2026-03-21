@@ -1,59 +1,15 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" pageEncoding="UTF-8" %>
-<%@ page import="java.util.List" %>
-<%@ page import="neuralnews.model.Article" %>
-<%@ page import="neuralnews.model.User" %>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 
-<%
-    List<Article> topArticles = (List<Article>) request.getAttribute("topArticles");
-    if (topArticles == null) {
-        request.getRequestDispatcher("/journalist/analytics").forward(request, response);
-        return;
-    }
+<c:if test="${empty topArticles}">
+    <jsp:forward page="/journalist/analytics" />
+</c:if>
 
-    String  fmtViews      = (String)  request.getAttribute("fmtViews");
-    String  fmtLikes      = (String)  request.getAttribute("fmtLikes");
-    String  fmtDislikes   = (String)  request.getAttribute("fmtDislikes");
-    int     totalComments = (Integer) request.getAttribute("totalComments");
-    int     totalPublished= (Integer) request.getAttribute("totalPublished");
-    int     sentimentScore= (Integer) request.getAttribute("sentimentScore");
-    int     pctPositive   = (Integer) request.getAttribute("pctPositive");
-    int     pctNeutral    = (Integer) request.getAttribute("pctNeutral");
-    int     pctNegative   = (Integer) request.getAttribute("pctNegative");
-    String  fmtTotal      = (String)  request.getAttribute("fmtTotal");
-    String  contextPath   = request.getContextPath();
-    if (fmtDislikes == null) fmtDislikes = "0";
+<c:set var="ctx" value="${pageContext.request.contextPath}" />
+<c:set var="dislikes" value="${not empty fmtDislikes ? fmtDislikes : '0'}" />
+<c:set var="score" value="${not empty sentimentScore ? sentimentScore : 0}" />
 
-    String[] catNames = (String[]) request.getAttribute("catNames");
-    int[]    catViews = (int[])    request.getAttribute("catViews");
-    String   catNamesJson = (String) request.getAttribute("catNamesJson");
-    String   catViewsJson = (String) request.getAttribute("catViewsJson");
-    if (catNames == null) catNames = new String[]{"","","","",""};
-    if (catViews == null) catViews = new int[]{0,0,0,0,0};
-    if (catNamesJson == null) catNamesJson = "[\"\",\"\",\"\",\"\",\"\"]";
-    if (catViewsJson == null) catViewsJson = "[0,0,0,0,0]";
-
-    int[][] weekData = (int[][]) request.getAttribute("weekData");
-    if (weekData == null) {
-        weekData = new int[7][2];
-        for (int[] d : weekData) { d[0]=pctPositive; d[1]=pctNegative; }
-    }
-    String statsJson = (String) request.getAttribute("statsJson");
-    if (statsJson == null) statsJson = "{}";
-    String sentJson1d  = (String) request.getAttribute("sentJson1d");
-    String sentJson7d  = (String) request.getAttribute("sentJson7d");
-    String sentJson30d = (String) request.getAttribute("sentJson30d");
-    String sentJsonAll = (String) request.getAttribute("sentJsonAll");
-    String sentLabels7d  = (String) request.getAttribute("sentLabels7d");
-    String sentLabels30d = (String) request.getAttribute("sentLabels30d");
-    String sentLabelsAll = (String) request.getAttribute("sentLabelsAll");
-    if (sentJson1d   == null) sentJson1d   = "{\"pos\":[0],\"neg\":[0]}";
-    if (sentJson7d   == null) sentJson7d   = "{\"pos\":[0,0,0,0,0,0,0],\"neg\":[0,0,0,0,0,0,0]}";
-    if (sentJson30d  == null) sentJson30d  = "{\"pos\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"neg\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]}";
-    if (sentJsonAll  == null) sentJsonAll  = "{\"pos\":[0],\"neg\":[0]}";
-    if (sentLabels7d  == null) sentLabels7d  = "[]";
-    if (sentLabels30d == null) sentLabels30d = "[]";
-    if (sentLabelsAll == null) sentLabelsAll = "[\"—\"]";
-%>
 <!DOCTYPE html>
 <html class="dark" lang="vi">
 <head>
@@ -106,7 +62,7 @@
                     <div class="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-border-dark shadow-sm">
                         <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Tổng lượt xem</p>
                         <div class="flex items-end justify-between">
-                            <h3 class="text-2xl font-bold" id="stat-views"><%= fmtViews %></h3>
+                            <h3 class="text-2xl font-bold" id="stat-views">${fmtViews}</h3>
                             <span class="text-blue-500 text-xs font-bold flex items-center mb-1">
                                 <span class="material-symbols-outlined text-sm">visibility</span>
                             </span>
@@ -115,7 +71,7 @@
                     <div class="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-border-dark shadow-sm">
                         <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Bình luận</p>
                         <div class="flex items-end justify-between">
-                            <h3 class="text-2xl font-bold" id="stat-comments"><%= totalComments %></h3>
+                            <h3 class="text-2xl font-bold" id="stat-comments">${totalComments}</h3>
                             <span class="text-purple-500 text-xs font-bold flex items-center mb-1">
                                 <span class="material-symbols-outlined text-sm">forum</span>
                             </span>
@@ -124,7 +80,7 @@
                     <div class="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-border-dark shadow-sm">
                         <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Lượt thích</p>
                         <div class="flex items-end justify-between">
-                            <h3 class="text-2xl font-bold" id="stat-likes"><%= fmtLikes %></h3>
+                            <h3 class="text-2xl font-bold" id="stat-likes">${fmtLikes}</h3>
                             <span class="text-emerald-500 text-xs font-bold flex items-center mb-1">
                                 <span class="material-symbols-outlined text-sm">thumb_up</span>
                             </span>
@@ -133,7 +89,7 @@
                     <div class="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-border-dark shadow-sm">
                         <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Không thích</p>
                         <div class="flex items-end justify-between">
-                            <h3 class="text-2xl font-bold" id="stat-dislikes"><%= fmtDislikes %></h3>
+                            <h3 class="text-2xl font-bold" id="stat-dislikes">${dislikes}</h3>
                             <span class="text-red-400 text-xs font-bold flex items-center mb-1">
                                 <span class="material-symbols-outlined text-sm">thumb_down</span>
                             </span>
@@ -142,10 +98,10 @@
                     <div class="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-border-dark shadow-sm">
                         <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Điểm cảm xúc</p>
                         <div class="flex items-end justify-between">
-                            <h3 class="text-2xl font-bold" id="stat-score"><%= sentimentScore %>/100</h3>
-                            <span id="stat-score-label" class="<%= sentimentScore >= 60 ? "text-emerald-500" : sentimentScore >= 40 ? "text-amber-500" : "text-red-500" %> text-xs font-bold flex items-center mb-1">
-                                <span class="material-symbols-outlined text-sm"><%= sentimentScore >= 60 ? "trending_up" : sentimentScore >= 40 ? "trending_flat" : "trending_down" %></span>
-                                <%= sentimentScore >= 60 ? "Tốt" : sentimentScore >= 40 ? "TB" : "Thấp" %>
+                            <h3 class="text-2xl font-bold" id="stat-score">${score}/100</h3>
+                            <span id="stat-score-label" class="${score >= 60 ? 'text-emerald-500' : score >= 40 ? 'text-amber-500' : 'text-red-500'} text-xs font-bold flex items-center mb-1">
+                                <span class="material-symbols-outlined text-sm">${score >= 60 ? 'trending_up' : score >= 40 ? 'trending_flat' : 'trending_down'}</span>
+                                ${score >= 60 ? 'Tốt' : score >= 40 ? 'TB' : 'Thấp'}
                             </span>
                         </div>
                     </div>
@@ -172,8 +128,6 @@
                                         <span class="text-[10px] font-bold text-slate-500 uppercase">Tiêu cực</span>
                                     </div>
                                 </div>
-                                <%-- Period filter --%>
-                                
                             </div>
                         </div>
                         <%-- Chart.js canvas --%>
@@ -183,17 +137,17 @@
                         <%-- Legend tổng — chỉ 2 cột --%>
                         <div class="mt-4 grid grid-cols-2 gap-3 pt-4 border-t border-slate-100 dark:border-border-dark">
                             <div class="text-center">
-                                <p class="text-2xl font-bold text-emerald-500"><%= pctPositive %>%</p>
+                                <p class="text-2xl font-bold text-emerald-500">${not empty pctPositive ? pctPositive : 0}%</p>
                                 <p class="text-[10px] text-slate-400 uppercase font-semibold mt-0.5">Tích cực</p>
                                 <div class="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full mt-2 overflow-hidden">
-                                    <div class="h-full bg-emerald-500 rounded-full transition-all" style="width:<%= pctPositive %>%"></div>
+                                    <div class="h-full bg-emerald-500 rounded-full transition-all" style="width:${not empty pctPositive ? pctPositive : 0}%"></div>
                                 </div>
                             </div>
                             <div class="text-center">
-                                <p class="text-2xl font-bold text-red-400"><%= pctNegative %>%</p>
+                                <p class="text-2xl font-bold text-red-400">${not empty pctNegative ? pctNegative : 0}%</p>
                                 <p class="text-[10px] text-slate-400 uppercase font-semibold mt-0.5">Tiêu cực</p>
                                 <div class="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full mt-2 overflow-hidden">
-                                    <div class="h-full bg-red-400 rounded-full transition-all" style="width:<%= pctNegative %>%"></div>
+                                    <div class="h-full bg-red-400 rounded-full transition-all" style="width:${not empty pctNegative ? pctNegative : 0}%"></div>
                                 </div>
                             </div>
                         </div>
@@ -208,27 +162,29 @@
                             <canvas id="categoryDonut"></canvas>
                             <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                                 <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Tổng</p>
-                                <p class="text-base font-bold text-slate-900 dark:text-white"><%= fmtTotal %></p>
+                                <p class="text-base font-bold text-slate-900 dark:text-white">${fmtTotal}</p>
                             </div>
                         </div>
 
                         <div class="space-y-2">
-                        <%
-                        String[] catColors = {"#0d7ff2","#10b981","#f59e0b","#f43f5e","#8b5cf6"};
-                        for (int ci = 0; ci < 5; ci++) {
-                            if (catNames[ci] == null || catNames[ci].isEmpty()) continue;
-                            String fmtV = catViews[ci] >= 1000
-                                ? String.format("%.1fk", catViews[ci]/1000.0)
-                                : String.valueOf(catViews[ci]);
-                        %>
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center gap-2">
-                                    <span class="size-2.5 rounded-sm shrink-0" style="background:<%= catColors[ci] %>"></span>
-                                    <span class="text-xs font-medium text-slate-600 dark:text-slate-300 truncate max-w-[130px]"><%= catNames[ci] %></span>
+                        <c:set var="catColors" value="${fn:split('#0d7ff2,#10b981,#f59e0b,#f43f5e,#8b5cf6', ',')}" />
+                        <c:forEach begin="0" end="4" var="ci">
+                            <c:if test="${not empty catNames[ci]}">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <span class="size-2.5 rounded-sm shrink-0" style="background:${catColors[ci]}"></span>
+                                        <span class="text-xs font-medium text-slate-600 dark:text-slate-300 truncate max-w-[130px]">${catNames[ci]}</span>
+                                    </div>
+                                    <c:set var="cv" value="${catViews[ci]}" />
+                                    <span class="text-xs font-bold text-slate-700 dark:text-slate-200">
+                                        <c:choose>
+                                            <c:when test="${cv >= 1000}"><c:out value="${fn:substring(cv/1000.0, 0, 3)}k" /></c:when>
+                                            <c:otherwise>${cv}</c:otherwise>
+                                        </c:choose>
+                                    </span>
                                 </div>
-                                <span class="text-xs font-bold text-slate-700 dark:text-slate-200"><%= fmtV %></span>
-                            </div>
-                        <% } %>
+                            </c:if>
+                        </c:forEach>
                         </div>
                     </div>
 
@@ -238,7 +194,7 @@
                 <div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-border-dark overflow-hidden shadow-sm">
                     <div class="px-6 py-4 border-b border-slate-200 dark:border-border-dark flex items-center justify-between">
                         <h4 class="font-bold">Bảng xếp hạng Hiệu suất Nội dung</h4>
-                        <a href="<%= contextPath %>/journalist/articles"
+                        <a href="${ctx}/journalist/articles"
                            class="text-xs text-primary font-semibold hover:underline flex items-center gap-1">
                             <span class="material-symbols-outlined text-sm">open_in_new</span>
                             Xem tất cả
@@ -261,50 +217,51 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
-                        <% if (topArticles.isEmpty()) { %>
-                            <tr>
-                                <td colspan="7" class="px-6 py-12 text-center text-slate-400 text-sm">
-                                    <span class="material-symbols-outlined text-4xl block mb-2">analytics</span>
-                                    Chưa có bài viết nào được xuất bản để phân tích.
-                                </td>
-                            </tr>
-                        <% } else {
-                            int rank = 0;
-                            for (Article a : topArticles) {
-                                rank++;
-                        %>
-                            <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
-                                <td class="px-6 py-4 text-xs font-bold text-slate-400"><%= rank %></td>
-                                <td class="px-6 py-4">
-                                    <a href="<%= contextPath %>/user/article?id=<%= a.getId() %>"
-                                       class="font-semibold text-slate-800 dark:text-white hover:text-primary transition-colors truncate max-w-xs block">
-                                        <%= a.getTitle() %>
-                                    </a>
-                                    <p class="text-[11px] text-slate-400 mt-0.5">
-                                        <%= a.getCategoryName() != null ? a.getCategoryName() : "—" %>
-                                    </p>
-                                </td>
-                                <td class="px-6 py-4 font-semibold"><%= a.getFormattedViews() %></td>
-                                <td class="px-6 py-4">
-                                    <span class="flex items-center gap-1 text-emerald-500 font-semibold text-xs">
-                                        <span class="material-symbols-outlined" style="font-size:14px">thumb_up</span>
-                                        <%= a.getLikesCount() %>
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <span class="flex items-center gap-1 text-red-400 font-semibold text-xs">
-                                        <span class="material-symbols-outlined" style="font-size:14px">thumb_down</span>
-                                        <%= a.getDislikesCount() %>
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 text-slate-600 dark:text-slate-400"><%= a.getEngagementRate() %></td>
-                                <td class="px-6 py-4 text-right">
-                                    <span class="material-symbols-outlined text-lg <%= a.getTrendClass() %>">
-                                        <%= a.getTrendIcon() %>
-                                    </span>
-                                </td>
-                            </tr>
-                        <% } } %>
+                        <c:choose>
+                            <c:when test="${empty topArticles}">
+                                <tr>
+                                    <td colspan="7" class="px-6 py-12 text-center text-slate-400 text-sm">
+                                        <span class="material-symbols-outlined text-4xl block mb-2">analytics</span>
+                                        Chưa có bài viết nào được xuất bản để phân tích.
+                                    </td>
+                                </tr>
+                            </c:when>
+                            <c:otherwise>
+                                <c:forEach var="a" items="${topArticles}" varStatus="vs">
+                                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+                                        <td class="px-6 py-4 text-xs font-bold text-slate-400">${vs.count}</td>
+                                        <td class="px-6 py-4">
+                                            <a href="${ctx}/user/article?id=${a.id}"
+                                               class="font-semibold text-slate-800 dark:text-white hover:text-primary transition-colors truncate max-w-xs block">
+                                                ${a.title}
+                                            </a>
+                                            <p class="text-[11px] text-slate-400 mt-0.5">
+                                                ${not empty a.categoryName ? a.categoryName : '—'}
+                                            </p>
+                                        </td>
+                                        <td class="px-6 py-4 font-semibold">${a.formattedViews}</td>
+                                        <td class="px-6 py-4">
+                                            <span class="flex items-center gap-1 text-emerald-500 font-semibold text-xs">
+                                                <span class="material-symbols-outlined" style="font-size:14px">thumb_up</span>
+                                                ${a.likesCount}
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <span class="flex items-center gap-1 text-red-400 font-semibold text-xs">
+                                                <span class="material-symbols-outlined" style="font-size:14px">thumb_down</span>
+                                                ${a.dislikesCount}
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 text-slate-600 dark:text-slate-400">${a.engagementRate}</td>
+                                        <td class="px-6 py-4 text-right">
+                                            <span class="material-symbols-outlined text-lg ${a.trendClass}">
+                                                ${a.trendIcon}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                </c:forEach>
+                            </c:otherwise>
+                        </c:choose>
                         </tbody>
                     </table>
                 </div>
@@ -315,26 +272,21 @@
 </div>
 
 <script>
-    // ── Dark / Light mode ─────────────────────────────────────────────────────
-    const html      = document.documentElement;
-    const themeIcon = document.getElementById('themeIcon');
-
-    // ── Chart.js: Biểu đồ cảm xúc — 2 cột, period switcher ───────────────
-    var isDark     = document.documentElement.classList.contains('dark');
-    var gridColor  = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
-    var labelColor = isDark ? '#94a3b8' : '#64748b';
+    const isDark     = document.documentElement.classList.contains('dark');
+    const gridColor  = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+    const labelColor = isDark ? '#94a3b8' : '#64748b';
 
     var SENT_DATA = {
-        '1d':  <%= sentJson1d  %>,
-        '7d':  <%= sentJson7d  %>,
-        '30d': <%= sentJson30d %>,
-        'all': <%= sentJsonAll %>
+        '1d':  ${not empty sentJson1d ? sentJson1d : '{"pos":[0],"neg":[0]}'},
+        '7d':  ${not empty sentJson7d ? sentJson7d : '{"pos":[0,0,0,0,0,0,0],"neg":[0,0,0,0,0,0,0]}'},
+        '30d': ${not empty sentJson30d ? sentJson30d : '{"pos":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"neg":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]}'},
+        'all': ${not empty sentJsonAll ? sentJsonAll : '{"pos":[0],"neg":[0]}'}
     };
     var SENT_LABELS = {
         '1d':  ['Hôm nay'],
-        '7d':  <%= sentLabels7d  %>,
-        '30d': <%= sentLabels30d %>,
-        'all': <%= sentLabelsAll %>
+        '7d':  ${not empty sentLabels7d ? sentLabels7d : '[]'},
+        '30d': ${not empty sentLabels30d ? sentLabels30d : '[]'},
+        'all': ${not empty sentLabelsAll ? sentLabelsAll : '["—"]'}
     };
     var SENT_SUBTITLES = {
         '1d':  'Tỉ lệ like/dislike hôm nay',
@@ -393,16 +345,13 @@
     });
 
     function setSentPeriod(p) {
-        // Active button
         document.querySelectorAll('.sent-period-btn').forEach(function(b) {
             b.classList.remove('bg-white','dark:bg-slate-700','text-primary','shadow-sm');
             b.classList.add('text-slate-500');
         });
         var btn = document.getElementById('spbtn-' + p);
         if (btn) { btn.classList.add('bg-white','text-primary','shadow-sm'); btn.classList.remove('text-slate-500'); }
-
         document.getElementById('sentSubtitle').textContent = SENT_SUBTITLES[p];
-
         var d = SENT_DATA[p];
         sentChart.data.labels            = SENT_LABELS[p];
         sentChart.data.datasets[0].data  = d.pos;
@@ -410,23 +359,17 @@
         sentChart.update();
     }
 
-    document.addEventListener('DOMContentLoaded', function() { setSentPeriod('all'); });
-
-    // ── Bộ lọc thời gian tổng — cập nhật tất cả stat cards ───────────────
-    var STATS_JSON = <%= statsJson %>;
+    var STATS_JSON = ${not empty statsJson ? statsJson : '{}'};
     var AP_LABELS  = { '1d':'1 ngày qua','7d':'7 ngày qua','30d':'30 ngày qua','all':'Tất cả thời gian' };
 
     function setAnalyticsPeriod(p) {
-        // Active button
         document.querySelectorAll('.analytics-period-btn').forEach(function(b) {
             b.classList.remove('bg-white','text-primary','shadow-sm');
             b.classList.add('text-slate-500','dark:text-slate-400');
         });
         var btn = document.getElementById('apbtn-' + p);
         if (btn) { btn.classList.add('bg-white','text-primary','shadow-sm'); btn.classList.remove('text-slate-500','dark:text-slate-400'); }
-
         document.getElementById('analyticsperiodLabel').textContent = AP_LABELS[p];
-
         var s = STATS_JSON[p];
         if (s) {
             document.getElementById('stat-views').textContent    = s.views;
@@ -439,16 +382,11 @@
             scoreEl.className = (sc >= 60 ? 'text-emerald-500' : sc >= 40 ? 'text-amber-500' : 'text-red-500') + ' text-xs font-bold flex items-center mb-1';
             scoreEl.innerHTML = '<span class="material-symbols-outlined text-sm">' + (sc >= 60 ? 'trending_up' : sc >= 40 ? 'trending_flat' : 'trending_down') + '</span>' + (sc >= 60 ? 'Tốt' : sc >= 40 ? 'TB' : 'Thấp');
         }
-        // Sync chart sentiment
         setSentPeriod(p);
     }
 
-    document.addEventListener('DOMContentLoaded', function() { setAnalyticsPeriod('all'); });
-
-    // ── Chart.js: Donut chart danh mục ───────────────────────────────────
-    var catNames = <%= catNamesJson %>;
-    var catData  = <%= catViewsJson %>;
-    // Lọc bỏ category rỗng
+    var catNames = ${not empty catNamesJson ? catNamesJson : '[]'};
+    var catData  = ${not empty catViewsJson ? catViewsJson : '[]'};
     var filteredNames = [], filteredData = [], filteredColors = [];
     var allColors = ['#0d7ff2','#10b981','#f59e0b','#f43f5e','#8b5cf6'];
     catNames.forEach(function(n, i) {
@@ -458,6 +396,7 @@
             filteredColors.push(allColors[i]);
         }
     });
+
     new Chart(document.getElementById('categoryDonut'), {
         type: 'doughnut',
         data: {
@@ -471,9 +410,7 @@
             }]
         },
         options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            cutout: '70%',
+            responsive: true, maintainAspectRatio: false, cutout: '70%',
             plugins: {
                 legend: { display: false },
                 tooltip: {
@@ -495,6 +432,7 @@
         }
     });
 
+    document.addEventListener('DOMContentLoaded', function() { setAnalyticsPeriod('all'); });
 </script>
 </body>
 </html>

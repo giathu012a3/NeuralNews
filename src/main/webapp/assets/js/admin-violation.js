@@ -86,10 +86,21 @@ const AdminViolation = {
         const reasonsContainer = document.getElementById('displayReasons');
         reasonsContainer.innerHTML = '';
         if (r.reason) {
+            const reasonMap = {
+                'SPAM': 'Nội dung rác',
+                'OFFENSIVE': 'Ngôn từ xúc phạm',
+                'ADS': 'Quảng cáo / Spam',
+                'OFFTOPIC': 'Lạc chủ đề',
+                'FAKE_NEWS': 'Tin giả',
+                'HARASSMENT': 'Quấy rối',
+                'HATE_SPEECH': 'Thù ghét',
+                'VIOLENCE': 'Bạo lực'
+            };
             r.reason.split(', ').forEach(rsn => {
                 const span = document.createElement('span');
                 span.className = 'px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-[10px] font-black text-slate-500 dark:text-slate-400 rounded-lg border border-slate-200 dark:border-slate-700 uppercase tracking-tight';
-                span.textContent = rsn;
+                const translated = reasonMap[rsn.toUpperCase()] || rsn;
+                span.textContent = translated;
                 reasonsContainer.appendChild(span);
             });
         }

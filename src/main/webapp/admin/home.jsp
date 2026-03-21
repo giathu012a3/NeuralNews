@@ -31,7 +31,7 @@
                 </header>
                 <div class="p-8 space-y-8">
                     <!-- Row 1: KPI Cards -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
                         <!-- Card 1 -->
                         <div
                             class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm flex items-center gap-4 border border-slate-50 dark:border-slate-700">
@@ -61,6 +61,18 @@
                         <div
                             class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm flex items-center gap-4 border border-slate-50 dark:border-slate-700">
                             <div
+                                class="w-12 h-12 bg-pink-100 dark:bg-pink-900/30 rounded-full flex items-center justify-center">
+                                <span class="material-icons text-pink-500">favorite</span>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Tổng lượt thích</p>
+                                <h3 class="text-2xl font-bold text-slate-800 dark:text-white">${totalLikes != null ? totalLikes : 0}</h3>
+                            </div>
+                        </div>
+                        <!-- Card 4 -->
+                        <div
+                            class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm flex items-center gap-4 border border-slate-50 dark:border-slate-700">
+                            <div
                                 class="w-12 h-12 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center">
                                 <span class="material-icons text-amber-500">person_add</span>
                             </div>
@@ -69,7 +81,7 @@
                                 <h3 class="text-2xl font-bold text-slate-800 dark:text-white">${journalistApplications}</h3>
                             </div>
                         </div>
-                        <!-- Card 4 -->
+                        <!-- Card 5 -->
                         <div
                             class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm flex items-center gap-4 border border-slate-50 dark:border-slate-700">
                             <div
@@ -173,29 +185,51 @@
                                     ${entry.value}${!loop.last ? ',' : ''}
                                 </c:forEach>
                             ];
+                            const likeCounts = [
+                                <c:forEach var="entry" items="${likeStats}" varStatus="loop">
+                                    ${entry.value}${!loop.last ? ',' : ''}
+                                </c:forEach>
+                            ];
 
                             new Chart(trafficCtx, {
                                 type: 'line',
                                 data: {
                                     labels: trafficDates,
-                                    datasets: [{
-                                        label: 'Lượt xem',
-                                        data: trafficCounts,
-                                        borderColor: '#0d7ff2',
-                                        backgroundColor: 'rgba(13, 127, 242, 0.1)',
-                                        fill: true,
-                                        tension: 0.4,
-                                        pointRadius: 4,
-                                        pointBackgroundColor: '#0d7ff2'
-                                    }]
+                                    datasets: [
+                                        {
+                                            label: 'Lượt xem',
+                                            data: trafficCounts,
+                                            borderColor: '#0d7ff2',
+                                            backgroundColor: 'rgba(13, 127, 242, 0.1)',
+                                            fill: true,
+                                            tension: 0.4,
+                                            pointRadius: 4,
+                                            pointBackgroundColor: '#0d7ff2',
+                                            yAxisID: 'y'
+                                        },
+                                        {
+                                            label: 'Lượt thích',
+                                            data: likeCounts,
+                                            borderColor: '#ec4899',
+                                            backgroundColor: 'rgba(236, 72, 153, 0.1)',
+                                            fill: true,
+                                            tension: 0.4,
+                                            pointRadius: 4,
+                                            pointBackgroundColor: '#ec4899',
+                                            yAxisID: 'y1'
+                                        }
+                                    ]
                                 },
                                 options: {
                                     responsive: true,
                                     maintainAspectRatio: false,
-                                    plugins: { legend: { display: false } },
+                                    interaction: { mode: 'index', intersect: false },
+                                    plugins: { legend: { display: true, position: 'top', align: 'end' } },
                                     scales: {
-                                        y: { beginAtZero: true, grid: { display: false } },
-                                        x: { grid: { display: false } }
+                                        y: { type: 'linear', display: true, position: 'left', beginAtZero: true, grid: { display: false } },
+                                        y1: { type: 'linear', display: true, position: 'right', beginAtZero: true,
+                                              grid: { drawOnChartArea: false },
+                                              ticks: { color: '#ec4899', precision: 0 } }
                                     }
                                 }
                             });

@@ -84,6 +84,7 @@
                             </p>
                         </div>
                     </div>
+                    <c:if test="${not empty art and art.status == 'PUBLISHED'}">
                     <div class="flex items-center gap-3">
                         <button id="btnBookmark" onclick="toggleBookmark()"
                             class="flex items-center gap-2 px-4 py-2 rounded-full border border-slate-200 dark:border-slate-700 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
@@ -97,6 +98,7 @@
                             <span class="material-symbols-outlined text-xl">share</span>
                         </button>
                     </div>
+                    </c:if>
                 </div>
 
                 <%-- AI Summary Button --%>
@@ -133,6 +135,7 @@
                     <c:out value="${not empty art ? art.getContentProcessed(pageContext.request.contextPath) : 'Nội dung đang được cập nhật...'}" escapeXml="false" />
                 </div>
 
+                <c:if test="${not empty art and art.status == 'PUBLISHED'}">
                 <%-- Reactions + Comments Section --%>
                 <div class="mt-16 pt-12 border-t border-slate-200 dark:border-slate-800">
 
@@ -204,6 +207,7 @@
                     </div>
 
                 </div><%-- End Reactions + Comments --%>
+                </c:if>
 
             </article>
         </main>

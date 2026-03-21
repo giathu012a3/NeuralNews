@@ -1,19 +1,23 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-    <%@ taglib prefix="c" uri="jakarta.tags.core" %>
-        <jsp:useBean id="articleDao" class="neuralnews.dao.ArticleDao" />
-        <c:set var="currentPage" value="${empty param.page ? 1 : param.page}" />
-        <c:set var="limit" value="10" />
-        <c:set var="offset" value="${(currentPage - 1) * limit}" />
-        <c:set var="readArticles" value="${articleDao.getReadArticlesByUser(sessionScope.userId, limit, offset)}" />
-        <c:set var="totalItems" value="${articleDao.getTotalReadArticlesByUser(sessionScope.userId)}" />
-        <% Object totalObj=pageContext.getAttribute("totalItems"); Object limitObj=pageContext.getAttribute("limit");
-            int total=totalObj !=null ? Integer.parseInt(totalObj.toString()) : 0; int lim=limitObj !=null ?
-            Integer.parseInt(limitObj.toString()) : 1; int pages=(lim> 0) ? (int) Math.ceil((double) total / lim) : 0;
-            pageContext.setAttribute("totalPages", pages);
-            %>
-            <!DOCTYPE html>
-            <html class="dark" lang="en">
-            <html class="dark" lang="en">
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
+<%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
+
+<jsp:useBean id="articleDao" class="neuralnews.dao.ArticleDao" />
+
+<c:set var="u" value="${sessionScope.currentUser}" />
+<c:set var="currentPage" value="${not empty param.page ? param.page : 1}" />
+<c:set var="limit" value="10" />
+<c:set var="offset" value="${(currentPage - 1) * limit}" />
+<c:set var="readArticles" value="${articleDao.getReadArticlesByUser(u.id, limit, offset)}" />
+<c:set var="totalItems" value="${articleDao.getTotalReadArticlesByUser(u.id)}" />
+<c:set var="totalPages" value="${totalItems > 0 ? (totalItems + limit - 1) / limit : 0}" />
+<fmt:parseNumber var="totalPages" integerOnly="true" value="${totalPages}" />
+
+<c:set var="ctx" value="${pageContext.request.contextPath}" />
+
+<!DOCTYPE html>
+<html class="dark" lang="vi">
 
             <head>
                 <title>Lịch sử đọc - Bảng điều khiển NexusAI</title>
@@ -142,40 +146,35 @@
                                                 <c:choose>
                                                     <c:when test="${not empty readArticles}">
                                                         <c:forEach var="article" items="${readArticles}">
-                                                            <div onclick="window.location.href='${pageContext.request.contextPath}/article?id=${article.id}'"
-                                                                class="group cursor-pointer flex flex-col md:flex-row md:items-center gap-4 p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-xl transition-all border border-transparent hover:border-slate-100 dark:hover:border-slate-700">
-                                                                <div
-                                                                    class="size-16 rounded-lg bg-slate-200 shrink-0 overflow-hidden">
-                                                                    <div class="size-full bg-cover bg-center"
-                                                                        style="background-image: url('${pageContext.request.contextPath}/${article.imageUrl != null ? article.imageUrl : 'assets/images/placeholder.jpg'}');">
+                                                            <div onclick="window.location.href='${ctx}/user/article?id=${article.id}'"
+                                                                class="group cursor-pointer flex flex-col md:flex-row md:items-center gap-5 p-4 bg-white dark:bg-slate-900/50 hover:bg-slate-50 dark:hover:bg-slate-800/80 rounded-2xl transition-all border border-slate-100 dark:border-slate-800/60 hover:border-primary/20 hover:shadow-xl">
+                                                                <div class="size-20 rounded-xl bg-slate-200 shrink-0 overflow-hidden shadow-sm">
+                                                                    <div class="size-full bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
+                                                                        style="background-image: url('${article.getDisplayImageUrl(ctx)}');">
                                                                     </div>
                                                                 </div>
                                                                 <div class="flex-1 min-w-0">
-                                                                    <div class="flex items-center gap-2 mb-1">
-                                                                        <span
-                                                                            class="px-2 py-0.5 bg-blue-500/10 text-blue-500 text-[10px] font-bold uppercase rounded">
+                                                                    <div class="flex items-center gap-2 mb-2">
+                                                                        <span class="px-2 py-0.5 bg-primary/10 text-primary text-[10px] font-black uppercase tracking-widest rounded-md border border-primary/10">
                                                                             ${article.categoryName}
                                                                         </span>
-                                                                        <span class="text-xs text-slate-400">• Đã đọc:
-                                                                            ${article.createdAt}</span>
+                                                                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1">
+                                                                            <span class="material-symbols-outlined text-[14px]">schedule</span>
+                                                                            ${article.createdAt}
+                                                                        </span>
                                                                     </div>
-                                                                    <h4
-                                                                        class="text-base font-bold text-slate-900 dark:text-white truncate">
+                                                                    <h4 class="text-lg font-black text-slate-900 dark:text-white truncate group-hover:text-primary transition-colors tracking-tight">
                                                                         ${article.title}
                                                                     </h4>
-                                                                    <div
-                                                                        class="flex items-center gap-4 mt-1 text-xs text-slate-500 line-clamp-1">
+                                                                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-1 italic">
                                                                         ${article.summary}
-                                                                    </div>
+                                                                    </p>
                                                                 </div>
-                                                                <div
-                                                                    class="flex items-center gap-2 self-end md:self-center">
-                                                                    <button
-                                                                        onclick="event.stopPropagation(); openConfirmModal(this, '${article.id}')"
-                                                                        class="p-2 text-red-500/70 hover:text-red-500 transition-colors bg-red-500/10 dark:bg-red-500/20 rounded-full flex items-center justify-center"
-                                                                        title="Xóa lịch sử bài này">
-                                                                        <span
-                                                                            class="material-symbols-outlined text-lg">delete</span>
+                                                                <div class="flex items-center gap-3 self-end md:self-center">
+                                                                    <button onclick="event.stopPropagation(); openConfirmModal(this, '${article.id}')"
+                                                                        class="size-10 text-red-500/70 hover:text-white hover:bg-red-500 transition-all bg-red-500/5 dark:bg-red-500/10 rounded-xl flex items-center justify-center group/del shadow-sm"
+                                                                        title="Xóa khỏi lịch sử">
+                                                                        <span class="material-symbols-outlined text-[20px] group-hover/del:rotate-12 transition-transform">delete</span>
                                                                     </button>
                                                                 </div>
                                                             </div>
@@ -190,86 +189,82 @@
                                         </section>
                                     </div>
 
-                                    <div class="mt-8 flex justify-center gap-2">
-                                        <c:if test="${currentPage > 1}">
-                                            <button onclick="window.location.href='?page=${currentPage - 1}'"
-                                                class="px-4 py-2 bg-white dark:bg-surface-dark border border-slate-200 dark:border-border-dark rounded-lg hover:text-primary transition-colors text-sm font-bold">
-                                                Trước
-                                            </button>
-                                        </c:if>
+                                    <c:if test="${totalPages > 1}">
+                                        <div class="mt-8 flex justify-center gap-2">
+                                            <c:if test="${currentPage > 1}">
+                                                <button onclick="window.location.href='?page=${currentPage - 1}'"
+                                                    class="px-4 py-2 bg-white dark:bg-surface-dark border border-slate-200 dark:border-border-dark rounded-lg hover:text-primary transition-colors text-sm font-bold">
+                                                    Trước
+                                                </button>
+                                            </c:if>
 
-                                        <c:forEach begin="1" end="${totalPages > 0 ? totalPages : 1}" var="i">
-                                            <button onclick="window.location.href='?page=${i}'"
-                                                class="px-4 py-2 rounded-lg text-sm font-bold transition-colors ${i == currentPage ? 'bg-primary text-white' : 'bg-white dark:bg-surface-dark border border-slate-200 dark:border-border-dark hover:text-primary'}">
-                                                ${i}
-                                            </button>
-                                        </c:forEach>
+                                            <c:forEach begin="1" end="${totalPages}" var="i">
+                                                <button onclick="window.location.href='?page=${i}'"
+                                                    class="px-4 py-2 rounded-lg text-sm font-bold transition-colors ${i == currentPage ? 'bg-primary text-white' : 'bg-white dark:bg-surface-dark border border-slate-200 dark:border-border-dark hover:text-primary'}">
+                                                    ${i}
+                                                </button>
+                                            </c:forEach>
 
-                                        <c:if test="${currentPage < totalPages}">
-                                            <button onclick="window.location.href='?page=${currentPage + 1}'"
-                                                class="px-4 py-2 bg-white dark:bg-surface-dark border border-slate-200 dark:border-border-dark rounded-lg hover:text-primary transition-colors text-sm font-bold">
-                                                Sau
-                                            </button>
-                                        </c:if>
+                                            <c:if test="${currentPage < totalPages}">
+                                                <button onclick="window.location.href='?page=${currentPage + 1}'"
+                                                    class="px-4 py-2 bg-white dark:bg-surface-dark border border-slate-200 dark:border-border-dark rounded-lg hover:text-primary transition-colors text-sm font-bold">
+                                                    Sau
+                                                </button>
+                                            </c:if>
+                                        </div>
+                                    </c:if>
+                                </div>
+                            </div>
+                            <div class="bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 border border-white/10 rounded-3xl p-8 lg:p-12 relative overflow-hidden group mt-6 shadow-2xl shadow-indigo-500/10">
+                                <%-- Accent glow --%>
+                                <div class="absolute -top-24 -right-24 size-96 bg-primary/20 rounded-full blur-[100px] pointer-events-none"></div>
+                                <div class="absolute -bottom-24 -left-24 size-96 bg-indigo-500/10 rounded-full blur-[100px] pointer-events-none"></div>
+                                
+                                <div class="absolute top-0 right-0 p-12 opacity-5 pointer-events-none group-hover:scale-110 transition-transform duration-1000">
+                                    <span class="material-symbols-outlined text-[200px] text-white">news</span>
+                                </div>
+
+                                <div class="relative z-10">
+                                    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-12">
+                                        <div class="max-w-2xl">
+                                            <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-primary/20 backdrop-blur-xl text-primary-light text-[10px] font-black uppercase tracking-[0.2em] rounded-full mb-6 border border-primary/20 shadow-lg shadow-primary/20">
+                                                <span class="material-symbols-outlined text-[14px]">verified</span>
+                                                Cơ hội nghề nghiệp
+                                            </div>
+                                            <h2 class="text-4xl md:text-5xl font-black text-white mb-6 tracking-tight leading-[1.1]">
+                                                Kế khai tiếng nói của bạn <br/>
+                                                <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">cùng Nexus AI.</span>
+                                            </h2>
+                                            <p class="text-lg text-slate-300 mb-8 font-medium leading-relaxed">Tham gia mạng lưới hơn 500 nhà báo chuyên nghiệp và cộng tác viên để cùng xây dựng nền tảng tin tức thông minh nhất thế giới.</p>
+                                        </div>
+                                        
+                                        <div class="shrink-0 flex flex-col items-center gap-6">
+                                            <c:choose>
+                                                <c:when test="${userStatus == 'PENDING'}">
+                                                    <div class="px-10 py-5 bg-amber-500/10 border border-amber-500/30 text-amber-500 font-black rounded-2xl backdrop-blur-xl flex flex-col items-center gap-2">
+                                                        <span class="material-symbols-outlined animate-spin">sync</span>
+                                                        Đang chờ duyệt hồ sơ
+                                                    </div>
+                                                </c:when>
+                                                <c:when test="${userRole == 'JOURNALIST' || userRole == 'ADMIN'}">
+                                                    <div class="px-10 py-6 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-black rounded-2xl backdrop-blur-xl flex flex-col items-center gap-1">
+                                                        <span class="material-symbols-outlined text-3xl">workspace_premium</span>
+                                                        Cấp độ Chuyên gia
+                                                    </div>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <button type="button" onclick="document.getElementById('upgradeModal').classList.remove('hidden')"
+                                                        class="group relative px-12 py-5 bg-white text-slate-900 font-black text-xl rounded-2xl shadow-[0_0_30px_-5px_rgba(255,255,255,0.3)] hover:shadow-primary/40 hover:-translate-y-1 active:scale-95 transition-all duration-300 overflow-hidden">
+                                                        <span class="relative z-10">Gửi đơn ngay</span>
+                                                        <div class="absolute inset-0 bg-gradient-to-r from-blue-50 to-indigo-50 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                                    </button>
+                                                    <p class="text-[11px] text-slate-500 font-bold uppercase tracking-widest">Phản hồi hồ sơ trong 24h</p>
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="bg-gradient-to-r from-slate-900 to-primary-dark border border-white/10 rounded-2xl p-8 relative overflow-hidden group mt-6">
-                        <div class="absolute top-0 right-0 p-12 opacity-10 pointer-events-none group-hover:scale-110 transition-transform duration-700">
-                            <span class="material-symbols-outlined text-[160px]">edit_note</span>
-                        </div>
-                        <div class="relative z-10">
-                            <div class="flex flex-col md:flex-row md:items-center justify-between gap-8">
-                                <div class="max-w-xl">
-                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-primary/20 backdrop-blur-md text-blue-400 text-[10px] font-bold uppercase tracking-widest rounded-full mb-4 border border-primary/30">
-                                        <span class="material-symbols-outlined text-[14px]">stars</span>
-                                        Chương trình Người sáng tạo Nexus
-                                    </span>
-                                    <h2 class="text-3xl md:text-4xl font-black text-white mb-4 tracking-tight">Trở thành Nhà báo Nexus</h2>
-                                    <p class="text-lg text-blue-100/90 mb-2 font-medium">Tiếp cận hàng triệu độc giả với nền tảng tin tức thế hệ mới của chúng tôi.</p>
-                                    <ul class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-blue-100/70 mb-6">
-                                        <li class="flex items-center gap-2">
-                                            <span class="material-symbols-outlined text-primary text-[18px]">check_circle</span>
-                                            Công cụ viết &amp; nghiên cứu AI
-                                        </li>
-                                        <li class="flex items-center gap-2">
-                                            <span class="material-symbols-outlined text-primary text-[18px]">check_circle</span>
-                                            Kiếm tiền từ báo cáo của bạn
-                                        </li>
-                                        <li class="flex items-center gap-2">
-                                            <span class="material-symbols-outlined text-primary text-[18px]">check_circle</span>
-                                            Truy cập nguồn cấp dữ liệu toàn cầu
-                                        </li>
-                                        <li class="flex items-center gap-2">
-                                            <span class="material-symbols-outlined text-primary text-[18px]">check_circle</span>
-                                            Tương tác trực tiếp với khán giả
-                                        </li>
-                                    </ul>
-                                </div>
-                                <div class="shrink-0 flex flex-col items-center gap-4">
-                                    <c:choose>
-                                        <c:when test="${userStatus == 'PENDING'}">
-                                            <div class="px-8 py-4 bg-amber-500/20 border border-amber-500/30 text-amber-400 font-bold rounded-xl backdrop-blur-md">
-                                                Đang chờ phê duyệt...
-                                            </div>
-                                        </c:when>
-                                        <c:when test="${userRole == 'JOURNALIST' || userRole == 'ADMIN'}">
-                                            <div class="px-8 py-4 bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 font-bold rounded-xl backdrop-blur-md">
-                                                Bạn đã là Nhà báo
-                                            </div>
-                                        </c:when>
-                                        <c:otherwise>
-                                            <button onclick="document.getElementById('upgradeModal').classList.remove('hidden')"
-                                                class="w-full md:w-auto px-10 py-4 bg-white text-primary-dark font-black text-lg rounded-xl shadow-xl shadow-black/20 hover:bg-cyan-50 hover:text-primary hover:shadow-cyan-400/20 hover:scale-105 active:scale-95 transition-all duration-300">
-                                                Đăng ký ngay
-                                            </button>
-                                            <p class="text-xs text-blue-200/60 font-medium">Nộp đơn mất &lt; 5 phút</p>
-                                        </c:otherwise>
-                                    </c:choose>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                         </div>
                     </main>
                     <jsp:include page="components/footer.jsp" />
@@ -302,117 +297,95 @@
                             </form>
                         </div>
                     </div>
-                </div>
 
-                <script>
-                    function openConfirmModal(btn, articleId) {
-                        const modal = document.getElementById('confirmModal');
-                        const confirmBtn = document.getElementById('modalConfirmBtn');
-                        modal.classList.remove('hidden');
-                        document.body.classList.add('overflow-hidden');
-                        confirmBtn.onclick = function() {
-                            closeConfirmModal();
-                            deleteHistoryItem(btn, articleId);
-                        };
-                    }
+                    <script>
+                        function openConfirmModal(btn, articleId) {
+                            const modal = document.getElementById('confirmModal');
+                            const confirmBtn = document.getElementById('modalConfirmBtn');
+                            modal.classList.remove('hidden');
+                            document.body.classList.add('overflow-hidden');
+                            confirmBtn.onclick = function() {
+                                closeConfirmModal();
+                                deleteHistoryItem(btn, articleId);
+                            };
+                        }
 
-                    function closeConfirmModal() {
-                        document.getElementById('confirmModal').classList.add('hidden');
-                        document.body.classList.remove('overflow-hidden');
-                    }
+                        function closeConfirmModal() {
+                            document.getElementById('confirmModal').classList.add('hidden');
+                            document.body.classList.remove('overflow-hidden');
+                        }
 
-                    function showToast(type, title, message) {
-                        const toastId = 'toast-js-' + Date.now();
-                        const colorClass = type === 'success' ? 'bg-emerald-500' : 'bg-red-500';
-                        const iconName   = type === 'success' ? 'check_circle'   : 'error';
-                        const toastHtml =
-                            '<div id="' + toastId + '" class="fixed top-5 right-5 z-[150] pointer-events-none">' +
-                                '<div class="' + colorClass + ' text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 pointer-events-auto transition-all duration-300">' +
-                                    '<span class="material-symbols-outlined text-2xl">' + iconName + '</span>' +
-                                    '<div>' +
-                                        '<p class="font-black tracking-tight text-sm">' + title + '</p>' +
-                                        '<p class="text-xs opacity-90">' + message + '</p>' +
+                        function showToast(type, title, message) {
+                            const toastId = 'toast-js-' + Date.now();
+                            const colorClass = type === 'success' ? 'bg-emerald-500' : 'bg-red-500';
+                            const iconName   = type === 'success' ? 'check_circle'   : 'error';
+                            const toastHtml =
+                                '<div id="' + toastId + '" class="fixed top-5 right-5 z-[150] pointer-events-none">' +
+                                    '<div class="' + colorClass + ' text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 pointer-events-auto transition-all duration-300 animate-in fade-in slide-in-from-top-4">' +
+                                        '<span class="material-symbols-outlined text-2xl">' + iconName + '</span>' +
+                                        '<div>' +
+                                            '<p class="font-black tracking-tight text-sm">' + title + '</p>' +
+                                            '<p class="text-xs opacity-90">' + message + '</p>' +
+                                        '</div>' +
                                     '</div>' +
-                                '</div>' +
-                            '</div>';
-                        document.body.insertAdjacentHTML('beforeend', toastHtml);
-                        setTimeout(function() {
-                            const t = document.getElementById(toastId);
-                            if (t) {
-                                t.querySelector('div').classList.add('opacity-0', 'translate-y-[-10px]', 'transition-all', 'duration-500');
-                                setTimeout(function() { t.remove(); }, 500);
+                                '</div>';
+                            document.body.insertAdjacentHTML('beforeend', toastHtml);
+                            setTimeout(function() {
+                                const t = document.getElementById(toastId);
+                                if (t) {
+                                    t.querySelector('div').classList.add('opacity-0', 'translate-y-[-10px]', 'transition-all', 'duration-500');
+                                    setTimeout(function() { t.remove(); }, 500);
+                                }
+                            }, 5000);
+                        }
+
+                        async function deleteHistoryItem(btn, articleId) {
+                            try {
+                                const response = await fetch(`${ctx}/api/history?articleId=` + articleId + `&action=remove`, {
+                                    method: 'POST'
+                                });
+
+                                if (response.ok) {
+                                    const result = await response.text();
+                                    if (result === 'success') {
+                                        showToast('success', 'Thành công!', 'Đã xóa khỏi lịch sử đọc.');
+                                        const card = btn.closest('.group');
+                                        if (card) {
+                                            card.classList.add('opacity-0', 'scale-95', 'transition-all', 'duration-300');
+                                            setTimeout(function() { card.remove(); }, 300);
+                                        }
+                                    } else {
+                                        showToast('error', 'Lỗi!', 'Không thể xóa lịch sử.');
+                                    }
+                                }
+                            } catch (error) {
+                                console.error('Error:', error);
+                                showToast('error', 'Lỗi!', 'Đã có lỗi xảy ra.');
                             }
+                        }
+
+                        async function clearAllHistory() {
+                            if (!confirm('Bạn có chắc chắn muốn xóa toàn bộ lịch sử đọc?')) return;
+                            try {
+                                const response = await fetch(`${ctx}/api/history?action=clear`, { method: 'POST' });
+                                if (response.ok) {
+                                    location.reload();
+                                }
+                            } catch (error) {
+                                console.error('Error:', error);
+                            }
+                        }
+
+                        // Auto-hide existing toasts
+                        setTimeout(() => {
+                            const toasts = document.querySelectorAll('[id^="toast-"]');
+                            toasts.forEach(toast => {
+                                toast.classList.add('opacity-0', 'translate-y-10', 'transition-all', 'duration-500');
+                                setTimeout(() => toast.remove(), 500);
+                            });
                         }, 5000);
-                    }
-
-                    async function deleteHistoryItem(btn, articleId) {
-                        try {
-                            const response = await fetch(`${pageContext.request.contextPath}/api/history?articleId=` + articleId + `&action=remove`, {
-                                method: 'POST'
-                            });
-
-                            if (response.ok) {
-                                const result = await response.text();
-                                if (result === 'success') {
-                                    showToast('success', 'Thành công!', 'Đã xóa khỏi lịch sử đọc.');
-                                    const card = btn.closest('.group');
-                                    if (card) {
-                                        card.classList.add('opacity-0', 'scale-95', 'transition-all', 'duration-300');
-                                        setTimeout(function() {
-                                            card.remove();
-                                            const historySection = document.querySelector('section > div.space-y-2');
-                                            if (historySection && historySection.querySelectorAll('.group').length === 0) {
-                                                historySection.innerHTML = '<p class="text-sm text-slate-500 dark:text-slate-400">Bạn chưa có lịch sử đọc nào.</p>';
-                                            }
-                                        }, 300);
-                                    }
-                                } else {
-                                    showToast('error', 'Lỗi!', 'Không thể xóa lịch sử.');
-                                }
-                            } else {
-                                showToast('error', 'Lỗi!', 'Lỗi kết nối máy chủ.');
-                            }
-                        } catch (error) {
-                            console.error('Error:', error);
-                            showToast('error', 'Lỗi!', 'Đã có lỗi không mong muốn xảy ra.');
-                        }
-                    }
-
-                    async function clearAllHistory() {
-                        if (!confirm('Bạn có chắc chắn muốn xóa toàn bộ lịch sử đọc?')) return;
-
-                        try {
-                            const response = await fetch(`${pageContext.request.contextPath}/api/history?action=clear`, {
-                                method: 'POST'
-                            });
-
-                            if (response.ok) {
-                                const result = await response.text();
-                                if (result === 'success') {
-                                    const historySection = document.querySelector('section > div.space-y-2');
-                                    if (historySection) {
-                                        historySection.innerHTML = '<p class="text-sm text-slate-500 dark:text-slate-400">Bạn chưa có lịch sử đọc nào.</p>';
-                                    }
-                                    location.reload(); // To update totalItems if needed
-                                } else {
-                                    alert('Lỗi khi xóa toàn bộ lịch sử.');
-                                }
-                            } else {
-                                alert('Lỗi kết nối.');
-                            }
-                        } catch (error) {
-                            console.error('Error:', error);
-                            alert('Đã có lỗi xảy ra.');
-                        }
-                    }
-                </script>
-            setTimeout(() => {
-                const toasts = document.querySelectorAll('[id^="toast-"]');
-                toasts.forEach(toast => {
-                    toast.classList.add('opacity-0', 'translate-y-10', 'transition-all', 'duration-500');
-                    setTimeout(() => toast.remove(), 500);
-                });
-            }, 5000);
+                    </script>
+                </div>
             </body>
-
             </html>
+```

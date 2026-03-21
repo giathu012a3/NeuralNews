@@ -1,52 +1,24 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
-<%@ page import="neuralnews.dao.NotificationDao" %>
-<%@ page import="neuralnews.model.Notification" %>
-<%@ page import="java.util.List" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
+<%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 
 <c:if test="${empty sessionScope.currentUser}">
     <c:redirect url="/auth/login.jsp" />
 </c:if>
 
-<jsp:useBean id="articleDao" class="neuralnews.dao.ArticleDao" />
-<jsp:useBean id="commentDao" class="neuralnews.dao.CommentDao" />
+<jsp:useBean id="articleDao" class="neuralnews.dao.ArticleDao" scope="request" />
+<jsp:useBean id="commentDao" class="neuralnews.dao.CommentDao" scope="request" />
+<jsp:useBean id="notifDao" class="neuralnews.dao.NotificationDao" scope="request" />
 
-<%
-    Object _uidObj = session.getAttribute("userId");
-    if (_uidObj != null) {
-        try {
-            long _profUid = -1;
-            if (_uidObj instanceof Long) _profUid = (Long)_uidObj;
-            else if (_uidObj instanceof Integer) _profUid = ((Integer)_uidObj).longValue();
-            else if (_uidObj instanceof String) _profUid = Long.parseLong((String)_uidObj);
-            
-            if (_profUid > 0) {
-                NotificationDao _notifDao = new NotificationDao();
-                
-                int _limit = 5; // Display 5 notifications per page
-                int _currPage = 1;
-                String _pStr = request.getParameter("page");
-                if (_pStr != null) try { _currPage = Integer.parseInt(_pStr); } catch(Exception e) {}
-                if (_currPage < 1) _currPage = 1;
-                
-                int _offset = (_currPage - 1) * _limit;
-                int _totalNotifs = _notifDao.countTotal(_profUid);
-                int _totalPages = (int) Math.ceil((double) _totalNotifs / _limit);
-                if (_totalPages < 1) _totalPages = 1;
-                if (_currPage > _totalPages) _currPage = _totalPages;
+<c:set var="ctx" value="${pageContext.request.contextPath}" />
 
-                List<Notification> _pNotifs = _notifDao.getNotificationsByUserId(_profUid, _limit, _offset);
-                request.setAttribute("profileNotifs", _pNotifs);
-                request.setAttribute("totalNotifPages", _totalPages);
-                request.setAttribute("currNotifPage", _currPage);
-                
-                request.setAttribute("countSaved", articleDao.countSavedByUser(_profUid));
-                request.setAttribute("countRead", articleDao.countReadByUser(_profUid));
-                request.setAttribute("countComments", commentDao.countCommentsByUser(_profUid));
-            }
-        } catch(Exception e) { e.printStackTrace(); }
-    }
-%>
+<%-- Fetch stats and notifications using EL-friendly beans --%>
+<c:set var="u" value="${sessionScope.currentUser}" />
+<c:set var="countSaved" value="${articleDao.countSavedByUser(u.id)}" />
+<c:set var="countRead" value="${articleDao.countReadByUser(u.id)}" />
+<c:set var="countComments" value="${commentDao.countCommentsByUser(u.id)}" />
+<c:set var="profileNotifs" value="${notifDao.getNotificationsByUserId(u.id, 10, 0)}" />
 
 <!DOCTYPE html>
 <html class="dark" lang="en">
@@ -111,32 +83,35 @@
                     </div>
 
                     <div class="p-6 md:p-8 space-y-8">
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div class="p-5 bg-slate-50 dark:bg-background-dark/50 border border-slate-200 dark:border-border-dark rounded-xl flex items-center gap-4">
-                                <div class="size-12 bg-blue-500/10 text-blue-500 rounded-full flex items-center justify-center">
-                                    <span class="material-symbols-outlined">bookmark</span>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <%-- Saved Articles --%>
+                            <div class="p-6 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl flex items-center gap-5 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border-b-4 border-b-blue-500 shadow-sm shadow-blue-500/5 group">
+                                <div class="size-14 bg-blue-500/10 text-blue-500 rounded-xl flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                                    <span class="material-symbols-outlined text-3xl">bookmark</span>
                                 </div>
                                 <div>
-                                    <p class="text-2xl font-black text-slate-900 dark:text-white leading-tight">${not empty countSaved ? countSaved : 0}</p>
-                                    <p class="text-xs text-slate-500 uppercase font-bold tracking-wider">Bài viết đã lưu</p>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400 font-black uppercase tracking-widest mb-1">Đã lưu</p>
+                                    <h4 class="text-3xl font-black text-slate-900 dark:text-white leading-tight">${not empty countSaved ? countSaved : 0}</h4>
                                 </div>
                             </div>
-                            <div class="p-5 bg-slate-50 dark:bg-background-dark/50 border border-slate-200 dark:border-border-dark rounded-xl flex items-center gap-4">
-                                <div class="size-12 bg-green-500/10 text-green-500 rounded-full flex items-center justify-center">
-                                    <span class="material-symbols-outlined">visibility</span>
+                            <%-- Reading History --%>
+                            <div class="p-6 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl flex items-center gap-5 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border-b-4 border-b-emerald-500 shadow-sm shadow-emerald-500/5 group">
+                                <div class="size-14 bg-emerald-500/10 text-emerald-500 rounded-xl flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                                    <span class="material-symbols-outlined text-3xl">history</span>
                                 </div>
                                 <div>
-                                    <p class="text-2xl font-black text-slate-900 dark:text-white leading-tight">${not empty countRead ? countRead : 0}</p>
-                                    <p class="text-xs text-slate-500 uppercase font-bold tracking-wider">Bài viết đã đọc</p>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400 font-black uppercase tracking-widest mb-1">Lịch sử</p>
+                                    <h4 class="text-3xl font-black text-slate-900 dark:text-white leading-tight">${not empty countRead ? countRead : 0}</h4>
                                 </div>
                             </div>
-                            <div class="p-5 bg-slate-50 dark:bg-background-dark/50 border border-slate-200 dark:border-border-dark rounded-xl flex items-center gap-4">
-                                <div class="size-12 bg-purple-500/10 text-purple-500 rounded-full flex items-center justify-center">
-                                    <span class="material-symbols-outlined">chat_bubble</span>
+                            <%-- Comments --%>
+                            <div class="p-6 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl flex items-center gap-5 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border-b-4 border-b-purple-500 shadow-sm shadow-purple-500/5 group">
+                                <div class="size-14 bg-purple-500/10 text-purple-500 rounded-xl flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                                    <span class="material-symbols-outlined text-3xl">forum</span>
                                 </div>
                                 <div>
-                                    <p class="text-2xl font-black text-slate-900 dark:text-white leading-tight">${not empty countComments ? countComments : 0}</p>
-                                    <p class="text-xs text-slate-500 uppercase font-bold tracking-wider">Bình luận</p>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400 font-black uppercase tracking-widest mb-1">Bình luận</p>
+                                    <h4 class="text-3xl font-black text-slate-900 dark:text-white leading-tight">${not empty countComments ? countComments : 0}</h4>
                                 </div>
                             </div>
                         </div>
@@ -189,82 +164,82 @@
                                         </c:otherwise>
                                     </c:choose>
                                 </div>
-                                <c:if test="${totalNotifPages > 1}">
-                                    <div class="flex items-center justify-between border-t border-slate-100 dark:border-slate-700/50 pt-6">
-                                        <p class="text-xs text-slate-500">Trang <span class="font-bold">${currNotifPage}</span> / ${totalNotifPages}</p>
-                                        <div class="flex items-center gap-1">
-                                            <a href="?page=${currNotifPage - 1}" 
-                                               class="${currNotifPage == 1 ? 'pointer-events-none opacity-50' : ''} size-8 flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-                                                <span class="material-symbols-outlined text-[18px]">chevron_left</span>
-                                            </a>
-                                            <c:forEach var="i" begin="1" end="${totalNotifPages}">
-                                                <a href="?page=${i}" 
-                                                   class="size-8 flex items-center justify-center rounded-lg text-xs font-bold transition-all ${i == currNotifPage ? 'bg-primary text-white shadow-sm shadow-primary/30' : 'border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'}">
-                                                    ${i}
-                                                </a>
-                                            </c:forEach>
-                                            <a href="?page=${currNotifPage + 1}" 
-                                               class="${currNotifPage == totalNotifPages ? 'pointer-events-none opacity-50' : ''} size-8 flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-                                                <span class="material-symbols-outlined text-[18px]">chevron_right</span>
-                                            </a>
-                                        </div>
-                                    </div>
-                                </c:if>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="bg-gradient-to-r from-slate-900 to-primary-dark border border-white/10 rounded-2xl p-8 relative overflow-hidden group mt-6">
-                    <div class="absolute top-0 right-0 p-12 opacity-10 pointer-events-none group-hover:scale-110 transition-transform duration-700">
-                        <span class="material-symbols-outlined text-[160px]">edit_note</span>
+                <div class="bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 border border-white/10 rounded-3xl p-8 lg:p-12 relative overflow-hidden group mt-6 shadow-2xl shadow-indigo-500/10">
+                    <%-- Accent glow --%>
+                    <div class="absolute -top-24 -right-24 size-96 bg-primary/20 rounded-full blur-[100px] pointer-events-none"></div>
+                    <div class="absolute -bottom-24 -left-24 size-96 bg-indigo-500/10 rounded-full blur-[100px] pointer-events-none"></div>
+                    
+                    <div class="absolute top-0 right-0 p-12 opacity-5 pointer-events-none group-hover:scale-110 transition-transform duration-1000">
+                        <span class="material-symbols-outlined text-[200px] text-white">news</span>
                     </div>
+
                     <div class="relative z-10">
-                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-8">
-                            <div class="max-w-xl">
-                                <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-primary/20 backdrop-blur-md text-blue-400 text-[10px] font-bold uppercase tracking-widest rounded-full mb-4 border border-primary/30">
-                                    <span class="material-symbols-outlined text-[14px]">stars</span>
-                                    Chương trình Người sáng tạo Nexus
-                                </span>
-                                <h2 class="text-3xl md:text-4xl font-black text-white mb-4 tracking-tight">Trở thành Nhà báo Nexus</h2>
-                                <p class="text-lg text-blue-100/90 mb-2 font-medium">Tiếp cận hàng triệu độc giả với nền tảng tin tức thế hệ mới của chúng tôi.</p>
-                                <ul class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-blue-100/70 mb-6">
-                                    <li class="flex items-center gap-2">
-                                        <span class="material-symbols-outlined text-primary text-[18px]">check_circle</span>
-                                        Công cụ viết &amp; nghiên cứu AI
-                                    </li>
-                                    <li class="flex items-center gap-2">
-                                        <span class="material-symbols-outlined text-primary text-[18px]">check_circle</span>
-                                        Kiếm tiền từ báo cáo của bạn
-                                    </li>
-                                    <li class="flex items-center gap-2">
-                                        <span class="material-symbols-outlined text-primary text-[18px]">check_circle</span>
-                                        Truy cập nguồn cấp dữ liệu toàn cầu
-                                    </li>
-                                    <li class="flex items-center gap-2">
-                                        <span class="material-symbols-outlined text-primary text-[18px]">check_circle</span>
-                                        Tương tác trực tiếp với khán giả
-                                    </li>
-                                </ul>
+                        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-12">
+                            <div class="max-w-2xl">
+                                <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-primary/20 backdrop-blur-xl text-primary-light text-[10px] font-black uppercase tracking-[0.2em] rounded-full mb-6 border border-primary/20 shadow-lg shadow-primary/20">
+                                    <span class="material-symbols-outlined text-[14px]">verified</span>
+                                    Cơ hội nghề nghiệp
+                                </div>
+                                <h2 class="text-4xl md:text-5xl font-black text-white mb-6 tracking-tight leading-[1.1]">
+                                    Kế khai tiếng nói của bạn <br/>
+                                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">cùng Nexus AI.</span>
+                                </h2>
+                                <p class="text-lg text-slate-300 mb-8 font-medium leading-relaxed">Tham gia mạng lưới hơn 500 nhà báo chuyên nghiệp và cộng tác viên để cùng xây dựng nền tảng tin tức thông minh nhất thế giới.</p>
+                                
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-8 text-sm text-slate-300/80 mb-8">
+                                    <div class="flex items-center gap-3">
+                                        <div class="size-6 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center shrink-0">
+                                            <span class="material-symbols-outlined text-sm">check</span>
+                                        </div>
+                                        Hỗ trợ biên tập viên ảo AI
+                                    </div>
+                                    <div class="flex items-center gap-3">
+                                        <div class="size-6 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center shrink-0">
+                                            <span class="material-symbols-outlined text-sm">check</span>
+                                        </div>
+                                        Cơ chế thu nhập công bằng
+                                    </div>
+                                    <div class="flex items-center gap-3">
+                                        <div class="size-6 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center shrink-0">
+                                            <span class="material-symbols-outlined text-sm">check</span>
+                                        </div>
+                                        Tiếp cận số liệu Real-time
+                                    </div>
+                                    <div class="flex items-center gap-3">
+                                        <div class="size-6 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center shrink-0">
+                                            <span class="material-symbols-outlined text-sm">check</span>
+                                        </div>
+                                        Xây dựng thương hiệu cá nhân
+                                    </div>
+                                </div>
                             </div>
-                            <div class="shrink-0 flex flex-col items-center gap-4">
+                            
+                            <div class="shrink-0 flex flex-col items-center gap-6">
                                 <c:choose>
                                     <c:when test="${userStatus == 'PENDING'}">
-                                        <div class="px-8 py-4 bg-amber-500/20 border border-amber-500/30 text-amber-400 font-bold rounded-xl backdrop-blur-md">
-                                            Đang chờ phê duyệt...
+                                        <div class="px-10 py-5 bg-amber-500/10 border border-amber-500/30 text-amber-500 font-black rounded-2xl backdrop-blur-xl flex flex-col items-center gap-2">
+                                            <span class="material-symbols-outlined animate-spin">sync</span>
+                                            Đang chờ duyệt hồ sơ
                                         </div>
                                     </c:when>
                                     <c:when test="${userRole == 'JOURNALIST' || userRole == 'ADMIN'}">
-                                        <div class="px-8 py-4 bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 font-bold rounded-xl backdrop-blur-md">
-                                            Bạn đã là Nhà báo
+                                        <div class="px-10 py-6 bg-emerald-500/10 border border-emerald-500/30 text-emerald-500 font-black rounded-2xl backdrop-blur-xl flex flex-col items-center gap-1">
+                                            <span class="material-symbols-outlined text-3xl">workspace_premium</span>
+                                            Cấp độ Chuyên gia
                                         </div>
                                     </c:when>
                                     <c:otherwise>
                                         <button type="button" onclick="openUpgradeModal()"
-                                            class="w-full md:w-auto px-10 py-4 bg-white text-primary-dark font-black text-lg rounded-xl shadow-xl shadow-black/20 hover:bg-cyan-50 hover:text-primary hover:shadow-cyan-400/20 hover:scale-105 active:scale-95 transition-all duration-300">
-                                            Đăng ký ngay
+                                            class="group relative px-12 py-5 bg-white text-slate-900 font-black text-xl rounded-2xl shadow-[0_0_30px_-5px_rgba(255,255,255,0.3)] hover:shadow-primary/40 hover:-translate-y-1 active:scale-95 transition-all duration-300 overflow-hidden">
+                                            <span class="relative z-10">Gửi đơn ngay</span>
+                                            <div class="absolute inset-0 bg-gradient-to-r from-blue-50 to-indigo-50 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                                         </button>
-                                        <p class="text-xs text-blue-200/60 font-medium">Nộp đơn mất &lt; 5 phút</p>
+                                        <p class="text-[11px] text-slate-500 font-bold uppercase tracking-widest">Phản hồi hồ sơ trong 24h</p>
                                     </c:otherwise>
                                 </c:choose>
                             </div>
@@ -272,6 +247,7 @@
                     </div>
                 </div>
             </div>
+
         </main>
         <jsp:include page="components/footer.jsp" />
     </div>
@@ -321,6 +297,5 @@
             });
         }, 5000);
     </script>
-    </div>
 </body>
 </html>

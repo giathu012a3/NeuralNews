@@ -171,25 +171,27 @@ public class ArticleDao {
                 ResultSet rs = psCheck.executeQuery();
 
                 if (rs.next()) {
-                    String oldType = rs.getString("type");
+                    String oldType = rs.getString("type").toUpperCase();
+                    String upperType = type.toUpperCase();
                     
-                    if (oldType.equals(type)) {
+                    if (oldType.equals(upperType)) {
                         // Bấm lại cái cũ -> Xóa interaction
-                        executeSql(conn, "DELETE FROM interactions WHERE user_id = ? AND article_id = ? AND type = ?", userId, articleId, type);
-                        updateCount(conn, articleId, type, -1);
+                        executeSql(conn, "DELETE FROM interactions WHERE user_id = ? AND article_id = ? AND type = ?", userId, articleId, oldType);
+                        updateCount(conn, articleId, oldType, -1);
                         resultStatus = "NONE";
                     } else {
                         // Đổi từ LIKE sang DISLIKE (hoặc ngược lại)
-                        executeSql(conn, "UPDATE interactions SET type = ? WHERE user_id = ? AND article_id = ? AND type = ?", type, userId, articleId, oldType);
+                        executeSql(conn, "UPDATE interactions SET type = ?, created_at = NOW() WHERE user_id = ? AND article_id = ? AND type = ?", upperType, userId, articleId, oldType);
                         updateCount(conn, articleId, oldType, -1);
-                        updateCount(conn, articleId, type, 1);
-                        resultStatus = type;
+                        updateCount(conn, articleId, upperType, 1);
+                        resultStatus = upperType;
                     }
                 } else {
-                        // Tương tác mới
-                    executeSql(conn, "INSERT INTO interactions (user_id, article_id, type) VALUES (?, ?, ?)", userId, articleId, type);
-                    updateCount(conn, articleId, type, 1);
-                    resultStatus = type;
+                    // Tương tác mới
+                    String upperType = type.toUpperCase();
+                    executeSql(conn, "INSERT INTO interactions (user_id, article_id, type, created_at) VALUES (?, ?, ?, NOW())", userId, articleId, upperType);
+                    updateCount(conn, articleId, upperType, 1);
+                    resultStatus = upperType;
                 }
             }
             conn.commit();
@@ -211,9 +213,10 @@ public class ArticleDao {
     }
 
     private void executeSql(Connection conn, String sql, Object... params) throws SQLException {
-        PreparedStatement ps = conn.prepareStatement(sql);
-        for (int i = 0; i < params.length; i++) ps.setObject(i + 1, params[i]);
-        ps.executeUpdate();
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            for (int i = 0; i < params.length; i++) ps.setObject(i + 1, params[i]);
+            ps.executeUpdate();
+        }
     }
     
     public String getUserReaction(long userId, long articleId) {
@@ -846,11 +849,11 @@ public class ArticleDao {
             sql.append(" AND a.title LIKE ?");
             params.add("%" + keyword.trim() + "%");
         }
-        if (status != null && !status.isBlank()) {
+        if (status != null && !status.isBlank() && !"ALL".equalsIgnoreCase(status)) {
             sql.append(" AND a.status = ?");
             params.add(status.trim());
         }
-        if (category != null && !category.isBlank()) {
+        if (category != null && !category.isBlank() && !"ALL".equalsIgnoreCase(category)) {
             sql.append(" AND c.name = ?");
             params.add(category.trim());
         }
@@ -876,6 +879,39 @@ public class ArticleDao {
         String sql = "SELECT date, view_count as count " +
                      "FROM daily_traffic " +
                      "WHERE date >= DATE_SUB(CURDATE(), INTERVAL ? DAY) " +
+                     "ORDER BY date ASC";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, days - 1);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                stats.put(rs.getString("date"), rs.getInt("count"));
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return stats;
+    }
+
+    public int getTotalLikesCount() {
+        String sql = "SELECT SUM(likes_count) FROM articles";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) return rs.getInt(1);
+        } catch (Exception e) { e.printStackTrace(); }
+        return 0;
+    }
+
+    public java.util.Map<String, Integer> getDailyLikes(int days) {
+        java.util.Map<String, Integer> stats = new java.util.LinkedHashMap<>();
+        java.time.LocalDate today = java.time.LocalDate.now();
+        for (int i = days - 1; i >= 0; i--) {
+            stats.put(today.minusDays(i).toString(), 0);
+        }
+
+        String sql = "SELECT DATE_FORMAT(created_at, '%Y-%m-%d') as date, COUNT(*) as count " +
+                     "FROM interactions " +
+                     "WHERE type = 'LIKE' AND created_at >= DATE_SUB(CURDATE(), INTERVAL ? DAY) " +
+                     "GROUP BY DATE_FORMAT(created_at, '%Y-%m-%d') " +
                      "ORDER BY date ASC";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
