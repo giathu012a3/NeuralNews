@@ -55,13 +55,13 @@
             <div class="absolute inset-0 bg-black/20 z-0"></div>
             <!-- Content on top of overlay -->
             <div class="relative z-10">
-                <div class="flex items-center gap-3">
+                <a href="${pageContext.request.contextPath}/" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
                     <div
                         class="flex items-center justify-center w-10 h-10 rounded-lg bg-white/20 backdrop-blur-sm text-white">
-                        <span class="material-symbols-outlined text-[24px]">newsmode</span>
+                        <span class="material-symbols-outlined text-[24px]">bolt</span>
                     </div>
-                    <h1 class="text-white text-2xl font-bold tracking-tight">NeuralNews</h1>
-                </div>
+                    <h1 class="text-white text-2xl font-bold tracking-tight">NexusAI</h1>
+                </a>
             </div>
             <div class="relative z-10 max-w-lg">
                 <h2 class="text-white text-4xl font-bold leading-tight mb-4">Nâng tầm Báo chí với Thông tin Trí tuệ
@@ -79,10 +79,10 @@
         <div class="w-full lg:w-1/2 flex flex-col h-full overflow-y-auto bg-white dark:bg-[#15202b]">
             <div class="flex-1 flex flex-col justify-center px-8 sm:px-12 md:px-24 py-12">
                 <!-- Mobile Logo -->
-                <div class="lg:hidden flex items-center gap-2 mb-8 text-primary">
-                    <span class="material-symbols-outlined text-[32px]">newsmode</span>
-                    <span class="text-xl font-bold text-[#111418] dark:text-white">NeuralNews</span>
-                </div>
+                <a href="${pageContext.request.contextPath}/" class="lg:hidden flex items-center gap-2 mb-8 text-primary hover:opacity-80 transition-opacity">
+                    <span class="material-symbols-outlined text-[32px]">bolt</span>
+                    <span class="text-xl font-bold text-[#111418] dark:text-white">NexusAI</span>
+                </a>
                 <div class="max-w-[480px] w-full mx-auto space-y-8">
                     <!-- Header -->
                     <div class="space-y-2">

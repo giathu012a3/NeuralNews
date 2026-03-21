@@ -120,7 +120,7 @@
                                 </div>
                                 <div class="flex items-center justify-between text-xs text-slate-400 border-t border-slate-100 dark:border-slate-800 pt-3 mt-3">
                                     <div class="flex items-center gap-4">
-                                        <span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">calendar_today</span> <fmt:formatDate value="${art.createdAt}" pattern="dd/MM/yyyy" /></span>
+                                        <span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">calendar_today</span> <fmt:formatDate value="${art.publishedAt}" pattern="dd/MM/yyyy" /></span>
                                         <span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">visibility</span> ${art.views} xem</span>
                                     </div>
                                     <button class="text-slate-400 hover:text-primary"><span class="material-symbols-outlined text-lg">bookmark_add</span></button>
@@ -289,8 +289,8 @@ document.addEventListener("DOMContentLoaded", function() {
                         let html = '';
                         data.forEach(art => {
                             let ds = '';
-                            if(art.createdAt) {
-                            	ds = new Date(art.createdAt).toLocaleDateString('vi-VN');
+                            if(art.publishedAt) {
+                            	ds = new Date(art.publishedAt).toLocaleDateString('vi-VN');
                             }
                             html += `
                             <article onclick="window.location.href='\${ctxPath}/user/article?id=\${art.id}'"

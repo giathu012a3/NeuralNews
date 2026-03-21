@@ -16,12 +16,11 @@ public class ArticleDao {
         List<Article> list = new ArrayList<>();
         String sql = """
             SELECT a.*, c.name AS category_name FROM articles a 
-            JOIN categories c ON a.category_id = c.id 
+            LEFT JOIN categories c ON a.category_id = c.id 
             WHERE a.status='PUBLISHED'
-
         """;
-        if (categoryId > 0) sql += "AND a.category_id=? ";
-        sql += "ORDER BY a.published_at DESC LIMIT ? OFFSET ?";
+        if (categoryId > 0) sql += " AND a.category_id=? ";
+        sql += " ORDER BY COALESCE(a.published_at, a.created_at) DESC LIMIT ? OFFSET ?";
         
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -39,9 +38,9 @@ public class ArticleDao {
         List<Article> list = new ArrayList<>();
         String sql = """
             SELECT a.*, c.name AS category_name FROM articles a 
-            JOIN categories c ON a.category_id = c.id 
+            LEFT JOIN categories c ON a.category_id = c.id 
             WHERE a.status='PUBLISHED' 
-            ORDER BY (a.popularity_score + 1) / (DATEDIFF(NOW(), a.created_at) + 1) DESC 
+            ORDER BY (a.popularity_score + 1) / (DATEDIFF(NOW(), a.published_at) + 1) DESC 
             LIMIT ?
         """;
         try (Connection conn = DBConnection.getConnection();
@@ -61,7 +60,7 @@ public class ArticleDao {
         List<Article> list = new ArrayList<>();
         String sql = """
             SELECT a.*, c.name AS category_name FROM articles a 
-            JOIN categories c ON a.category_id = c.id 
+            LEFT JOIN categories c ON a.category_id = c.id 
             WHERE a.status='PUBLISHED' 
             ORDER BY a.likes_count DESC LIMIT ?
         """;
@@ -78,7 +77,7 @@ public class ArticleDao {
         List<Article> list = new ArrayList<>();
         String sql = """
             SELECT a.*, c.name AS category_name FROM articles a 
-            JOIN categories c ON a.category_id = c.id 
+            LEFT JOIN categories c ON a.category_id = c.id 
             WHERE a.status='PUBLISHED' 
             ORDER BY a.views DESC LIMIT ?
         """;
@@ -593,13 +592,16 @@ public class ArticleDao {
     }
 
     public boolean updateArticleStatus(long articleId, String status, Long approvedBy) {
-        String sql = "UPDATE articles SET status = ?, approved_by = ? WHERE id = ?";
+        String sql = "UPDATE articles SET status = ?, approved_by = ?, " +
+                     "published_at = CASE WHEN ? = 'PUBLISHED' AND published_at IS NULL THEN NOW() ELSE published_at END " +
+                     "WHERE id = ?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, status);
             if (approvedBy != null) ps.setLong(2, approvedBy);
             else ps.setNull(2, java.sql.Types.BIGINT);
-            ps.setLong(3, articleId);
+            ps.setString(3, status);
+            ps.setLong(4, articleId);
             return ps.executeUpdate() > 0;
         } catch (Exception e) { e.printStackTrace(); return false; }
     }

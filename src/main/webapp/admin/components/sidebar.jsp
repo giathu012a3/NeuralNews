@@ -1,11 +1,11 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" pageEncoding="UTF-8" %>
     <%@ page contentType="text/html;charset=UTF-8" language="java" %>
         <aside class="w-64 bg-background-dark text-white flex-shrink-0 flex flex-col fixed h-full z-50">
-            <div class="p-6 flex items-center gap-3">
+            <a href="${pageContext.request.contextPath}/" class="p-6 flex items-center gap-3 hover:opacity-80 transition-opacity">
                 <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center"> <span
                         class="material-icons text-white">bolt</span> </div>
                 <h1 class="text-xl font-bold tracking-tight">NexusAI</h1>
-            </div>
+            </a>
             <nav class="flex-1 mt-6 px-4 space-y-2"> <a
                     class="${param.activePage == 'dashboard' ? 'sidebar-active' : 'text-slate-400 hover:text-white hover:bg-slate-800'} flex items-center gap-3 px-4 py-3 rounded-lg transition-all"
                     href="${pageContext.request.contextPath}/admin/home"> <span
