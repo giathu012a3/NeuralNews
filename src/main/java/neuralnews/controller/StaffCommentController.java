@@ -60,7 +60,7 @@ public class StaffCommentController extends HttpServlet {
             setStatusStyle(c);
             setFormattedTime(c);
             setUserAvatar(c);
-            List<Comment> replies = dao.getReplies(c.getId());
+            List<Comment> replies = dao.getReplies(c.getId(), user.getId());
             for (Comment r : replies) {
                 setStatusStyle(r);
                 setFormattedTime(r);

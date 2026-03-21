@@ -1,11 +1,14 @@
 package neuralnews.controller;
 
+import neuralnews.dao.NotificationDao;
 import neuralnews.dao.UserDAO;
+import neuralnews.model.Notification;
 import neuralnews.model.User;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Handle existing user upgrading to Journalist: POST /JournalistUpgradeController
@@ -47,6 +50,28 @@ public class JournalistUpgradeController extends HttpServlet {
         boolean success = userDAO.updateJournalistApplication(currentUser.getId(), bio.trim(), experience);
 
         if (success) {
+            NotificationDao notiDao = new NotificationDao();
+            // Gui thong bao cho user
+            notiDao.create(new Notification(
+                currentUser.getId(),
+                "Yêu cầu được gửi",
+                "Yêu cầu nâng cấp lên Nhà báo của bạn đã được gửi thành công. Vui lòng chờ Ban quản trị duyệt.",
+                "SYSTEM",
+                "/user/profile.jsp"
+            ));
+
+            // Thong bao cho tat ca Admin
+            List<User> admins = userDAO.getAllUsersFiltered(null, "Admin", "ACTIVE", "date", "DESC", 100, 0);
+            for (User admin : admins) {
+                notiDao.create(new Notification(
+                    admin.getId(),
+                    "Yêu cầu Nhà báo mới",
+                    "Người dùng " + currentUser.getFullName() + " vừa gửi yêu cầu nâng cấp lên Nhà báo.",
+                    "SYSTEM",
+                    "/admin/users"
+                ));
+            }
+
             // Update the session user object status
             currentUser.setStatus("PENDING");
             currentUser.setBio(bio.trim());

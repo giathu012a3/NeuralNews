@@ -1,11 +1,14 @@
 package neuralnews.controller;
 
+import neuralnews.dao.NotificationDao;
 import neuralnews.dao.UserDAO;
+import neuralnews.model.Notification;
 import neuralnews.model.User;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Handle new journalist account registration: POST /JournalistRegisterController
@@ -76,6 +79,32 @@ public class JournalistRegisterController extends HttpServlet {
         if (!isRegistered) {
             response.sendRedirect(contextPath + "/auth/register_journalist.jsp?error=servererror");
             return;
+        }
+
+        if (isRegistered) {
+            User registeredUser = userDAO.findByEmail(newUser.getEmail());
+            if (registeredUser != null) {
+                 Notification welcomeNoti = new Notification(
+                    registeredUser.getId(),
+                    "Đăng ký thành công",
+                    "Đơn đăng ký làm Nhà báo của bạn đã được gửi. Tài khoản của bạn sẽ hoạt động sau khi được duyệt.",
+                    "SYSTEM",
+                    "/auth/login.jsp"
+                );
+                new NotificationDao().create(welcomeNoti);
+                
+                // Thong bao cho admin
+                List<User> admins = userDAO.getAllUsersFiltered(null, "Admin", "ACTIVE", "date", "DESC", 100, 0);
+                for (User admin : admins) {
+                    new NotificationDao().create(new Notification(
+                        admin.getId(),
+                        "Đăng ký Nhà báo mới",
+                        "Người dùng " + registeredUser.getFullName() + " vừa đăng ký tài khoản Nhà báo mới và đang chờ duyệt.",
+                        "SYSTEM",
+                        "/admin/users"
+                    ));
+                }
+            }
         }
 
         // Registration successful -> redirect to login with special success message

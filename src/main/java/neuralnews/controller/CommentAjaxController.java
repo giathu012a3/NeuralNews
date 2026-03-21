@@ -7,8 +7,12 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import neuralnews.dao.ArticleDao;
 import neuralnews.dao.CommentDao;
+import neuralnews.dao.NotificationDao;
+import neuralnews.model.Article;
 import neuralnews.model.Comment;
+import neuralnews.model.Notification;
 import neuralnews.model.User;
 
 import java.io.IOException;
@@ -122,6 +126,54 @@ public class CommentAjaxController extends HttpServlet {
                     ? Long.parseLong(parentIdStr) : null;
 
             boolean success = commentDao.addComment(articleId, user.getId(), parentId, content.trim());
+            
+            if (success) {
+                NotificationDao notiDao = new NotificationDao();
+                ArticleDao artDao = new ArticleDao();
+                Article art = artDao.getArticleById(articleId);
+                
+                if (art != null) {
+                    String userName = user.getFullName() != null ? user.getFullName() : "Doc gia";
+                    String articleUrl = "/user/article?id=" + articleId;
+
+                    if (parentId == null) {
+                        if (art.getAuthorId() != user.getId()) {
+                            Notification n = new Notification(
+                                art.getAuthorId(),
+                                "Binh luan moi",
+                                userName + " da binh luan ve bai viet: '" + art.getTitle() + "'.",
+                                "COMMENT",
+                                articleUrl
+                            );
+                            notiDao.create(n);
+                        }
+                    } else {
+                        Comment parentComment = commentDao.getCommentById(parentId);
+                        if (parentComment != null && parentComment.getUserId() != user.getId()) {
+                            Notification n = new Notification(
+                                parentComment.getUserId(),
+                                "Phan hoi binh luan",
+                                userName + " da phan hoi binh luan cua ban trong bai viet: '" + art.getTitle() + "'.",
+                                "COMMENT",
+                                articleUrl
+                            );
+                            notiDao.create(n);
+                        }
+                        
+                        if (art.getAuthorId() != user.getId() && (parentComment == null || art.getAuthorId() != parentComment.getUserId())) {
+                            Notification n = new Notification(
+                                art.getAuthorId(),
+                                "Binh luan moi",
+                                userName + " da phan hoi mot binh luan trong bai viet: '" + art.getTitle() + "'.",
+                                "COMMENT",
+                                articleUrl
+                            );
+                            notiDao.create(n);
+                        }
+                    }
+                }
+            }
+            
             out.print("{\"status\": \"" + (success ? "SUCCESS" : "ERROR") + "\"}");
         } catch (Exception e) {
             out.print("{\"status\": \"ERROR\", \"message\": \"" + e.getMessage() + "\"}");
