@@ -51,8 +51,12 @@ public class JournalistAnalyticsController extends HttpServlet {
 
         // Sentiment score tổng
         long totVote = statsAll[1] + statsAll[2];
-        int pctPositive = totVote > 0 ? (int) Math.round(statsAll[1] * 100.0 / totVote) : 50;
-        int pctNegative = Math.max(0, 100 - pctPositive);
+        int pctPositive = 0;
+        int pctNegative = 0;
+        if (totVote > 0) {
+            pctPositive = (int) Math.round(statsAll[1] * 100.0 / totVote);
+            pctNegative = Math.max(0, 100 - pctPositive);
+        }
         int sentimentScore = pctPositive;
 
         // ── 2. Top 10 bài viết ────────────────────────────────────────────
@@ -133,6 +137,7 @@ public class JournalistAnalyticsController extends HttpServlet {
         request.setAttribute("sentLabels7d",  toJsonStringArr(labels7d));
         request.setAttribute("sentLabels30d", toJsonStringArr(labels30d));
         request.setAttribute("sentLabelsAll", toJsonStringArr(sentAll.labels()));
+        request.setAttribute("dashboardDataLoaded", true);
 
         request.getRequestDispatcher("/journalist/analytics.jsp").forward(request, response);
     }
@@ -177,16 +182,16 @@ public class JournalistAnalyticsController extends HttpServlet {
         return "{"
             + "\"all\":{\"views\":\"" + formatNumber(all[0]) + "\",\"likes\":\"" + formatNumber(all[1])
             + "\",\"dislikes\":\"" + formatNumber(all[2]) + "\",\"comments\":" + all[3]
-            + ",\"score\":" + (all[1]+all[2]>0 ? (int)Math.round(all[1]*100.0/(all[1]+all[2])) : 50) + "},"
+            + ",\"score\":" + (all[1]+all[2]>0 ? (int)Math.round(all[1]*100.0/(all[1]+all[2])) : 0) + "},"
             + "\"1d\":{\"views\":\"" + formatNumber(d1[0]) + "\",\"likes\":\"" + formatNumber(d1[1])
             + "\",\"dislikes\":\"" + formatNumber(d1[2]) + "\",\"comments\":" + d1[3]
-            + ",\"score\":" + (d1[1]+d1[2]>0 ? (int)Math.round(d1[1]*100.0/(d1[1]+d1[2])) : 50) + "},"
+            + ",\"score\":" + (d1[1]+d1[2]>0 ? (int)Math.round(d1[1]*100.0/(d1[1]+d1[2])) : 0) + "},"
             + "\"7d\":{\"views\":\"" + formatNumber(d7[0]) + "\",\"likes\":\"" + formatNumber(d7[1])
             + "\",\"dislikes\":\"" + formatNumber(d7[2]) + "\",\"comments\":" + d7[3]
-            + ",\"score\":" + (d7[1]+d7[2]>0 ? (int)Math.round(d7[1]*100.0/(d7[1]+d7[2])) : 50) + "},"
+            + ",\"score\":" + (d7[1]+d7[2]>0 ? (int)Math.round(d7[1]*100.0/(d7[1]+d7[2])) : 0) + "},"
             + "\"30d\":{\"views\":\"" + formatNumber(d30[0]) + "\",\"likes\":\"" + formatNumber(d30[1])
             + "\",\"dislikes\":\"" + formatNumber(d30[2]) + "\",\"comments\":" + d30[3]
-            + ",\"score\":" + (d30[1]+d30[2]>0 ? (int)Math.round(d30[1]*100.0/(d30[1]+d30[2])) : 50) + "}"
+            + ",\"score\":" + (d30[1]+d30[2]>0 ? (int)Math.round(d30[1]*100.0/(d30[1]+d30[2])) : 0) + "}"
             + "}";
     }
 

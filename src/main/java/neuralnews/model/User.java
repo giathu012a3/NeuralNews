@@ -11,8 +11,8 @@ public class User {
 	private String email;
 	private String passwordHash;
 	private String fullName;
-	private Role role; // Giờ chỉ cần 1 Role duy nhất
-	private String status; // 'ACTIVE', 'PENDING', 'BANNED', 'SUSPENDED', 'REJECTED', 'DELETED'
+	private Role role;
+	private String status; 
 	private String avatarUrl;
 	private String bio;
 	private int experienceYears;
@@ -20,13 +20,6 @@ public class User {
 
 	public User() {
 	}
-
-	// --- Helper Methods ---
-
-	/**
-	 * Kiểm tra nhanh xem user có chứa role cụ thể hay không. Cây phân quyền phân
-	 * cấp: ADMIN có mọi quyền, JOURNALIST có quyền USER.
-	 */
 	public boolean hasRole(String roleName) {
 		if (this.role == null || this.role.getName() == null) {
 			return false;
@@ -34,23 +27,19 @@ public class User {
 
 		String currentRole = this.role.getName().toUpperCase();
 
-		// Cấp 1: Nếu là ADMIN, full quyền
 		if ("ADMIN".equals(currentRole)) {
 			return true;
 		}
 
-		// Cấp 2: Nếu là JOURNALIST, được qua cửa USER hoặc JOURNALIST
 		if ("JOURNALIST".equals(currentRole)) {
 			if ("USER".equalsIgnoreCase(roleName) || "JOURNALIST".equalsIgnoreCase(roleName)) {
 				return true;
 			}
 		}
 
-		// Cấp 3: Khớp chính xác (Ví dụ tài khoản USER thì chỉ vào được trang USER)
 		return currentRole.equalsIgnoreCase(roleName);
 	}
 
-	// --- Getters & Setters ---
 
 	public long getId() {
 		return id;

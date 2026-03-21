@@ -4,9 +4,7 @@
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 
 <c:set var="categories" value="${requestScope.categories}" />
-<c:if test="${empty categories}">
-    <jsp:forward page="/journalist/create-article" />
-</c:if>
+
 
 <c:set var="u" value="${requestScope.currentUser}" />
 <c:set var="art" value="${requestScope.article}" />

@@ -1,12 +1,10 @@
+<%-- DIAGNOSTIC MARKER: REDIRECT LOOP REMOVED --%>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-    <%@ taglib prefix="c" uri="jakarta.tags.core" %>
-        <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
-            <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
+<%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 
-                <c:set var="topArticles" value="${requestScope.topArticles}" />
-                <c:if test="${empty topArticles}">
-                    <jsp:forward page="/journalist/home" />
-                </c:if>
+<c:set var="topArticles" value="${requestScope.topArticles}" />
 
                 <c:set var="u" value="${sessionScope.currentUser}" />
                 <c:set var="totalViews" value="${not empty requestScope.totalViews ? requestScope.totalViews : '0'}" />
@@ -287,16 +285,16 @@
                                                                     id="chartXLabels" style="overflow:hidden;"></div>
                                                         <script>
                                                             var CHART_DATA = {
-                                                                '1d': ${chartJson1d},
-                                                                '7d': ${chartJson7d},
-                                                                '30d': ${chartJson30d},
-                                                                'all': ${chartJsonAll}
+                                                                '1d': ${not empty chartJson1d ? chartJson1d : '[]'},
+                                                                '7d': ${not empty chartJson7d ? chartJson7d : '[]'},
+                                                                '30d': ${not empty chartJson30d ? chartJson30d : '[]'},
+                                                                'all': ${not empty chartJsonAll ? chartJsonAll : '[]'}
                                                             };
                                                             var LABEL_DATA = {
-                                                                '1d': ${labelJson1d},
-                                                                '7d': ${labelJson7d},
-                                                                '30d': ${labelJson30d},
-                                                                'all': ${labelJsonAll}
+                                                                '1d': ${not empty labelJson1d ? labelJson1d : '[]'},
+                                                                '7d': ${not empty labelJson7d ? labelJson7d : '[]'},
+                                                                '30d': ${not empty labelJson30d ? labelJson30d : '[]'},
+                                                                'all': ${not empty labelJsonAll ? labelJsonAll : '[]'}
                                                             };
                                                             var VIEWS_DATA = {
                                                                 '1d': '${views1d}',

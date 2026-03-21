@@ -2,9 +2,7 @@
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 
-<c:if test="${empty topArticles}">
-    <jsp:forward page="/journalist/analytics" />
-</c:if>
+
 
 <c:set var="ctx" value="${pageContext.request.contextPath}" />
 <c:set var="dislikes" value="${not empty fmtDislikes ? fmtDislikes : '0'}" />

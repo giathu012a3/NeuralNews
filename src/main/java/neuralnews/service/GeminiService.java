@@ -37,7 +37,8 @@ public class GeminiService {
                 cleanText = cleanText.substring(0, 5000); // Truncate if very long
             }
 
-            String prompt = "Dựa trên nội dung sau, hãy viết một bản tóm tắt cực kỳ ngắn gọn gồm 4-5 gạch đầu dòng tóm tắt các ý quan trọng nhất của bài báo này. Chỉ trả về các gạch đầu dòng, không thêm lời dẫn. \n\nNội dung: "
+            String prompt = "Dựa trên nội dung sau, hãy viết một bản tóm tắt cực kỳ ngắn gọn gồm 4-5 gạch đầu dòng tóm tắt các ý quan trọng nhất của bài báo này."
+            		+ " Chỉ trả về các gạch đầu dòng, không thêm lời dẫn. \n\nNội dung: "
                     + cleanText;
 
             // Construct JSON request

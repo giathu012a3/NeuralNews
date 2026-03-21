@@ -3,9 +3,7 @@
         <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
             <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 
-                <c:if test="${comments == null}">
-                    <jsp:forward page="/journalist/comments" />
-                </c:if>
+                
 
                 <c:set var="ctx" value="${pageContext.request.contextPath}" />
                 <c:set var="sort" value="${not empty sort ? sort : 'latest'}" />

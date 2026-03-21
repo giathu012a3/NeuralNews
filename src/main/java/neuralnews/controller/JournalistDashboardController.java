@@ -159,6 +159,7 @@ public class JournalistDashboardController extends HttpServlet {
         request.setAttribute("labelJson7d",  toJsonStringArray(labels7d));
         request.setAttribute("labelJson30d", toJsonStringArray(labels30d));
         request.setAttribute("labelJsonAll", toJsonStringArray(chartAllLabels));
+        request.setAttribute("dashboardDataLoaded", true);
 
         request.getRequestDispatcher("/journalist/home.jsp").forward(request, response);
     }
