@@ -78,3 +78,16 @@ Dự án sử dụng tài khoản mẫu mặc định sau khi chạy file SQL:
 1.  **Lỗi "The import jakarta cannot be resolved"**: Do dùng Tomcat/Servlet phiên bản cũ. Yêu cầu bắt buộc là **Tomcat 11** và **Jakarta EE**.
 2.  **Lỗi 404 hoặc giao diện vỡ nát**: Chắc chắn bạn đã set `Content directory` thành `src/main/webapp` lúc cấu hình project. Đừng để mặc định là `WebContent` hay `src/main/webapp/WEB-INF`.
 3.  **Lỗi 500 khi đăng nhập/đăng ký**: Kiểm tra log console của Eclipse. Lỗi 99% do kết nối Database thất bại (Sai pass, sai port hoặc quên chưa tạo DB `neural_news`).
+
+4.  **Upload ảnh xong không thấy trong folder project**:
+    - Mặc định, ảnh được lưu vào **thư mục deploy của Tomcat** (để URL `/uploads/images/...` truy cập được ngay).
+    - Ngoài ra, hệ thống sẽ **copy thêm 1 bản về folder mặc định theo user** để ai cũng mở ra xem được:
+      - Windows: `C:\Users\<user>\NeuralNews\uploads\images`
+      - macOS/Linux: `~/NeuralNews/uploads/images`
+    - Nếu bạn muốn đổi nơi copy, hãy cấu hình 1 trong các cách sau:
+      - **Cách A (Windows/macOS/Linux)**: Environment variable `NEURALNEWS_UPLOAD_DIR`
+      - **Cách B**: JVM arg `-Dneuralnews.upload.dir=...`
+      - **Cách C (commit được trong project)**: set `context-param` `NEURALNEWS_UPLOAD_DIR` trong `src/main/webapp/WEB-INF/web.xml`
+    
+    Ví dụ Windows:
+    - `NEURALNEWS_UPLOAD_DIR=C:\Users\<you>\Desktop\NeuralNews\src\main\webapp\uploads\images`

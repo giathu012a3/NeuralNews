@@ -1,39 +1,37 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" pageEncoding="UTF-8" %>
     <%@ page contentType="text/html;charset=UTF-8" language="java" %>
         <aside class="w-64 bg-background-dark text-white flex-shrink-0 flex flex-col fixed h-full z-50">
-            <div class="p-6 flex items-center gap-3">
+            <a href="${pageContext.request.contextPath}/" class="p-6 flex items-center gap-3 hover:opacity-80 transition-opacity">
                 <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center"> <span
                         class="material-icons text-white">bolt</span> </div>
                 <h1 class="text-xl font-bold tracking-tight">NexusAI</h1>
-            </div>
+            </a>
             <nav class="flex-1 mt-6 px-4 space-y-2"> <a
                     class="${param.activePage == 'dashboard' ? 'sidebar-active' : 'text-slate-400 hover:text-white hover:bg-slate-800'} flex items-center gap-3 px-4 py-3 rounded-lg transition-all"
-                    href="${pageContext.request.contextPath}/admin/home.jsp"> <span
+                    href="${pageContext.request.contextPath}/admin/home"> <span
                         class="material-icons text-[20px]">dashboard</span> <span class="font-medium">Bảng điều
-                        khiển</span> </a> <a href="${pageContext.request.contextPath}/admin/users.jsp"
+                        khiển</span> </a> <a href="${pageContext.request.contextPath}/admin/users"
                     class="${param.activePage == 'users' ? 'sidebar-active' : 'text-slate-400 hover:text-white hover:bg-slate-800'} flex items-center gap-3 px-4 py-3 rounded-lg transition-all">
                     <span class="material-icons text-[20px]">people</span> <span class="font-medium">Quản lý Người
-                        dùng</span> </a> <a href="${pageContext.request.contextPath}/admin/permissions.jsp"
-                    class="${param.activePage == 'permissions' ? 'sidebar-active' : 'text-slate-400 hover:text-white hover:bg-slate-800'} flex items-center gap-3 px-4 py-3 rounded-lg transition-all">
-                    <span class="material-icons text-[20px]">verified_user</span> <span class="font-medium">Quyền
-                        hạn</span> </a> <a
+                        dùng</span> </a> <a
                     class="${param.activePage == 'content' ? 'sidebar-active' : 'text-slate-400 hover:text-white hover:bg-slate-800'} flex items-center gap-3 px-4 py-3 rounded-lg transition-all"
                     href="${pageContext.request.contextPath}/admin/content"> <span
                         class="material-icons text-[20px]">article</span> <span class="font-medium">Quản lý Nội
                         dung</span> </a> <a
-                    class="${param.activePage == 'violation' ? 'sidebar-active' : 'text-slate-400 hover:text-white hover:bg-slate-800'} flex items-center gap-3 px-4 py-3 rounded-lg transition-all"
-                    href="${pageContext.request.contextPath}/admin/violation.jsp"> <span
-                        class="material-icons text-[20px]">gavel</span> <span class="font-medium">Xử lý Vi phạm</span>
+                    class="${param.activePage == 'categories' ? 'sidebar-active' : 'text-slate-400 hover:text-white hover:bg-slate-800'} flex items-center gap-3 px-4 py-3 rounded-lg transition-all"
+                    href="${pageContext.request.contextPath}/admin/categories"> <span
+                        class="material-icons text-[20px]">category</span> <span class="font-medium">Danh mục</span>
                 </a> <a
-                    class="${param.activePage == 'layout' ? 'sidebar-active' : 'text-slate-400 hover:text-white hover:bg-slate-800'} flex items-center gap-3 px-4 py-3 rounded-lg transition-all"
-                    href="${pageContext.request.contextPath}/admin/layout.jsp"> <span
-                        class="material-icons text-[20px]">palette</span> <span class="font-medium">Tùy chỉnh Giao
-                        diện</span> </a> <a
+                    class="${param.activePage == 'violation' ? 'sidebar-active' : 'text-slate-400 hover:text-white hover:bg-slate-800'} flex items-center gap-3 px-4 py-3 rounded-lg transition-all"
+                    href="${pageContext.request.contextPath}/admin/violation"> <span
+                        class="material-icons text-[20px]">gavel</span> <span class="font-medium">Xử lý Vi phạm</span>
+                </a>                <a
                     class="${param.activePage == 'ai' ? 'sidebar-active' : 'text-slate-400 hover:text-white hover:bg-slate-800'} flex items-center gap-3 px-4 py-3 rounded-lg transition-all"
-                    href="#"> <span class="material-icons text-[20px]">psychology</span> <span class="font-medium">Cấu
+                    href="${pageContext.request.contextPath}/admin/ai-settings"> <span
+                        class="material-icons text-[20px]">psychology</span> <span class="font-medium">Cấu
                         hình AI</span> </a> <a
                     class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 transition-all text-slate-400 hover:text-white"
-                    href="${pageContext.request.contextPath}/auth/logout.jsp"> <span
+                    href="${pageContext.request.contextPath}/logout"> <span
                         class="material-icons text-[20px]">logout</span> <span class="font-medium">Đăng xuất</span> </a>
             </nav>
             <div class="p-4 mt-auto">

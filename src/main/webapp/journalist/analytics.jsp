@@ -1,373 +1,436 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" pageEncoding="UTF-8" %>
-    <!DOCTYPE html>
-    <html class="dark" lang="en">
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 
-    <head>
-        <jsp:include page="components/head.jsp" />
-        <title>Trung tâm Dữ liệu Phân tích Nâng cao</title>
-    </head>
 
-    <body class="min-h-screen overflow-hidden">
-        <div class="flex h-screen">
-            <jsp:include page="components/sidebar.jsp">
-                <jsp:param name="activePage" value="analytics" />
-            </jsp:include>
-            <main class="flex-1 flex flex-col min-w-0">
-                <header
-                    class="h-16 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-border-dark flex items-center justify-between px-8 shrink-0 z-20">
-                    <div class="flex items-center gap-6">
-                        <h2 class="text-lg font-bold tracking-tight">Trung tâm Dữ liệu Phân tích Nâng cao</h2>
-                        <div class="hidden md:flex items-center gap-2 text-xs text-slate-500 font-medium"> <span>Cổng
-                                thông tin Nhà báo</span> <span
-                                class="material-symbols-outlined text-sm">chevron_right</span> <span
-                                class="text-slate-900 dark:text-slate-200">Trung tâm Dữ liệu</span> </div>
+
+<c:set var="ctx" value="${pageContext.request.contextPath}" />
+<c:set var="dislikes" value="${not empty fmtDislikes ? fmtDislikes : '0'}" />
+<c:set var="score" value="${not empty sentimentScore ? sentimentScore : 0}" />
+
+<!DOCTYPE html>
+<html class="dark" lang="vi">
+<head>
+    <jsp:include page="components/head.jsp" />
+    <title>Trung tâm Dữ liệu Phân tích Nâng cao</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+</head>
+<body class="min-h-screen overflow-hidden bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100">
+<div class="flex h-screen">
+
+    <jsp:include page="components/sidebar.jsp">
+        <jsp:param name="activePage" value="analytics" />
+    </jsp:include>
+
+    <main class="flex-1 flex flex-col min-w-0">
+
+        <%-- HEADER --%>
+        <jsp:include page="components/header.jsp">
+            <jsp:param name="pageTitle" value="Trung tâm Dữ liệu Phân tích" />
+        </jsp:include>
+
+        <div class="flex-1 overflow-y-auto bg-slate-50 dark:bg-background-dark/50">
+            <div class="p-8 space-y-8 max-w-[1400px] mx-auto">
+
+                <%-- ══ PERIOD FILTER ══ --%>
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <p class="text-xs text-slate-400" id="analyticsperiodLabel">Tất cả thời gian</p>
+                    <div class="flex items-center bg-slate-100 dark:bg-slate-800 rounded-xl p-1 gap-0.5">
+                        <button onclick="setAnalyticsPeriod('1d')" id="apbtn-1d"
+                                class="analytics-period-btn px-3 py-1.5 text-[11px] font-bold rounded-lg transition-all text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-white">
+                            1 Ngày
+                        </button>
+                        <button onclick="setAnalyticsPeriod('7d')" id="apbtn-7d"
+                                class="analytics-period-btn px-3 py-1.5 text-[11px] font-bold rounded-lg transition-all text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-white">
+                            7 Ngày
+                        </button>
+                        <button onclick="setAnalyticsPeriod('30d')" id="apbtn-30d"
+                                class="analytics-period-btn px-3 py-1.5 text-[11px] font-bold rounded-lg transition-all text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-white">
+                            30 Ngày
+                        </button>
+                        <button onclick="setAnalyticsPeriod('all')" id="apbtn-all"
+                                class="analytics-period-btn px-4 py-1.5 text-[11px] font-bold rounded-lg transition-all bg-white dark:bg-slate-700 text-primary shadow-sm">
+                            Tất cả
+                        </button>
                     </div>
-                    <div class="flex items-center gap-3">
-                        <div class="relative group"> <span
-                                class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
-                            <input
-                                class="bg-slate-100 dark:bg-slate-800 border-none rounded-lg py-1.5 pl-10 pr-4 w-64 focus:ring-2 focus:ring-primary text-xs transition-all"
-                                placeholder="Tìm kiếm số liệu báo cáo..." type="text" />
+                </div>
+
+                <%-- ══ STAT CARDS ══ --%>
+                <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                    <div class="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-border-dark shadow-sm">
+                        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Tổng lượt xem</p>
+                        <div class="flex items-end justify-between">
+                            <h3 class="text-2xl font-bold" id="stat-views">${fmtViews}</h3>
+                            <span class="text-blue-500 text-xs font-bold flex items-center mb-1">
+                                <span class="material-symbols-outlined text-sm">visibility</span>
+                            </span>
                         </div>
-                        <div class="h-6 w-px bg-slate-200 dark:bg-slate-700 mx-1"></div> <button
-                            class="relative p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-slate-500">
-                            <span class="material-symbols-outlined">notifications</span> <span
-                                class="absolute top-2.5 right-2.5 size-2 bg-red-500 rounded-full border-2 border-white dark:border-slate-900"></span>
-                        </button> <button
-                            class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-slate-500">
-                            <span class="material-symbols-outlined">light_mode</span> </button>
                     </div>
-                </header>
-                <div class="flex-1 overflow-y-auto bg-slate-50 dark:bg-background-dark/50">
-                    <div class="p-8 space-y-8 max-w-[1400px] mx-auto">
-                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                            <div
-                                class="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-border-dark shadow-sm">
-                                <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Tổng lượt
-                                    xem Trang</p>
-                                <div class="flex items-end justify-between">
-                                    <h3 class="text-2xl font-bold">1,284,592</h3> <span
-                                        class="text-emerald-500 text-xs font-bold flex items-center mb-1"> <span
-                                            class="material-symbols-outlined text-sm">trending_up</span> +12.5% </span>
-                                </div>
-                            </div>
-                            <div
-                                class="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-border-dark shadow-sm">
-                                <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Thời gian
-                                    Đọc Trung bình </p>
-                                <div class="flex items-end justify-between">
-                                    <h3 class="text-2xl font-bold">4m 32s</h3> <span
-                                        class="text-emerald-500 text-xs font-bold flex items-center mb-1"> <span
-                                            class="material-symbols-outlined text-sm">trending_up</span> +4% </span>
-                                </div>
-                            </div>
-                            <div
-                                class="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-border-dark shadow-sm">
-                                <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Lượt Tương
-                                    tác </p>
-                                <div class="flex items-end justify-between">
-                                    <h3 class="text-2xl font-bold">842,109</h3> <span
-                                        class="text-red-500 text-xs font-bold flex items-center mb-1"> <span
-                                            class="material-symbols-outlined text-sm">trending_down</span> -2.1% </span>
-                                </div>
-                            </div>
-                            <div
-                                class="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-border-dark shadow-sm">
-                                <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Điểm Cảm
-                                    xúc</p>
-                                <div class="flex items-end justify-between">
-                                    <h3 class="text-2xl font-bold">88/100</h3> <span
-                                        class="text-emerald-500 text-xs font-bold flex items-center mb-1"> <span
-                                            class="material-symbols-outlined text-sm">trending_up</span> +5.4% </span>
-                                </div>
-                            </div>
+                    <div class="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-border-dark shadow-sm">
+                        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Bình luận</p>
+                        <div class="flex items-end justify-between">
+                            <h3 class="text-2xl font-bold" id="stat-comments">${totalComments}</h3>
+                            <span class="text-purple-500 text-xs font-bold flex items-center mb-1">
+                                <span class="material-symbols-outlined text-sm">forum</span>
+                            </span>
                         </div>
-                        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                            <div
-                                class="lg:col-span-8 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-border-dark p-6 shadow-sm">
-                                <div class="flex items-center justify-between mb-8">
-                                    <div>
-                                        <h4 class="font-bold text-slate-900 dark:text-white">Phân tích Cảm xúc theo Thời
-                                            gian </h4>
-                                        <p class="text-xs text-slate-500 mt-0.5">Phân bổ cảm xúc người đọc trên tất cả
-                                            bài viết</p>
-                                    </div>
-                                    <div class="flex gap-4">
-                                        <div class="flex items-center gap-1.5"> <span
-                                                class="size-2 rounded-full bg-chart-teal"></span> <span
-                                                class="text-[10px] font-bold text-slate-500 uppercase">Tích cực</span>
-                                        </div>
-                                        <div class="flex items-center gap-1.5"> <span
-                                                class="size-2 rounded-full bg-chart-amber"></span> <span
-                                                class="text-[10px] font-bold text-slate-500 uppercase">Trung lập</span>
-                                        </div>
-                                        <div class="flex items-center gap-1.5"> <span
-                                                class="size-2 rounded-full bg-chart-rose"></span> <span
-                                                class="text-[10px] font-bold text-slate-500 uppercase">Tiêu cực</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="h-64 flex items-end gap-3 px-2">
-                                    <div class="flex-1 flex flex-col gap-0.5 group relative">
-                                        <div
-                                            class="w-full bg-chart-teal/80 rounded-t-sm h-[40%] transition-all group-hover:bg-chart-teal">
-                                        </div>
-                                        <div
-                                            class="w-full bg-chart-amber/80 h-[30%] transition-all group-hover:bg-chart-amber">
-                                        </div>
-                                        <div
-                                            class="w-full bg-chart-rose/80 rounded-b-sm h-[20%] transition-all group-hover:bg-chart-rose">
-                                        </div> <span
-                                            class="absolute -bottom-6 left-1/2 -translate-x-1/2 text-[10px] font-medium text-slate-400">T2</span>
-                                    </div>
-                                    <div class="flex-1 flex flex-col gap-0.5 group relative">
-                                        <div
-                                            class="w-full bg-chart-teal/80 rounded-t-sm h-[55%] transition-all group-hover:bg-chart-teal">
-                                        </div>
-                                        <div
-                                            class="w-full bg-chart-amber/80 h-[25%] transition-all group-hover:bg-chart-amber">
-                                        </div>
-                                        <div
-                                            class="w-full bg-chart-rose/80 rounded-b-sm h-[10%] transition-all group-hover:bg-chart-rose">
-                                        </div> <span
-                                            class="absolute -bottom-6 left-1/2 -translate-x-1/2 text-[10px] font-medium text-slate-400">T3</span>
-                                    </div>
-                                    <div class="flex-1 flex flex-col gap-0.5 group relative">
-                                        <div
-                                            class="w-full bg-chart-teal/80 rounded-t-sm h-[30%] transition-all group-hover:bg-chart-teal">
-                                        </div>
-                                        <div
-                                            class="w-full bg-chart-amber/80 h-[45%] transition-all group-hover:bg-chart-amber">
-                                        </div>
-                                        <div
-                                            class="w-full bg-chart-rose/80 rounded-b-sm h-[15%] transition-all group-hover:bg-chart-rose">
-                                        </div> <span
-                                            class="absolute -bottom-6 left-1/2 -translate-x-1/2 text-[10px] font-medium text-slate-400">T4</span>
-                                    </div>
-                                    <div class="flex-1 flex flex-col gap-0.5 group relative">
-                                        <div
-                                            class="w-full bg-chart-teal/80 rounded-t-sm h-[60%] transition-all group-hover:bg-chart-teal">
-                                        </div>
-                                        <div
-                                            class="w-full bg-chart-amber/80 h-[20%] transition-all group-hover:bg-chart-amber">
-                                        </div>
-                                        <div
-                                            class="w-full bg-chart-rose/80 rounded-b-sm h-[10%] transition-all group-hover:bg-chart-rose">
-                                        </div> <span
-                                            class="absolute -bottom-6 left-1/2 -translate-x-1/2 text-[10px] font-medium text-slate-400">T5</span>
-                                    </div>
-                                    <div class="flex-1 flex flex-col gap-0.5 group relative">
-                                        <div
-                                            class="w-full bg-chart-teal/80 rounded-t-sm h-[45%] transition-all group-hover:bg-chart-teal">
-                                        </div>
-                                        <div
-                                            class="w-full bg-chart-amber/80 h-[35%] transition-all group-hover:bg-chart-amber">
-                                        </div>
-                                        <div
-                                            class="w-full bg-chart-rose/80 rounded-b-sm h-[12%] transition-all group-hover:bg-chart-rose">
-                                        </div> <span
-                                            class="absolute -bottom-6 left-1/2 -translate-x-1/2 text-[10px] font-medium text-slate-400">T6</span>
-                                    </div>
-                                    <div class="flex-1 flex flex-col gap-0.5 group relative">
-                                        <div
-                                            class="w-full bg-chart-teal/80 rounded-t-sm h-[20%] transition-all group-hover:bg-chart-teal">
-                                        </div>
-                                        <div
-                                            class="w-full bg-chart-amber/80 h-[30%] transition-all group-hover:bg-chart-amber">
-                                        </div>
-                                        <div
-                                            class="w-full bg-chart-rose/80 rounded-b-sm h-[40%] transition-all group-hover:bg-chart-rose">
-                                        </div> <span
-                                            class="absolute -bottom-6 left-1/2 -translate-x-1/2 text-[10px] font-medium text-slate-400">T7</span>
-                                    </div>
-                                    <div class="flex-1 flex flex-col gap-0.5 group relative">
-                                        <div
-                                            class="w-full bg-chart-teal/80 rounded-t-sm h-[50%] transition-all group-hover:bg-chart-teal">
-                                        </div>
-                                        <div
-                                            class="w-full bg-chart-amber/80 h-[25%] transition-all group-hover:bg-chart-amber">
-                                        </div>
-                                        <div
-                                            class="w-full bg-chart-rose/80 rounded-b-sm h-[15%] transition-all group-hover:bg-chart-rose">
-                                        </div> <span
-                                            class="absolute -bottom-6 left-1/2 -translate-x-1/2 text-[10px] font-medium text-slate-400">CN</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div
-                                class="lg:col-span-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-border-dark p-6 shadow-sm">
-                                <h4 class="font-bold text-slate-900 dark:text-white mb-6">Nguồn Lưu lượng</h4>
-                                <div class="relative flex justify-center mb-8">
-                                    <div
-                                        class="size-48 rounded-full border-[18px] border-chart-blue border-r-chart-teal border-b-chart-amber border-l-chart-rose/40 flex items-center justify-center">
-                                        <div class="text-center">
-                                            <p class="text-[10px] font-bold text-slate-400 uppercase leading-none">Tổng
-                                            </p>
-                                            <p class="text-xl font-bold">1.2M</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="space-y-3">
-                                    <div class="flex items-center justify-between">
-                                        <div class="flex items-center gap-3"> <span
-                                                class="size-2.5 rounded-sm bg-chart-blue"></span> <span
-                                                class="text-xs font-medium text-slate-600 dark:text-slate-400">Tìm kiếm
-                                                Trực tiếp</span> </div> <span class="text-xs font-bold">42%</span>
-                                    </div>
-                                    <div class="flex items-center justify-between">
-                                        <div class="flex items-center gap-3"> <span
-                                                class="size-2.5 rounded-sm bg-chart-teal"></span> <span
-                                                class="text-xs font-medium text-slate-600 dark:text-slate-400">Mạng Xã
-                                                hội</span> </div> <span class="text-xs font-bold">28%</span>
-                                    </div>
-                                    <div class="flex items-center justify-between">
-                                        <div class="flex items-center gap-3"> <span
-                                                class="size-2.5 rounded-sm bg-chart-amber"></span> <span
-                                                class="text-xs font-medium text-slate-600 dark:text-slate-400">Newsletters</span>
-                                        </div> <span class="text-xs font-bold">18%</span>
-                                    </div>
-                                    <div class="flex items-center justify-between">
-                                        <div class="flex items-center gap-3"> <span
-                                                class="size-2.5 rounded-sm bg-chart-rose/40"></span> <span
-                                                class="text-xs font-medium text-slate-600 dark:text-slate-400">Referrals</span>
-                                        </div> <span class="text-xs font-bold">12%</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div
-                                class="lg:col-span-12 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-border-dark p-6 shadow-sm overflow-hidden">
-                                <div class="flex items-center justify-between mb-8">
-                                    <div>
-                                        <h4 class="font-bold text-slate-900 dark:text-white">Đặc điểm Nhân khẩu học Độc
-                                            giả Toàn cầu </h4>
-                                        <p class="text-xs text-slate-500 mt-0.5">Bản đồ nhiệt về mức độ tập trung khán
-                                            giả theo khu vực </p>
-                                    </div> <button
-                                        class="text-xs font-bold text-primary hover:underline flex items-center gap-1">
-                                        Xem Báo cáo Đầy đủ <span
-                                            class="material-symbols-outlined text-sm">open_in_new</span> </button>
-                                </div>
-                                <div
-                                    class="relative bg-slate-50 dark:bg-slate-800/50 rounded-lg h-80 flex items-center justify-center border border-slate-100 dark:border-slate-800">
-                                    <div
-                                        class="absolute inset-0 opacity-10 flex flex-wrap gap-4 p-8 overflow-hidden pointer-events-none">
-                                        <span class="material-symbols-outlined text-9xl">public</span>
-                                    </div>
-                                    <div class="z-10 w-full px-12 grid grid-cols-2 md:grid-cols-4 gap-8">
-                                        <div class="text-center">
-                                            <p class="text-3xl font-bold text-primary">42%</p>
-                                            <p class="text-xs font-bold text-slate-500 uppercase mt-1">Bắc Mỹ</p>
-                                            <div
-                                                class="w-24 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full mx-auto mt-3 overflow-hidden">
-                                                <div class="h-full bg-primary w-[42%]"></div>
-                                            </div>
-                                        </div>
-                                        <div class="text-center">
-                                            <p class="text-3xl font-bold text-chart-teal">31%</p>
-                                            <p class="text-xs font-bold text-slate-500 uppercase mt-1">Châu Âu</p>
-                                            <div
-                                                class="w-24 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full mx-auto mt-3 overflow-hidden">
-                                                <div class="h-full bg-chart-teal w-[31%]"></div>
-                                            </div>
-                                        </div>
-                                        <div class="text-center">
-                                            <p class="text-3xl font-bold text-chart-amber">18%</p>
-                                            <p class="text-xs font-bold text-slate-500 uppercase mt-1">Châu Á Thái Bình
-                                                Dương</p>
-                                            <div
-                                                class="w-24 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full mx-auto mt-3 overflow-hidden">
-                                                <div class="h-full bg-chart-amber w-[18%]"></div>
-                                            </div>
-                                        </div>
-                                        <div class="text-center">
-                                            <p class="text-3xl font-bold text-chart-rose">9%</p>
-                                            <p class="text-xs font-bold text-slate-500 uppercase mt-1">Khu vực Khác</p>
-                                            <div
-                                                class="w-24 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full mx-auto mt-3 overflow-hidden">
-                                                <div class="h-full bg-chart-rose w-[9%]"></div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div
-                                        class="absolute top-1/4 left-1/3 size-4 bg-primary/40 rounded-full animate-pulse">
-                                    </div>
-                                    <div class="absolute top-1/3 left-1/4 size-2 bg-primary/60 rounded-full"></div>
-                                    <div class="absolute top-1/2 left-1/2 size-3 bg-chart-teal/50 rounded-full"></div>
-                                    <div class="absolute bottom-1/3 right-1/4 size-5 bg-chart-amber/30 rounded-full">
-                                    </div>
-                                </div>
-                            </div>
+                    </div>
+                    <div class="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-border-dark shadow-sm">
+                        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Lượt thích</p>
+                        <div class="flex items-end justify-between">
+                            <h3 class="text-2xl font-bold" id="stat-likes">${fmtLikes}</h3>
+                            <span class="text-emerald-500 text-xs font-bold flex items-center mb-1">
+                                <span class="material-symbols-outlined text-sm">thumb_up</span>
+                            </span>
                         </div>
-                        <div
-                            class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-border-dark overflow-hidden shadow-sm">
-                            <div
-                                class="px-6 py-4 border-b border-slate-200 dark:border-border-dark flex items-center justify-between">
-                                <h4 class="font-bold">Bảng xếp hạng Hiệu suất Nội dung</h4>
-                                <div class="flex gap-2"> <button
-                                        class="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md transition-colors">
-                                        <span class="material-symbols-outlined text-xl">filter_list</span> </button>
-                                    <button
-                                        class="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md transition-colors">
-                                        <span class="material-symbols-outlined text-xl">file_download</span> </button>
-                                </div>
-                            </div>
-                            <table class="w-full text-left text-sm">
-                                <thead>
-                                    <tr
-                                        class="bg-slate-50 dark:bg-slate-800/50 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                                        <th class="px-6 py-3">Tiêu đề Bài viết</th>
-                                        <th class="px-6 py-3">Lượt xem</th>
-                                        <th class="px-6 py-3">Tương tác</th>
-                                        <th class="px-6 py-3">Cảm xúc AI</th>
-                                        <th class="px-6 py-3 text-right">Xu hướng</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
-                                    <tr>
-                                        <td class="px-6 py-4 font-semibold">Tương lai của AI trong Báo chí Hiện đại</td>
-                                        <td class="px-6 py-4">42,891</td>
-                                        <td class="px-6 py-4">84%</td>
-                                        <td class="px-6 py-4"> <span
-                                                class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400 text-[10px] font-bold uppercase ring-1 ring-inset ring-emerald-500/20">
-                                                <span class="size-1.5 rounded-full bg-emerald-500"></span> Tích cực
-                                            </span> </td>
-                                        <td class="px-6 py-4 text-right"> <span
-                                                class="text-emerald-500 material-symbols-outlined text-lg">trending_up</span>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td class="px-6 py-4 font-semibold">An ninh mạng trong Kỷ nguyên Lượng tử...
-                                        </td>
-                                        <td class="px-6 py-4">28,502</td>
-                                        <td class="px-6 py-4">62%</td>
-                                        <td class="px-6 py-4"> <span
-                                                class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400 text-[10px] font-bold uppercase ring-1 ring-inset ring-amber-500/20">
-                                                <span class="size-1.5 rounded-full bg-amber-500"></span> Tiêu cực
-                                            </span> </td>
-                                        <td class="px-6 py-4 text-right"> <span
-                                                class="text-amber-500 material-symbols-outlined text-lg">trending_flat</span>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td class="px-6 py-4 font-semibold">Giải thích Khủng hoảng Chuỗi cung ứng Toàn
-                                            cầu </td>
-                                        <td class="px-6 py-4">19,420</td>
-                                        <td class="px-6 py-4">45%</td>
-                                        <td class="px-6 py-4"> <span
-                                                class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 dark:bg-slate-500/10 dark:text-slate-400 text-[10px] font-bold uppercase ring-1 ring-inset ring-slate-500/20">
-                                                <span class="size-1.5 rounded-full bg-slate-400"></span> Trung lập
-                                            </span> </td>
-                                        <td class="px-6 py-4 text-right"> <span
-                                                class="text-red-500 material-symbols-outlined text-lg">trending_down</span>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                    </div>
+                    <div class="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-border-dark shadow-sm">
+                        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Không thích</p>
+                        <div class="flex items-end justify-between">
+                            <h3 class="text-2xl font-bold" id="stat-dislikes">${dislikes}</h3>
+                            <span class="text-red-400 text-xs font-bold flex items-center mb-1">
+                                <span class="material-symbols-outlined text-sm">thumb_down</span>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-border-dark shadow-sm">
+                        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Điểm cảm xúc</p>
+                        <div class="flex items-end justify-between">
+                            <h3 class="text-2xl font-bold" id="stat-score">${score}/100</h3>
+                            <span id="stat-score-label" class="${score >= 60 ? 'text-emerald-500' : score >= 40 ? 'text-amber-500' : 'text-red-500'} text-xs font-bold flex items-center mb-1">
+                                <span class="material-symbols-outlined text-sm">${score >= 60 ? 'trending_up' : score >= 40 ? 'trending_flat' : 'trending_down'}</span>
+                                ${score >= 60 ? 'Tốt' : score >= 40 ? 'TB' : 'Thấp'}
+                            </span>
                         </div>
                     </div>
                 </div>
-            </main>
-        </div>
-    </body>
 
-    </html>
+                <%-- ══ CHARTS ROW ══ --%>
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+                    <%-- Biểu đồ cảm xúc theo Thời gian --%>
+                    <div class="lg:col-span-8 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-border-dark p-6 shadow-sm">
+                        <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+                            <div>
+                                <h4 class="font-bold text-slate-900 dark:text-white">Phân tích Cảm xúc theo Thời gian</h4>
+                                <p class="text-xs text-slate-500 mt-0.5" id="sentSubtitle">Tỉ lệ like/dislike theo ngày trong tuần</p>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <div class="flex items-center gap-3">
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="size-2.5 rounded-full bg-emerald-500"></span>
+                                        <span class="text-[10px] font-bold text-slate-500 uppercase">Tích cực</span>
+                                    </div>
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="size-2.5 rounded-full bg-red-400"></span>
+                                        <span class="text-[10px] font-bold text-slate-500 uppercase">Tiêu cực</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <%-- Chart.js canvas --%>
+                        <div class="relative" style="height:220px">
+                            <canvas id="sentimentChart"></canvas>
+                        </div>
+                        <%-- Legend tổng — chỉ 2 cột --%>
+                        <div class="mt-4 grid grid-cols-2 gap-3 pt-4 border-t border-slate-100 dark:border-border-dark">
+                            <div class="text-center">
+                                <p class="text-2xl font-bold text-emerald-500">${not empty pctPositive ? pctPositive : 0}%</p>
+                                <p class="text-[10px] text-slate-400 uppercase font-semibold mt-0.5">Tích cực</p>
+                                <div class="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full mt-2 overflow-hidden">
+                                    <div class="h-full bg-emerald-500 rounded-full transition-all" style="width:${not empty pctPositive ? pctPositive : 0}%"></div>
+                                </div>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-2xl font-bold text-red-400">${not empty pctNegative ? pctNegative : 0}%</p>
+                                <p class="text-[10px] text-slate-400 uppercase font-semibold mt-0.5">Tiêu cực</p>
+                                <div class="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full mt-2 overflow-hidden">
+                                    <div class="h-full bg-red-400 rounded-full transition-all" style="width:${not empty pctNegative ? pctNegative : 0}%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <%-- Views theo Danh mục — Donut Chart --%>
+                    <div class="lg:col-span-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-border-dark p-6 shadow-sm">
+                        <h4 class="font-bold text-slate-900 dark:text-white mb-1">Views theo Danh mục</h4>
+                        <p class="text-xs text-slate-400 mb-4">Top 5 danh mục nhiều lượt xem nhất</p>
+
+                        <div class="relative flex justify-center mb-5" style="height:170px">
+                            <canvas id="categoryDonut"></canvas>
+                            <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Tổng</p>
+                                <p class="text-base font-bold text-slate-900 dark:text-white">${fmtTotal}</p>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2">
+                        <c:set var="catColors" value="${fn:split('#0d7ff2,#10b981,#f59e0b,#f43f5e,#8b5cf6', ',')}" />
+                        <c:forEach begin="0" end="4" var="ci">
+                            <c:if test="${not empty catNames[ci]}">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <span class="size-2.5 rounded-sm shrink-0" style="background:${catColors[ci]}"></span>
+                                        <span class="text-xs font-medium text-slate-600 dark:text-slate-300 truncate max-w-[130px]">${catNames[ci]}</span>
+                                    </div>
+                                    <c:set var="cv" value="${catViews[ci]}" />
+                                    <span class="text-xs font-bold text-slate-700 dark:text-slate-200">
+                                        <c:choose>
+                                            <c:when test="${cv >= 1000}"><c:out value="${fn:substring(cv/1000.0, 0, 3)}k" /></c:when>
+                                            <c:otherwise>${cv}</c:otherwise>
+                                        </c:choose>
+                                    </span>
+                                </div>
+                            </c:if>
+                        </c:forEach>
+                        </div>
+                    </div>
+
+                </div>
+
+                <%-- ══ BẢNG XẾP HẠNG ══ --%>
+                <div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-border-dark overflow-hidden shadow-sm">
+                    <div class="px-6 py-4 border-b border-slate-200 dark:border-border-dark flex items-center justify-between">
+                        <h4 class="font-bold">Bảng xếp hạng Hiệu suất Nội dung</h4>
+                        <a href="${ctx}/journalist/articles"
+                           class="text-xs text-primary font-semibold hover:underline flex items-center gap-1">
+                            <span class="material-symbols-outlined text-sm">open_in_new</span>
+                            Xem tất cả
+                        </a>
+                    </div>
+                    <table class="w-full text-left text-sm">
+                        <thead>
+                            <tr class="bg-slate-50 dark:bg-slate-800/50 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                                <th class="px-6 py-3 w-8">#</th>
+                                <th class="px-6 py-3">Tiêu đề Bài viết</th>
+                                <th class="px-6 py-3">Lượt xem</th>
+                                <th class="px-6 py-3 text-emerald-500">
+                                    <span class="flex items-center gap-1"><span class="material-symbols-outlined" style="font-size:13px">thumb_up</span> Like</span>
+                                </th>
+                                <th class="px-6 py-3 text-red-400">
+                                    <span class="flex items-center gap-1"><span class="material-symbols-outlined" style="font-size:13px">thumb_down</span> Dislike</span>
+                                </th>
+                                <th class="px-6 py-3">Tương tác</th>
+                                <th class="px-6 py-3 text-right">Xu hướng</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                        <c:choose>
+                            <c:when test="${empty topArticles}">
+                                <tr>
+                                    <td colspan="7" class="px-6 py-12 text-center text-slate-400 text-sm">
+                                        <span class="material-symbols-outlined text-4xl block mb-2">analytics</span>
+                                        Chưa có bài viết nào được xuất bản để phân tích.
+                                    </td>
+                                </tr>
+                            </c:when>
+                            <c:otherwise>
+                                <c:forEach var="a" items="${topArticles}" varStatus="vs">
+                                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+                                        <td class="px-6 py-4 text-xs font-bold text-slate-400">${vs.count}</td>
+                                        <td class="px-6 py-4">
+                                            <a href="${ctx}/user/article?id=${a.id}"
+                                               class="font-semibold text-slate-800 dark:text-white hover:text-primary transition-colors truncate max-w-xs block">
+                                                ${a.title}
+                                            </a>
+                                            <p class="text-[11px] text-slate-400 mt-0.5">
+                                                ${not empty a.categoryName ? a.categoryName : '—'}
+                                            </p>
+                                        </td>
+                                        <td class="px-6 py-4 font-semibold">${a.formattedViews}</td>
+                                        <td class="px-6 py-4">
+                                            <span class="flex items-center gap-1 text-emerald-500 font-semibold text-xs">
+                                                <span class="material-symbols-outlined" style="font-size:14px">thumb_up</span>
+                                                ${a.likesCount}
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <span class="flex items-center gap-1 text-red-400 font-semibold text-xs">
+                                                <span class="material-symbols-outlined" style="font-size:14px">thumb_down</span>
+                                                ${a.dislikesCount}
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 text-slate-600 dark:text-slate-400">${a.engagementRate}</td>
+                                        <td class="px-6 py-4 text-right">
+                                            <span class="material-symbols-outlined text-lg ${a.trendClass}">
+                                                ${a.trendIcon}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                </c:forEach>
+                            </c:otherwise>
+                        </c:choose>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+    const isDark     = document.documentElement.classList.contains('dark');
+    const gridColor  = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+    const labelColor = isDark ? '#94a3b8' : '#64748b';
+
+    var SENT_DATA = {
+        '1d':  ${not empty sentJson1d ? sentJson1d : '{"pos":[0],"neg":[0]}'},
+        '7d':  ${not empty sentJson7d ? sentJson7d : '{"pos":[0,0,0,0,0,0,0],"neg":[0,0,0,0,0,0,0]}'},
+        '30d': ${not empty sentJson30d ? sentJson30d : '{"pos":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"neg":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]}'},
+        'all': ${not empty sentJsonAll ? sentJsonAll : '{"pos":[0],"neg":[0]}'}
+    };
+    var SENT_LABELS = {
+        '1d':  ['Hôm nay'],
+        '7d':  ${not empty sentLabels7d ? sentLabels7d : '[]'},
+        '30d': ${not empty sentLabels30d ? sentLabels30d : '[]'},
+        'all': ${not empty sentLabelsAll ? sentLabelsAll : '["—"]'}
+    };
+    var SENT_SUBTITLES = {
+        '1d':  'Tỉ lệ like/dislike hôm nay',
+        '7d':  'Tỉ lệ like/dislike 7 ngày gần nhất',
+        '30d': 'Tỉ lệ like/dislike 30 ngày gần nhất',
+        'all': 'Tỉ lệ like/dislike theo ngày trong tuần'
+    };
+
+    var sentCtx = document.getElementById('sentimentChart').getContext('2d');
+    function makeGradient(ctx, colorTop, colorBot) {
+        var g = ctx.createLinearGradient(0, 0, 0, 200);
+        g.addColorStop(0, colorTop); g.addColorStop(1, colorBot);
+        return g;
+    }
+
+    var sentChart = new Chart(sentCtx, {
+        type: 'bar',
+        data: { labels: [], datasets: [
+            {
+                label: 'Tích cực', data: [],
+                backgroundColor: makeGradient(sentCtx, 'rgba(16,185,129,0.95)', 'rgba(16,185,129,0.45)'),
+                borderRadius: 5, borderSkipped: false, borderWidth: 0,
+                barPercentage: 0.6, categoryPercentage: 0.9
+            },
+            {
+                label: 'Tiêu cực', data: [],
+                backgroundColor: makeGradient(sentCtx, 'rgba(248,113,113,0.95)', 'rgba(248,113,113,0.45)'),
+                borderRadius: 5, borderSkipped: false, borderWidth: 0,
+                barPercentage: 0.6, categoryPercentage: 0.9
+            }
+        ]},
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: isDark ? '#1e293b' : '#fff',
+                    titleColor: isDark ? '#e2e8f0' : '#1e293b',
+                    bodyColor: isDark ? '#94a3b8' : '#475569',
+                    borderColor: isDark ? '#334155' : '#e2e8f0',
+                    borderWidth: 1, padding: 10,
+                    callbacks: {
+                        label: function(ctx) {
+                            var icons = ['✅','🔴'];
+                            return '  ' + icons[ctx.datasetIndex] + ' ' + ctx.dataset.label + ': ' + ctx.raw + '%';
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: { grid: { display: false }, ticks: { color: labelColor, font: { size: 11, weight: '600' } }, border: { display: false } },
+                y: { max: 100, grid: { color: gridColor }, ticks: { color: labelColor, font: { size: 10 }, callback: function(v){ return v+'%'; }, maxTicksLimit: 5 }, border: { display: false } }
+            }
+        }
+    });
+
+    function setSentPeriod(p) {
+        document.querySelectorAll('.sent-period-btn').forEach(function(b) {
+            b.classList.remove('bg-white','dark:bg-slate-700','text-primary','shadow-sm');
+            b.classList.add('text-slate-500');
+        });
+        var btn = document.getElementById('spbtn-' + p);
+        if (btn) { btn.classList.add('bg-white','text-primary','shadow-sm'); btn.classList.remove('text-slate-500'); }
+        document.getElementById('sentSubtitle').textContent = SENT_SUBTITLES[p];
+        var d = SENT_DATA[p];
+        sentChart.data.labels            = SENT_LABELS[p];
+        sentChart.data.datasets[0].data  = d.pos;
+        sentChart.data.datasets[1].data  = d.neg;
+        sentChart.update();
+    }
+
+    var STATS_JSON = ${not empty statsJson ? statsJson : '{}'};
+    var AP_LABELS  = { '1d':'1 ngày qua','7d':'7 ngày qua','30d':'30 ngày qua','all':'Tất cả thời gian' };
+
+    function setAnalyticsPeriod(p) {
+        document.querySelectorAll('.analytics-period-btn').forEach(function(b) {
+            b.classList.remove('bg-white','text-primary','shadow-sm');
+            b.classList.add('text-slate-500','dark:text-slate-400');
+        });
+        var btn = document.getElementById('apbtn-' + p);
+        if (btn) { btn.classList.add('bg-white','text-primary','shadow-sm'); btn.classList.remove('text-slate-500','dark:text-slate-400'); }
+        document.getElementById('analyticsperiodLabel').textContent = AP_LABELS[p];
+        var s = STATS_JSON[p];
+        if (s) {
+            document.getElementById('stat-views').textContent    = s.views;
+            document.getElementById('stat-comments').textContent = s.comments;
+            document.getElementById('stat-likes').textContent    = s.likes;
+            document.getElementById('stat-dislikes').textContent = s.dislikes;
+            document.getElementById('stat-score').textContent    = s.score + '/100';
+            var sc = s.score;
+            var scoreEl = document.getElementById('stat-score-label');
+            scoreEl.className = (sc >= 60 ? 'text-emerald-500' : sc >= 40 ? 'text-amber-500' : 'text-red-500') + ' text-xs font-bold flex items-center mb-1';
+            scoreEl.innerHTML = '<span class="material-symbols-outlined text-sm">' + (sc >= 60 ? 'trending_up' : sc >= 40 ? 'trending_flat' : 'trending_down') + '</span>' + (sc >= 60 ? 'Tốt' : sc >= 40 ? 'TB' : 'Thấp');
+        }
+        setSentPeriod(p);
+    }
+
+    var catNames = ${not empty catNamesJson ? catNamesJson : '[]'};
+    var catData  = ${not empty catViewsJson ? catViewsJson : '[]'};
+    var filteredNames = [], filteredData = [], filteredColors = [];
+    var allColors = ['#0d7ff2','#10b981','#f59e0b','#f43f5e','#8b5cf6'];
+    catNames.forEach(function(n, i) {
+        if (n && n.length > 0) {
+            filteredNames.push(n);
+            filteredData.push(catData[i]);
+            filteredColors.push(allColors[i]);
+        }
+    });
+
+    new Chart(document.getElementById('categoryDonut'), {
+        type: 'doughnut',
+        data: {
+            labels: filteredNames,
+            datasets: [{
+                data: filteredData,
+                backgroundColor: filteredColors,
+                borderWidth: 0,
+                hoverOffset: 8,
+                borderRadius: 4
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false, cutout: '70%',
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: isDark ? '#1e293b' : '#fff',
+                    titleColor: isDark ? '#e2e8f0' : '#1e293b',
+                    bodyColor: isDark ? '#94a3b8' : '#475569',
+                    borderColor: isDark ? '#334155' : '#e2e8f0',
+                    borderWidth: 1,
+                    callbacks: {
+                        label: function(ctx) {
+                            var total = ctx.dataset.data.reduce(function(a,b){return a+b;}, 0);
+                            var pct = total > 0 ? Math.round(ctx.raw * 100 / total) : 0;
+                            var val = ctx.raw >= 1000 ? (ctx.raw/1000).toFixed(1)+'k' : ctx.raw;
+                            return ' ' + ctx.label + ': ' + val + ' (' + pct + '%)';
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', function() { setAnalyticsPeriod('all'); });
+</script>
+</body>
+</html>

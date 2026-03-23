@@ -1,6 +1,58 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" pageEncoding="UTF-8" %>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <script>
+        (function () {
+            var KEY_PRIMARY = 'theme';
+            var KEY_LEGACY  = 'editor_theme';
+
+            function getSaved() {
+                try {
+                    return localStorage.getItem(KEY_PRIMARY) || localStorage.getItem(KEY_LEGACY) || 'dark';
+                } catch (e) {
+                    return 'dark';
+                }
+            }
+
+            function persist(v) {
+                try {
+                    localStorage.setItem(KEY_PRIMARY, v);
+                    localStorage.setItem(KEY_LEGACY, v);
+                } catch (e) {}
+            }
+
+            function apply(v) {
+                var html = document.documentElement;
+                if (v === 'light') html.classList.remove('dark');
+                else html.classList.add('dark');
+
+                // Update icons with standard IDs if they exist
+                var iconA = document.getElementById('themeIcon');
+                var iconB = document.getElementById('iconTheme');
+                var iconToggle = document.getElementById('themeToggleBtn');
+                
+                if (iconA) iconA.textContent = html.classList.contains('dark') ? 'light_mode' : 'dark_mode';
+                if (iconB) iconB.textContent = html.classList.contains('dark') ? 'light_mode' : 'dark_mode';
+            }
+
+            // Apply immediately to prevent flash
+            apply(getSaved());
+
+            window.toggleTheme = function () {
+                var html = document.documentElement;
+                var next = html.classList.contains('dark') ? 'light' : 'dark';
+                persist(next);
+                apply(next);
+            };
+
+            window.addEventListener('storage', function (e) {
+                if (!e) return;
+                if (e.key === KEY_PRIMARY || e.key === KEY_LEGACY) {
+                    apply(getSaved());
+                }
+            });
+        })();
+    </script>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap"
         rel="stylesheet" />

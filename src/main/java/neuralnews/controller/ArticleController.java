@@ -41,6 +41,13 @@ public class ArticleController extends HttpServlet {
                 // Gửi "màu sắc" sang cho JSP
                 request.setAttribute("userReaction", userReaction);
 
+                // 2b. Kiểm tra trạng thái lưu (Bookmark)
+                boolean isBookmarked = false;
+                if (user != null) {
+                    isBookmarked = artDao.isBookmarked(user.getId(), articleId);
+                }
+                request.setAttribute("isBookmarked", isBookmarked);
+
                 // 3. Lấy danh sách danh mục (cho menu hoặc sidebar)
                 CategoryDao catDao = new CategoryDao();
                 List<Category> listCat = catDao.getAllCategory();

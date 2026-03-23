@@ -1,4 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
     <!DOCTYPE html>
     <html lang="en">
 
@@ -24,29 +25,13 @@
                             Trang / Bảng điều khiển</p>
                         <h2 class="text-2xl font-bold text-slate-800 dark:text-white">Bảng điều khiển hệ thống</h2>
                     </div>
-                    <div
-                        class="flex items-center gap-4 bg-white dark:bg-slate-800 p-2 rounded-full shadow-sm border border-slate-100 dark:border-slate-700">
-                        <div class="relative flex items-center ml-2">
-                            <span class="material-icons absolute left-3 text-slate-400 text-[18px]">search</span>
-                            <input
-                                class="pl-10 pr-4 py-2 bg-[#F4F7FE] dark:bg-slate-900 border-none rounded-full text-sm focus:ring-2 focus:ring-primary w-48 lg:w-64 transition-all"
-                                placeholder="Tìm kiếm..." type="text" />
-                        </div>
-                        <button class="p-2 text-slate-500 hover:text-primary transition-colors">
-                            <span class="material-icons">notifications</span>
-                        </button>
-                        <button class="p-2 text-slate-500 hover:text-primary transition-colors">
-                            <span class="material-icons">settings</span>
-                        </button>
-                        <div class="h-8 w-8 rounded-full overflow-hidden bg-primary/20 border-2 border-primary/20">
-                            <img class="w-full h-full object-cover" data-alt="Admin user profile avatar"
-                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuC4v1Xj-x5c0-BNWvuQMWrNKnYpUqHJu2FzBC2ANgMo6855wzRgUZD-tyPVU_iWy9HANXuBFUBSMxHPeds14WCinCTTRCtzwz4MqbtS_WsSwg5Gy0dENGvERGxaw9BORVzow9HavpimbV7bIQ6_ZH8VevoPeGWPT5YBZAurWMoIevRvkLkGWt1gp_7QPG9XNSgbrNUujAcFewuJkhw1rocmmASWGj67hq21d4jI11-j3ZZxxaxhgSjEO9Fx64PNgntutDDQHHdl5Ubo" />
-                        </div>
+                    <div class="flex items-center gap-4">
+                        <jsp:include page="components/header_profile.jsp" />
                     </div>
                 </header>
                 <div class="p-8 space-y-8">
                     <!-- Row 1: KPI Cards -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
                         <!-- Card 1 -->
                         <div
                             class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm flex items-center gap-4 border border-slate-50 dark:border-slate-700">
@@ -56,7 +41,7 @@
                             <div>
                                 <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Người dùng đang hoạt
                                     động</p>
-                                <h3 class="text-2xl font-bold text-slate-800 dark:text-white">12,842</h3>
+                                <h3 class="text-2xl font-bold text-slate-800 dark:text-white">${totalUsers}</h3>
                             </div>
                         </div>
                         <!-- Card 2 -->
@@ -69,10 +54,22 @@
                             <div>
                                 <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Bài viết mới hôm nay
                                 </p>
-                                <h3 class="text-2xl font-bold text-slate-800 dark:text-white">1,452</h3>
+                                <h3 class="text-2xl font-bold text-slate-800 dark:text-white">${todayArticles}</h3>
                             </div>
                         </div>
                         <!-- Card 3 -->
+                        <div
+                            class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm flex items-center gap-4 border border-slate-50 dark:border-slate-700">
+                            <div
+                                class="w-12 h-12 bg-pink-100 dark:bg-pink-900/30 rounded-full flex items-center justify-center">
+                                <span class="material-icons text-pink-500">favorite</span>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Tổng lượt thích</p>
+                                <h3 class="text-2xl font-bold text-slate-800 dark:text-white">${totalLikes != null ? totalLikes : 0}</h3>
+                            </div>
+                        </div>
+                        <!-- Card 4 -->
                         <div
                             class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm flex items-center gap-4 border border-slate-50 dark:border-slate-700">
                             <div
@@ -81,10 +78,10 @@
                             </div>
                             <div>
                                 <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Yêu cầu Nhà báo</p>
-                                <h3 class="text-2xl font-bold text-slate-800 dark:text-white">84</h3>
+                                <h3 class="text-2xl font-bold text-slate-800 dark:text-white">${journalistApplications}</h3>
                             </div>
                         </div>
-                        <!-- Card 4 -->
+                        <!-- Card 5 -->
                         <div
                             class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm flex items-center gap-4 border border-slate-50 dark:border-slate-700">
                             <div
@@ -94,264 +91,215 @@
                             <div>
                                 <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Vi phạm đang chờ xử lý
                                 </p>
-                                <h3 class="text-2xl font-bold text-slate-800 dark:text-white">12</h3>
+                                <h3 class="text-2xl font-bold text-slate-800 dark:text-white">${pendingViolations}</h3>
                             </div>
                         </div>
                     </div>
                     <!-- Row 2: Traffic and AI Insights -->
                     <div class="grid grid-cols-1 lg:grid-cols-10 gap-6">
-                        <!-- Traffic Chart Mockup -->
+                        <!-- Traffic Chart -->
                         <div
                             class="lg:col-span-7 bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-slate-50 dark:border-slate-700">
-                            <div class="flex items-center justify-between mb-8">
+                            <div class="flex items-center justify-between mb-6">
                                 <div>
-                                    <h3 class="text-lg font-bold text-slate-800 dark:text-white">Tổng quan Lưu lượng 24h
-                                    </h3>
-                                    <p class="text-sm text-slate-500 dark:text-slate-400">So sánh giữa Hôm nay và Hôm
-                                        qua</p>
+                                    <h3 class="font-bold text-slate-800 dark:text-white">Tổng quan Lưu lượng ${currentDays != null ? currentDays : 7} ngày qua</h3>
+                                    <p class="text-xs text-slate-500">Dựa trên số lượt xem thực tế theo từng ngày</p>
                                 </div>
-                                <div class="flex gap-2">
-                                    <span
-                                        class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary">Hôm
-                                        nay</span>
-                                    <span
-                                        class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-700 text-slate-500">Hôm
-                                        qua</span>
+                                <div>
+                                    <select onchange="window.location.href='${pageContext.request.contextPath}/admin/home?days=' + this.value"
+                                            class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-sm px-3 py-1.5 focus:ring-primary focus:border-primary outline-none cursor-pointer">
+                                        <option value="7" ${currentDays == 7 ? 'selected' : ''}>7 Ngày</option>
+                                        <option value="30" ${currentDays == 30 ? 'selected' : ''}>30 Ngày</option>
+                                        <option value="365" ${currentDays == 365 ? 'selected' : ''}>1 Năm</option>
+                                    </select>
                                 </div>
                             </div>
-                            <!-- Simple SVG Chart Representation -->
-                            <div class="h-64 w-full relative">
-                                <svg class="w-full h-full" preserveaspectratio="none" viewbox="0 0 1000 200">
-                                    <defs>
-                                        <lineargradient id="chartGradient" x1="0" x2="0" y1="0" y2="1">
-                                            <stop offset="0%" stop-color="#0d7ff2" stop-opacity="0.2"></stop>
-                                            <stop offset="100%" stop-color="#0d7ff2" stop-opacity="0"></stop>
-                                        </lineargradient>
-                                    </defs>
-                                    <path
-                                        d="M0,150 Q100,120 200,160 T400,100 T600,140 T800,80 T1000,110 L1000,200 L0,200 Z"
-                                        fill="url(#chartGradient)"></path>
-                                    <path d="M0,150 Q100,120 200,160 T400,100 T600,140 T800,80 T1000,110" fill="none"
-                                        stroke="#0d7ff2" stroke-width="3"></path>
-                                </svg>
-                                <!-- Grid lines mockup -->
-                                <div
-                                    class="absolute inset-0 flex flex-col justify-between pointer-events-none border-b border-slate-100 dark:border-slate-700 pb-2">
-                                    <div class="border-t border-slate-100 dark:border-slate-700/50 w-full"></div>
-                                    <div class="border-t border-slate-100 dark:border-slate-700/50 w-full"></div>
-                                    <div class="border-t border-slate-100 dark:border-slate-700/50 w-full"></div>
-                                </div>
-                            </div>
-                            <div class="flex justify-between mt-4 text-xs text-slate-400 font-medium">
-                                <span>00:00</span><span>04:00</span><span>08:00</span><span>12:00</span><span>16:00</span><span>20:00</span><span>23:59</span>
+                            <div class="h-64 relative">
+                                <canvas id="trafficChart"></canvas>
                             </div>
                         </div>
-                        <!-- AI Smart Insights Widget -->
+                        <!-- Category Distribution Chart -->
                         <div
-                            class="lg:col-span-3 ai-gradient-border rounded-xl shadow-lg p-6 flex flex-col overflow-hidden dark:bg-slate-800">
-                            <div class="flex items-center gap-2 mb-6">
-                                <span class="material-icons text-primary">auto_awesome</span>
-                                <h3 class="font-bold text-slate-800 dark:text-white">Thông tin Thông minh AI</h3>
+                            class="lg:col-span-3 bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-slate-50 dark:border-slate-700 flex flex-col items-center">
+                            <h3 class="font-bold text-slate-800 dark:text-white mb-6 self-start">Tỉ lệ Danh mục</h3>
+                            <div class="w-full h-64 relative">
+                                <canvas id="categoryChart"></canvas>
                             </div>
-                            <div class="space-y-6">
-                                <div>
-                                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Đang
-                                        thịnh hành
-                                    </p>
-                                    <div class="flex flex-wrap gap-2">
-                                        <span
-                                            class="px-3 py-1 bg-slate-100 dark:bg-slate-700 rounded-full text-xs font-medium text-slate-600 dark:text-slate-300">#Election2024</span>
-                                        <span
-                                            class="px-3 py-1 bg-slate-100 dark:bg-slate-700 rounded-full text-xs font-medium text-slate-600 dark:text-slate-300">#AIRevolution</span>
-                                        <span
-                                            class="px-3 py-1 bg-slate-100 dark:bg-slate-700 rounded-full text-xs font-medium text-slate-600 dark:text-slate-300">#ClimateTech</span>
-                                        <span
-                                            class="px-3 py-1 bg-slate-100 dark:bg-slate-700 rounded-full text-xs font-medium text-slate-600 dark:text-slate-300">#GlobalTrade</span>
-                                    </div>
-                                </div>
-                                <div class="border-t border-slate-100 dark:border-slate-700 pt-6">
-                                    <div class="flex items-center justify-between mb-3">
-                                        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Cảnh báo
-                                            Spam
-                                        </p>
-                                        <span
-                                            class="text-[10px] bg-red-100 text-red-600 px-2 py-0.5 rounded-full font-bold">RỦI
-                                            RO CAO</span>
-                                    </div>
-                                    <ul class="space-y-3">
-                                        <li class="flex items-start gap-3">
-                                            <div class="mt-1 w-2 h-2 rounded-full bg-red-500"></div>
-                                            <div>
-                                                <p class="text-xs font-semibold text-slate-700 dark:text-slate-200">Đã
-                                                    phát hiện mẫu bot</p>
-                                                <p class="text-[10px] text-slate-500">Nguồn: 192.168.1.42 (Nga)</p>
-                                            </div>
-                                        </li>
-                                        <li class="flex items-start gap-3">
-                                            <div class="mt-1 w-2 h-2 rounded-full bg-amber-500"></div>
-                                            <div>
-                                                <p class="text-xs font-semibold text-slate-700 dark:text-slate-200">Phù
-                                                    hợp sao chép nội dung</p>
-                                                <p class="text-[10px] text-slate-500">84% tương đồng với AP News</p>
-                                            </div>
-                                        </li>
-                                    </ul>
-                                </div>
-                                <button
-                                    class="mt-4 w-full py-3 bg-primary text-white rounded-lg text-sm font-bold shadow-md shadow-primary/30 hover:bg-primary/90 transition-all flex items-center justify-center gap-2">
-                                    <span class="material-icons text-[18px]">bolt</span>
-                                    Chạy phân tích sâu
-                                </button>
+                            <div class="mt-4 grid grid-cols-2 gap-4 w-full">
+                                <c:forEach var="cat" items="${categoryStats}" varStatus="loop">
+                                    <c:if test="${loop.index < 4}">
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-3 h-3 rounded-full" style="background-color: ${loop.index == 0 ? '#0d7ff2' : (loop.index == 1 ? '#00e396' : (loop.index == 2 ? '#feb019' : '#ff4560'))}"></div>
+                                            <span class="text-xs text-slate-500 truncate">${cat.name}</span>
+                                        </div>
+                                    </c:if>
+                                </c:forEach>
                             </div>
                         </div>
+                    </div>
+
+                    <!-- Chart.js Script -->
+                    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+                    <script>
+                        document.addEventListener("DOMContentLoaded", function() {
+                            // 1. Category Chart
+                            const catCtx = document.getElementById('categoryChart').getContext('2d');
+                            const categories = [
+                                <c:forEach var="cat" items="${categoryStats}" varStatus="loop">
+                                    '${cat.name}'${!loop.last ? ',' : ''}
+                                </c:forEach>
+                            ];
+                            const catCounts = [
+                                <c:forEach var="cat" items="${categoryStats}" varStatus="loop">
+                                    ${cat.articleCount}${!loop.last ? ',' : ''}
+                                </c:forEach>
+                            ];
+
+                            new Chart(catCtx, {
+                                type: 'doughnut',
+                                data: {
+                                    labels: categories,
+                                    datasets: [{
+                                        data: catCounts,
+                                        backgroundColor: ['#0d7ff2', '#00e396', '#feb019', '#ff4560', '#775dd0'],
+                                        borderWidth: 0
+                                    }]
+                                },
+                                options: {
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    plugins: { legend: { display: false } },
+                                    cutout: '75%'
+                                }
+                            });
+
+                            // 2. Traffic Chart
+                            const trafficCtx = document.getElementById('trafficChart').getContext('2d');
+                            const trafficDates = [
+                                <c:forEach var="entry" items="${trafficStats}" varStatus="loop">
+                                    '${entry.key}'${!loop.last ? ',' : ''}
+                                </c:forEach>
+                            ];
+                            const trafficCounts = [
+                                <c:forEach var="entry" items="${trafficStats}" varStatus="loop">
+                                    ${entry.value}${!loop.last ? ',' : ''}
+                                </c:forEach>
+                            ];
+                            const likeCounts = [
+                                <c:forEach var="entry" items="${likeStats}" varStatus="loop">
+                                    ${entry.value}${!loop.last ? ',' : ''}
+                                </c:forEach>
+                            ];
+
+                            new Chart(trafficCtx, {
+                                type: 'line',
+                                data: {
+                                    labels: trafficDates,
+                                    datasets: [
+                                        {
+                                            label: 'Lượt xem',
+                                            data: trafficCounts,
+                                            borderColor: '#0d7ff2',
+                                            backgroundColor: 'rgba(13, 127, 242, 0.1)',
+                                            fill: true,
+                                            tension: 0.4,
+                                            pointRadius: 4,
+                                            pointBackgroundColor: '#0d7ff2',
+                                            yAxisID: 'y'
+                                        },
+                                        {
+                                            label: 'Lượt thích',
+                                            data: likeCounts,
+                                            borderColor: '#ec4899',
+                                            backgroundColor: 'rgba(236, 72, 153, 0.1)',
+                                            fill: true,
+                                            tension: 0.4,
+                                            pointRadius: 4,
+                                            pointBackgroundColor: '#ec4899',
+                                            yAxisID: 'y1'
+                                        }
+                                    ]
+                                },
+                                options: {
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    interaction: { mode: 'index', intersect: false },
+                                    plugins: { legend: { display: true, position: 'top', align: 'end' } },
+                                    scales: {
+                                        y: { type: 'linear', display: true, position: 'left', beginAtZero: true, grid: { display: false } },
+                                        y1: { type: 'linear', display: true, position: 'right', beginAtZero: true,
+                                              grid: { drawOnChartArea: false },
+                                              ticks: { color: '#ec4899', precision: 0 } }
+                                    }
+                                }
+                            });
+                        });
+                    </script>
                     </div>
                     <!-- Row 3: Quick Action Table -->
                     <div
                         class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-50 dark:border-slate-700 overflow-hidden">
                         <div
                             class="p-6 border-b border-slate-50 dark:border-slate-700 flex items-center justify-between">
-                            <h3 class="text-lg font-bold text-slate-800 dark:text-white">Thao tác Nhanh: Vi phạm Hàng
-                                đầu</h3>
-                            <button class="text-primary text-sm font-semibold hover:underline">Xem tất cả Vi
-                                phạm</button>
+                            <h3 class="text-lg font-bold text-slate-800 dark:text-white">Bài viết mới cập nhật</h3>
+                            <a href="${pageContext.request.contextPath}/admin/content" class="text-primary text-sm font-semibold hover:underline">Xem tất cả</a>
                         </div>
                         <div class="overflow-x-auto">
                             <table class="w-full text-left">
                                 <thead class="bg-slate-50 dark:bg-slate-700/50">
                                     <tr>
                                         <th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">
-                                            Chủ đề</th>
+                                            Bài viết</th>
                                         <th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">
-                                            Lý do</th>
+                                            Danh mục</th>
                                         <th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">
-                                            Mức độ nghiêm trọng</th>
-                                        <th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">
-                                            Dấu thời gian</th>
-                                        <th
-                                            class="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider text-right">
+                                            Trạng thái</th>
+                                        <th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider text-right">
                                             Hành động</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-slate-50 dark:divide-slate-700">
+                                    <c:forEach var="art" items="${recentArticles}">
                                     <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-700/30 transition-colors">
                                         <td class="px-6 py-4">
                                             <div class="flex items-center gap-3">
-                                                <div
-                                                    class="w-8 h-8 rounded bg-slate-200 dark:bg-slate-700 flex-shrink-0">
-                                                    <img class="w-full h-full object-cover rounded"
-                                                        data-alt="User avatar thumbnail"
-                                                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuAIMiwkUSgzeJwQjnImgm-EtQUStgnx77XaVyk6IYHPqOp0dm7MArK8Jw7O-5W5Y19FcGoIA35dJr6Z0kgbTzlrkQL26UKyUpgHTZNnj8dl2ETxJ_1kcN7J2W0NIK_hu7G22AQDyN34HN0IMEwJyd7WQmpyztp_lt1fqhP6ffdVebb8WfanKR-hDbqiPh-zJtUObWkzP5AtG5DrFUGvU00pu70F-Dtofq_yRSlVbueBpI-6AXsHeMEf3vGQwmO1-ERURjqhpCusHl6e" />
+                                                <div class="w-10 h-10 rounded bg-slate-200 dark:bg-slate-700 flex-shrink-0">
+                                                    <img class="w-full h-full object-cover rounded" src="${art.imageUrl}" onerror="this.src='https://placehold.co/100x100?text=News'" />
                                                 </div>
-                                                <div>
-                                                    <p class="text-sm font-semibold text-slate-800 dark:text-white">
-                                                        Marcus
-                                                        Thorne</p>
-                                                    <p class="text-[10px] text-slate-500">ID: #USR-8821</p>
+                                                <div class="max-w-xs xl:max-w-md">
+                                                    <p class="text-sm font-semibold text-slate-800 dark:text-white truncate">${art.title}</p>
+                                                    <p class="text-[10px] text-slate-500">ID: #${art.id}</p>
                                                 </div>
                                             </div>
                                         </td>
                                         <td class="px-6 py-4">
-                                            <p class="text-sm text-slate-600 dark:text-slate-300">Lan truyền thông tin
-                                                sai lệch
-                                            </p>
+                                            <span class="text-xs font-medium px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                                                ${art.categoryName}
+                                            </span>
                                         </td>
                                         <td class="px-6 py-4">
-                                            <span
-                                                class="px-2 py-1 text-[10px] font-bold rounded-full bg-red-100 text-red-600">NGHIÊM
-                                                TRỌNG</span>
+                                            <c:choose>
+                                                <c:when test="${art.status == 'PUBLISHED'}">
+                                                    <span class="px-2 py-1 text-[10px] font-bold rounded-full bg-green-100 text-green-600">ĐÃ ĐĂNG</span>
+                                                </c:when>
+                                                <c:when test="${art.status == 'PENDING'}">
+                                                    <span class="px-2 py-1 text-[10px] font-bold rounded-full bg-amber-100 text-amber-600">CHỜ DUYỆT</span>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <span class="px-2 py-1 text-[10px] font-bold rounded-full bg-slate-100 text-slate-600">${art.status}</span>
+                                                </c:otherwise>
+                                            </c:choose>
                                         </td>
-                                        <td class="px-6 py-4 text-sm text-slate-500">2 phút trước</td>
                                         <td class="px-6 py-4 text-right">
                                             <div class="flex justify-end gap-2">
-                                                <button
-                                                    class="p-2 bg-primary/10 text-primary hover:bg-primary hover:text-white rounded-lg transition-all">
-                                                    <span class="material-icons text-[18px]">visibility</span>
-                                                </button>
-                                                <button
-                                                    class="p-2 bg-slate-100 dark:bg-slate-700 text-slate-400 hover:text-red-500 rounded-lg transition-all">
-                                                    <span class="material-icons text-[18px]">delete</span>
-                                                </button>
+                                                <a href="${pageContext.request.contextPath}/admin/content?action=edit&id=${art.id}"
+                                                     class="p-2 bg-primary/10 text-primary hover:bg-primary hover:text-white rounded-lg transition-all">
+                                                    <span class="material-icons text-[18px]">edit</span>
+                                                </a>
                                             </div>
                                         </td>
                                     </tr>
-                                    <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-700/30 transition-colors">
-                                        <td class="px-6 py-4">
-                                            <div class="flex items-center gap-3">
-                                                <div
-                                                    class="w-8 h-8 rounded bg-slate-200 dark:bg-slate-700 flex-shrink-0">
-                                                    <img class="w-full h-full object-cover rounded"
-                                                        data-alt="Journalist avatar thumbnail"
-                                                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuC55r-FPmuWNCA53-kd_rt_KLAl5nu4DaqBh0RTF-cYgZxEV2NQeHrabEkBjRzvbBM1edkuSUHwGCS1yceEeNznZZOq85sva-ol4CGokb4XcEx53GR-20x9tDzWWnWePKd5R6HzkUDzU05zc61reG6O6XMxAy7XAZRvYwgDwl-aEnI8DhDUkThHah3waU1liIDvUr2VmJAZhG4HAlgUO7WdaHRn1LjPLYBdd6LMy_dI-6NG2r2FJHbW_vUttZg4hiMUiM68JCyPGg4u" />
-                                                </div>
-                                                <div>
-                                                    <p class="text-sm font-semibold text-slate-800 dark:text-white">
-                                                        Elena
-                                                        Rodriguez</p>
-                                                    <p class="text-[10px] text-slate-500">ID: #JRN-4412</p>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td class="px-6 py-4">
-                                            <p class="text-sm text-slate-600 dark:text-slate-300">Sử dụng nguồn chưa
-                                                được xác minh
-                                            </p>
-                                        </td>
-                                        <td class="px-6 py-4">
-                                            <span
-                                                class="px-2 py-1 text-[10px] font-bold rounded-full bg-amber-100 text-amber-600">TRUNG
-                                                BÌNH</span>
-                                        </td>
-                                        <td class="px-6 py-4 text-sm text-slate-500">14 phút trước</td>
-                                        <td class="px-6 py-4 text-right">
-                                            <div class="flex justify-end gap-2">
-                                                <button
-                                                    class="p-2 bg-primary/10 text-primary hover:bg-primary hover:text-white rounded-lg transition-all">
-                                                    <span class="material-icons text-[18px]">visibility</span>
-                                                </button>
-                                                <button
-                                                    class="p-2 bg-slate-100 dark:bg-slate-700 text-slate-400 hover:text-red-500 rounded-lg transition-all">
-                                                    <span class="material-icons text-[18px]">delete</span>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-700/30 transition-colors">
-                                        <td class="px-6 py-4">
-                                            <div class="flex items-center gap-3">
-                                                <div
-                                                    class="w-8 h-8 rounded bg-slate-200 dark:bg-slate-700 flex-shrink-0">
-                                                    <img class="w-full h-full object-cover rounded"
-                                                        data-alt="User avatar thumbnail"
-                                                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuBg4Auvl_Av2vlLpUiIuU3DAXdNhP_qBaw7mwI2I4nI_-NFZUJMq4w3hVdfWxAFlYA_9gaEwZsI5r2of9VhHiEz6RHtPWn28CQZgtD4itnzML9OjDPTmOJ8XZw_bEwlfkE_JSyBheBbWO4Rhz8Ewqb9bYtxhMAwn9oK4_qQVL38z3ZoA3nHB5WoQqnRoMv942YqihVPWPdlre7IFRxV9wHOu2ljEl9aukMNBomaGNewCmMDiMIOy-GrqBDAUEmqd3iSXpVdF3hfP5lz" />
-                                                </div>
-                                                <div>
-                                                    <p class="text-sm font-semibold text-slate-800 dark:text-white">Sam
-                                                        Wilson</p>
-                                                    <p class="text-[10px] text-slate-500">ID: #USR-9901</p>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td class="px-6 py-4">
-                                            <p class="text-sm text-slate-600 dark:text-slate-300">Cờ quấy rối</p>
-                                        </td>
-                                        <td class="px-6 py-4">
-                                            <span
-                                                class="px-2 py-1 text-[10px] font-bold rounded-full bg-red-100 text-red-600">CAO</span>
-                                        </td>
-                                        <td class="px-6 py-4 text-sm text-slate-500">42 phút trước</td>
-                                        <td class="px-6 py-4 text-right">
-                                            <div class="flex justify-end gap-2">
-                                                <button
-                                                    class="p-2 bg-primary/10 text-primary hover:bg-primary hover:text-white rounded-lg transition-all">
-                                                    <span class="material-icons text-[18px]">visibility</span>
-                                                </button>
-                                                <button
-                                                    class="p-2 bg-slate-100 dark:bg-slate-700 text-slate-400 hover:text-red-500 rounded-lg transition-all">
-                                                    <span class="material-icons text-[18px]">delete</span>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
+                                    </c:forEach>
                                 </tbody>
                             </table>
                         </div>

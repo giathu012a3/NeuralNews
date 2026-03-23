@@ -14,7 +14,7 @@
             rel="stylesheet" />
         <!-- Material Symbols -->
         <link
-            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
             rel="stylesheet" />
         <!-- Tailwind Configuration -->
         <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
@@ -55,13 +55,13 @@
             <div class="absolute inset-0 bg-black/20 z-0"></div>
             <!-- Content on top of overlay -->
             <div class="relative z-10">
-                <div class="flex items-center gap-3">
+                <a href="${pageContext.request.contextPath}/" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
                     <div
                         class="flex items-center justify-center w-10 h-10 rounded-lg bg-white/20 backdrop-blur-sm text-white">
-                        <span class="material-symbols-outlined text-[24px]">newsmode</span>
+                        <span class="material-symbols-outlined text-[24px]">bolt</span>
                     </div>
-                    <h1 class="text-white text-2xl font-bold tracking-tight">NeuralNews</h1>
-                </div>
+                    <h1 class="text-white text-2xl font-bold tracking-tight">NexusAI</h1>
+                </a>
             </div>
             <div class="relative z-10 max-w-lg">
                 <h2 class="text-white text-4xl font-bold leading-tight mb-4">Nâng tầm Báo chí với Thông tin Trí tuệ
@@ -79,10 +79,10 @@
         <div class="w-full lg:w-1/2 flex flex-col h-full overflow-y-auto bg-white dark:bg-[#15202b]">
             <div class="flex-1 flex flex-col justify-center px-8 sm:px-12 md:px-24 py-12">
                 <!-- Mobile Logo -->
-                <div class="lg:hidden flex items-center gap-2 mb-8 text-primary">
-                    <span class="material-symbols-outlined text-[32px]">newsmode</span>
-                    <span class="text-xl font-bold text-[#111418] dark:text-white">NeuralNews</span>
-                </div>
+                <a href="${pageContext.request.contextPath}/" class="lg:hidden flex items-center gap-2 mb-8 text-primary hover:opacity-80 transition-opacity">
+                    <span class="material-symbols-outlined text-[32px]">bolt</span>
+                    <span class="text-xl font-bold text-[#111418] dark:text-white">NexusAI</span>
+                </a>
                 <div class="max-w-[480px] w-full mx-auto space-y-8">
                     <!-- Header -->
                     <div class="space-y-2">
@@ -116,70 +116,86 @@
                                             <p class="text-sm font-medium">Đăng ký thành công! Hãy đăng nhập để tiếp
                                                 tục.</p>
                                         </div>
-                                        <% } %>
+                                        <% } else if ("journalist_pending".equals(success)) { %>
+                                            <div
+                                                class="flex items-center gap-3 p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-400">
+                                                <span
+                                                    class="material-symbols-outlined text-[20px] flex-shrink-0">info</span>
+                                                <p class="text-sm font-medium">Đơn đăng ký của bạn đã được gửi thanh
+                                                    công! Vui lòng chờ quản trị viên phê duyệt trong vòng 24h.</p>
+                                            </div>
+                                            <% } %>
 
-                                            <!-- Form -->
-                                            <form class="space-y-5"
-                                                action="${pageContext.request.contextPath}/LoginController"
-                                                method="post">
-                                                <!-- Email Input -->
-                                                <div class="space-y-2">
-                                                    <label class="text-[#111418] dark:text-white text-sm font-medium"
-                                                        for="email">Email</label>
-                                                    <div class="relative">
-                                                        <input
-                                                            class="form-input block w-full rounded-lg border border-[#dbe0e6] dark:border-[#3e4c59] bg-white dark:bg-[#101922] h-12 px-4 text-[#111418] dark:text-white placeholder:text-[#60758a] focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
-                                                            id="email" name="email" placeholder="name@example.com"
-                                                            type="email" required />
+                                                <!-- Form -->
+                                                <form class="space-y-5"
+                                                    action="${pageContext.request.contextPath}/LoginController"
+                                                    method="post">
+                                                    <!-- Email Input -->
+                                                    <div class="space-y-2">
+                                                        <label
+                                                            class="text-[#111418] dark:text-white text-sm font-medium"
+                                                            for="email">Email</label>
+                                                        <div class="relative">
+                                                            <input
+                                                                class="form-input block w-full rounded-lg border border-[#dbe0e6] dark:border-[#3e4c59] bg-white dark:bg-[#101922] h-12 px-4 text-[#111418] dark:text-white placeholder:text-[#60758a] focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
+                                                                id="email" name="email" placeholder="name@example.com"
+                                                                type="email" required />
+                                                        </div>
                                                     </div>
-                                                </div>
-                                                <!-- Password Input -->
-                                                <div class="space-y-2">
-                                                    <label class="text-[#111418] dark:text-white text-sm font-medium"
-                                                        for="password">Mật khẩu</label>
-                                                    <div class="relative group">
-                                                        <input
-                                                            class="form-input block w-full rounded-lg border border-[#dbe0e6] dark:border-[#3e4c59] bg-white dark:bg-[#101922] h-12 px-4 text-[#111418] dark:text-white placeholder:text-[#60758a] focus:border-primary focus:ring-1 focus:ring-primary transition-colors pr-10"
-                                                            id="password" name="password"
-                                                            placeholder="Nhập mật khẩu của bạn" type="password"
-                                                            required />
-                                                        <button
-                                                            class="absolute right-3 top-3 text-[#60758a] hover:text-[#111418] dark:hover:text-white focus:outline-none transition-colors"
-                                                            type="button" onclick="togglePassword('password', this)">
+                                                    <!-- Password Input -->
+                                                    <div class="space-y-2">
+                                                        <label
+                                                            class="text-[#111418] dark:text-white text-sm font-medium"
+                                                            for="password">Mật khẩu</label>
+                                                        <div class="relative group">
+                                                            <input
+                                                                class="form-input block w-full rounded-lg border border-[#dbe0e6] dark:border-[#3e4c59] bg-white dark:bg-[#101922] h-12 px-4 text-[#111418] dark:text-white placeholder:text-[#60758a] focus:border-primary focus:ring-1 focus:ring-primary transition-colors pr-10"
+                                                                id="password" name="password"
+                                                                placeholder="Nhập mật khẩu của bạn" type="password"
+                                                                required />
+                                                            <button
+                                                                class="absolute right-3 top-3 text-[#60758a] hover:text-[#111418] dark:hover:text-white focus:outline-none transition-colors"
+                                                                type="button"
+                                                                onclick="togglePassword('password', this)">
+                                                                <span
+                                                                    class="material-symbols-outlined text-[20px]">visibility</span>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                    <!-- Options Row -->
+                                                    <div class="flex items-center justify-between">
+                                                        <label class="flex items-center gap-2 cursor-pointer">
+                                                            <input
+                                                                class="checkbox-primary form-checkbox rounded text-primary focus:ring-primary border-[#dbe0e6] dark:border-[#3e4c59] bg-white dark:bg-[#101922] w-4 h-4"
+                                                                type="checkbox" />
                                                             <span
-                                                                class="material-symbols-outlined text-[20px]">visibility</span>
-                                                        </button>
+                                                                class="text-sm text-[#60758a] dark:text-[#9aa0a6] font-medium select-none">Ghi
+                                                                nhớ đăng nhập</span>
+                                                        </label>
+                                                        <a class="text-sm font-semibold text-primary hover:text-primary/80 transition-colors"
+                                                            href="#">Quên mật khẩu?</a>
                                                     </div>
-                                                </div>
-                                                <!-- Options Row -->
-                                                <div class="flex items-center justify-between">
-                                                    <label class="flex items-center gap-2 cursor-pointer">
-                                                        <input
-                                                            class="checkbox-primary form-checkbox rounded text-primary focus:ring-primary border-[#dbe0e6] dark:border-[#3e4c59] bg-white dark:bg-[#101922] w-4 h-4"
-                                                            type="checkbox" />
+                                                    <!-- Main Action -->
+                                                    <button
+                                                        class="w-full h-12 bg-primary hover:bg-primary/90 text-white font-semibold rounded-lg transition-all shadow-sm flex items-center justify-center gap-2"
+                                                        type="submit">
+                                                        Đăng nhập
                                                         <span
-                                                            class="text-sm text-[#60758a] dark:text-[#9aa0a6] font-medium select-none">Ghi
-                                                            nhớ đăng nhập</span>
-                                                    </label>
-                                                    <a class="text-sm font-semibold text-primary hover:text-primary/80 transition-colors"
-                                                        href="#">Quên mật khẩu?</a>
-                                                </div>
-                                                <!-- Main Action -->
-                                                <button
-                                                    class="w-full h-12 bg-primary hover:bg-primary/90 text-white font-semibold rounded-lg transition-all shadow-sm flex items-center justify-center gap-2"
-                                                    type="submit">
-                                                    Đăng nhập
-                                                    <span
-                                                        class="material-symbols-outlined text-[20px]">arrow_forward</span>
-                                                </button>
-                                            </form>
-                                            <!-- Footer Link -->
-                                            <p class="text-center text-[#60758a] dark:text-[#9aa0a6] text-sm">
-                                                Chưa có tài khoản?
-                                                <a class="text-primary font-semibold hover:underline"
-                                                    href="${pageContext.request.contextPath}/auth/register.jsp">Đăng
-                                                    ký</a>
-                                            </p>
+                                                            class="material-symbols-outlined text-[20px]">arrow_forward</span>
+                                                    </button>
+                                                </form>
+                                                <!-- Footer Link -->
+                                                <p class="text-center text-[#60758a] dark:text-[#9aa0a6] text-sm">
+                                                    Chưa có tài khoản?
+                                                    <a class="text-primary font-semibold hover:underline"
+                                                        href="${pageContext.request.contextPath}/auth/register.jsp">Đăng
+                                                        ký</a>
+                                                </p>
+                                                <p class="text-center text-[#60758a] dark:text-[#9aa0a6] text-sm pt-2">
+                                                    Hoặc <a class="text-primary font-semibold hover:underline"
+                                                        href="${pageContext.request.contextPath}/auth/register_journalist.jsp">Đăng
+                                                        ký làm nhà báo</a>
+                                                </p>
                 </div>
             </div>
             <!-- Footer -->

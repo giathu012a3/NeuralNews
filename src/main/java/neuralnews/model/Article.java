@@ -10,24 +10,28 @@ public class Article {
     private String summary;
     private String imageUrl;
     private long authorId;
+    private Long approvedBy;
     private int categoryId;
     private String status;
     private int views;
     private int likesCount;
     private int dislikesCount;
-    private String sentimentLabel;
-    private double sourceScore;
     private double popularityScore;
     private Timestamp publishedAt;
     private Timestamp createdAt;
     private String categoryName;
 
-    // Display fields - ─æ╞░ß╗úc set bß╗ƒi Controller
     private String authorName;
+    private String authorAvatar;
     private String statusLabel;
     private String statusBadgeClass;
     private String statusDotClass;
     private String formattedViews;
+    private String reviewerName;
+    private String readingTime;
+    private String engagementRate;
+    private String trendIcon;
+    private String trendClass;
 
     public Article() {
     }
@@ -110,6 +114,14 @@ public class Article {
         this.authorId = authorId;
     }
 
+    public Long getApprovedBy() {
+        return approvedBy;
+    }
+
+    public void setApprovedBy(Long approvedBy) {
+        this.approvedBy = approvedBy;
+    }
+
     public int getCategoryId() {
         return categoryId;
     }
@@ -134,13 +146,9 @@ public class Article {
         this.views = views;
     }
 
-    public int getLikesCount() {
-        return likesCount;
-    }
+    public int getLikesCount() { return likesCount; }
+    public void setLikesCount(int likesCount) { this.likesCount = likesCount; }
 
-    public void setLikesCount(int likesCount) {
-        this.likesCount = likesCount;
-    }
 
     
     public int getDislikesCount() {
@@ -151,21 +159,6 @@ public class Article {
         this.dislikesCount = dislikesCount;
     }
     
-    public String getSentimentLabel() {
-        return sentimentLabel;
-    }
-
-    public void setSentimentLabel(String sentimentLabel) {
-        this.sentimentLabel = sentimentLabel;
-    }
-
-    public double getSourceScore() {
-        return sourceScore;
-    }
-
-    public void setSourceScore(double sourceScore) {
-        this.sourceScore = sourceScore;
-    }
 
     public double getPopularityScore() {
         return popularityScore;
@@ -215,6 +208,14 @@ public class Article {
         this.authorName = authorName;
     }
 
+    public String getAuthorAvatar() {
+        return authorAvatar;
+    }
+
+    public void setAuthorAvatar(String authorAvatar) {
+        this.authorAvatar = authorAvatar;
+    }
+
     public String getStatusBadgeClass() {
         return statusBadgeClass;
     }
@@ -238,4 +239,30 @@ public class Article {
     public void setFormattedViews(String formattedViews) {
         this.formattedViews = formattedViews;
     }
+
+    public String getReviewerName() {
+        return reviewerName;
+    }
+
+    public void setReviewerName(String reviewerName) {
+        this.reviewerName = reviewerName;
+    }
+
+    public String getReadingTime() {
+        return readingTime;
+    }
+
+    public void setReadingTime(String readingTime) {
+        this.readingTime = readingTime;
+    }
+
+    public String getEngagementRate() { return engagementRate; }
+    public void setEngagementRate(String engagementRate) { this.engagementRate = engagementRate; }
+
+
+    public String getTrendIcon() { return trendIcon; }
+    public void setTrendIcon(String trendIcon) { this.trendIcon = trendIcon; }
+
+    public String getTrendClass() { return trendClass; }
+    public void setTrendClass(String trendClass) { this.trendClass = trendClass; }
 }

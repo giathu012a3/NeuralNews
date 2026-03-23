@@ -87,7 +87,18 @@ public class CreateArticleController extends HttpServlet {
         article.setTitle(title.trim());
         article.setContent(content != null ? content : "");
         article.setSummary(summary != null ? summary.trim() : "");
-        article.setImageUrl(imageUrl != null ? imageUrl.trim() : "");
+        String normalizedImageUrl = imageUrl != null ? imageUrl.trim() : "";
+        // Nếu client gửi full path có contextPath (vd: /NeuralNews/uploads/..)
+        // thì strip để DB luôn lưu relative (uploads/..) hoặc URL tuyệt đối (http..)
+        String ctx = request.getContextPath();
+        if (!normalizedImageUrl.isEmpty() && !normalizedImageUrl.startsWith("http")) {
+            if (normalizedImageUrl.startsWith(ctx + "/")) {
+                normalizedImageUrl = normalizedImageUrl.substring(ctx.length() + 1);
+            } else if (normalizedImageUrl.startsWith("/")) {
+                normalizedImageUrl = normalizedImageUrl.substring(1);
+            }
+        }
+        article.setImageUrl(normalizedImageUrl);
         article.setAuthorId(user.getId());
         article.setStatus(status);
         try {
@@ -109,6 +120,31 @@ public class CreateArticleController extends HttpServlet {
             }
 
             dao.update(article);
+
+            if ("submit".equals(action)) {
+                neuralnews.dao.NotificationDao notiDao = new neuralnews.dao.NotificationDao();
+                neuralnews.model.Notification noti = new neuralnews.model.Notification();
+                noti.setUserId(user.getId());
+                noti.setTitle("Gửi Bài Thành Công");
+                noti.setContent("Bài biên tập '" + article.getTitle() + "' đã được chuyển sang chế độ chờ duyệt.");
+                noti.setType("ARTICLE");
+                noti.setUrl("/journalist/articles");
+                notiDao.create(noti);
+
+                // Notify admins
+                neuralnews.dao.UserDAO uDao = new neuralnews.dao.UserDAO();
+                List<User> admins = uDao.getAllUsersFiltered(null, "Admin", "ACTIVE", "date", "DESC", 100, 0);
+                for (User admin : admins) {
+                    neuralnews.model.Notification adminNoti = new neuralnews.model.Notification();
+                    adminNoti.setUserId(admin.getId());
+                    adminNoti.setTitle("Yêu Cầu Đăng Bài");
+                    adminNoti.setContent("Nhà báo " + user.getFullName() + " vừa cập nhật bài viết (#" + article.getId() + ") và yêu cầu phê duyệt.");
+                    adminNoti.setType("SYSTEM");
+                    adminNoti.setUrl("/admin/content");
+                    notiDao.create(adminNoti);
+                }
+            }
+
             response.sendRedirect(request.getContextPath() + "/journalist/articles");
 
         } else {
@@ -116,6 +152,28 @@ public class CreateArticleController extends HttpServlet {
             long newId = dao.save(article);
             if (newId > 0) {
                 if ("submit".equals(action)) {
+                    neuralnews.dao.NotificationDao notiDao = new neuralnews.dao.NotificationDao();
+                    neuralnews.model.Notification noti = new neuralnews.model.Notification();
+                    noti.setUserId(user.getId());
+                    noti.setTitle("Gửi Bài Thành Công");
+                    noti.setContent("Bài biên tập '" + article.getTitle() + "' đã được gửi lên Ban Quản Trị thành công. Vui lòng chờ duyệt.");
+                    noti.setType("ARTICLE");
+                    noti.setUrl("/journalist/articles");
+                    notiDao.create(noti);
+
+                    // Notify admins
+                    neuralnews.dao.UserDAO uDao = new neuralnews.dao.UserDAO();
+                    List<User> admins = uDao.getAllUsersFiltered(null, "Admin", "ACTIVE", "date", "DESC", 100, 0);
+                    for (User admin : admins) {
+                        neuralnews.model.Notification adminNoti = new neuralnews.model.Notification();
+                        adminNoti.setUserId(admin.getId());
+                        adminNoti.setTitle("Yêu Cầu Đăng Bài");
+                        adminNoti.setContent("Nhà báo " + user.getFullName() + " vừa gửi bài viết mới (#" + newId + ") yêu cầu phê duyệt.");
+                        adminNoti.setType("SYSTEM");
+                        adminNoti.setUrl("/admin/content");
+                        notiDao.create(adminNoti);
+                    }
+
                     // Gửi duyệt → về danh sách bài viết
                     response.sendRedirect(request.getContextPath() + "/journalist/articles?submitted=true");
                 } else {

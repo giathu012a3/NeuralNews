@@ -47,27 +47,29 @@ public class LoginController extends HttpServlet {
 		}
 
 		// Check account status
-		if ("BANNED".equals(user.getStatus()) || "SUSPENDED".equals(user.getStatus())) {
+		if ("BANNED".equals(user.getStatus()) || "SUSPENDED".equals(user.getStatus())
+				|| "DELETED".equals(user.getStatus())) {
 			response.sendRedirect(contextPath + "/auth/login.jsp?error=banned");
 			return;
 		}
-		if ("PENDING".equals(user.getStatus())) {
-			response.sendRedirect(contextPath + "/auth/login.jsp?error=pending");
-			return;
-		}
+		// We allow PENDING users to login now, so they can see their application status
+		// in profile.
 
 		// Save user info to session
 		HttpSession session = request.getSession();
 		session.setAttribute("currentUser", user);
 		session.setAttribute("userId", user.getId());
 		session.setAttribute("userEmail", user.getEmail());
+		session.setAttribute("userStatus", user.getStatus());
 		session.setAttribute("userRole", user.getRole().getName());
 		session.setAttribute("userName", user.getFullName());
+		session.setAttribute("avatarUrl", user.getAvatarUrl());
 
 		// Redirect by role
-		boolean isAdmin = user.hasRole("ADMIN");
-		if (isAdmin) {
-			response.sendRedirect(contextPath + "/admin/home.jsp");
+		if (user.hasRole("ADMIN")) {
+			response.sendRedirect(contextPath + "/admin/home");
+		} else if (user.hasRole("JOURNALIST")) {
+			response.sendRedirect(contextPath + "/journalist/home");
 		} else {
 			response.sendRedirect(contextPath + "/home");
 		}
@@ -77,6 +79,6 @@ public class LoginController extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		// GET /LoginController -> redirect to login page
-		response.sendRedirect(request.getContextPath() + "/auth/login.jsp");
+		response.sendRedirect(request.getContextPath() + "/auth/login");
 	}
 }

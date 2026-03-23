@@ -12,6 +12,7 @@ public class Comment {
     private String statusBadgeClass;
     private String statusDotClass;
     private Timestamp createdAt;
+    private int likesCount;
     private String formattedTime;
 
     // User info
@@ -28,53 +29,152 @@ public class Comment {
     private Long parentId;
     private List<Comment> replies;
 
-    public Comment() {}
+    public Comment() {
+    }
 
-    public long getId() { return id; }
-    public void setId(long id) { this.id = id; }
+    public long getId() {
+        return id;
+    }
 
-    public String getContent() { return content; }
-    public void setContent(String content) { this.content = content; }
+    public void setId(long id) {
+        this.id = id;
+    }
 
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
+    public String getContent() {
+        return content;
+    }
 
-    public String getStatusLabel() { return statusLabel; }
-    public void setStatusLabel(String statusLabel) { this.statusLabel = statusLabel; }
+    public void setContent(String content) {
+        this.content = content;
+    }
 
-    public String getStatusBadgeClass() { return statusBadgeClass; }
-    public void setStatusBadgeClass(String statusBadgeClass) { this.statusBadgeClass = statusBadgeClass; }
+    public String getStatus() {
+        return status;
+    }
 
-    public String getStatusDotClass() { return statusDotClass; }
-    public void setStatusDotClass(String statusDotClass) { this.statusDotClass = statusDotClass; }
+    public void setStatus(String status) {
+        this.status = status;
+    }
 
-    public Timestamp getCreatedAt() { return createdAt; }
-    public void setCreatedAt(Timestamp createdAt) { this.createdAt = createdAt; }
+    public String getStatusLabel() {
+        return statusLabel;
+    }
 
-    public String getFormattedTime() { return formattedTime; }
-    public void setFormattedTime(String formattedTime) { this.formattedTime = formattedTime; }
+    public void setStatusLabel(String statusLabel) {
+        this.statusLabel = statusLabel;
+    }
 
-    public long getUserId() { return userId; }
-    public void setUserId(long userId) { this.userId = userId; }
+    public String getStatusBadgeClass() {
+        return statusBadgeClass;
+    }
 
-    public String getUserName() { return userName; }
-    public void setUserName(String userName) { this.userName = userName; }
+    public void setStatusBadgeClass(String statusBadgeClass) {
+        this.statusBadgeClass = statusBadgeClass;
+    }
 
-    public String getUserAvatar() { return userAvatar; }
-    public void setUserAvatar(String userAvatar) { this.userAvatar = userAvatar; }
+    public String getStatusDotClass() {
+        return statusDotClass;
+    }
 
-    public String getUserAvatarBgClass() { return userAvatarBgClass; }
-    public void setUserAvatarBgClass(String userAvatarBgClass) { this.userAvatarBgClass = userAvatarBgClass; }
+    public void setStatusDotClass(String statusDotClass) {
+        this.statusDotClass = statusDotClass;
+    }
 
-    public long getArticleId() { return articleId; }
-    public void setArticleId(long articleId) { this.articleId = articleId; }
+    public Timestamp getCreatedAt() {
+        return createdAt;
+    }
 
-    public String getArticleTitle() { return articleTitle; }
-    public void setArticleTitle(String articleTitle) { this.articleTitle = articleTitle; }
+    public void setCreatedAt(Timestamp createdAt) {
+        this.createdAt = createdAt;
+    }
 
-    public Long getParentId() { return parentId; }
-    public void setParentId(Long parentId) { this.parentId = parentId; }
+    public String getFormattedTime() {
+        return formattedTime;
+    }
 
-    public List<Comment> getReplies() { return replies; }
-    public void setReplies(List<Comment> replies) { this.replies = replies; }
+    public void setFormattedTime(String formattedTime) {
+        this.formattedTime = formattedTime;
+    }
+
+    public int getLikesCount() {
+        return likesCount;
+    }
+
+    public void setLikesCount(int likesCount) {
+        this.likesCount = likesCount;
+    }
+
+    public long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(long userId) {
+        this.userId = userId;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public String getUserAvatar() {
+        return userAvatar;
+    }
+
+    public void setUserAvatar(String userAvatar) {
+        this.userAvatar = userAvatar;
+    }
+
+    public String getUserAvatarBgClass() {
+        return userAvatarBgClass;
+    }
+
+    public void setUserAvatarBgClass(String userAvatarBgClass) {
+        this.userAvatarBgClass = userAvatarBgClass;
+    }
+
+    public long getArticleId() {
+        return articleId;
+    }
+
+    public void setArticleId(long articleId) {
+        this.articleId = articleId;
+    }
+
+    public String getArticleTitle() {
+        return articleTitle;
+    }
+
+    public void setArticleTitle(String articleTitle) {
+        this.articleTitle = articleTitle;
+    }
+
+    public Long getParentId() {
+        return parentId;
+    }
+
+    public void setParentId(Long parentId) {
+        this.parentId = parentId;
+    }
+
+    public List<Comment> getReplies() {
+        return replies;
+    }
+
+    public void setReplies(List<Comment> replies) {
+        this.replies = replies;
+    }
+
+    private boolean isLikedByUser;
+
+    public boolean isLikedByUser() {
+        return isLikedByUser;
+    }
+
+    public void setLikedByUser(boolean likedByUser) {
+        isLikedByUser = likedByUser;
+    }
 }

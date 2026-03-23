@@ -6,8 +6,10 @@ import jakarta.servlet.http.*;
 import java.io.IOException;
 import java.io.PrintWriter;
 import neuralnews.dao.ArticleDao;
-import neuralnews.model.User;
+import neuralnews.dao.NotificationDao;
 import neuralnews.model.Article;
+import neuralnews.model.Notification;
+import neuralnews.model.User;
 
 @WebServlet("/handle-reaction")
 public class ReactionController extends HttpServlet {
@@ -58,19 +60,58 @@ public class ReactionController extends HttpServlet {
         try {
             String type = request.getParameter("type"); 
 
-            if (artIdParam == null || artIdParam.trim().isEmpty() || type == null) {
+            if (artIdParam == null || artIdParam.trim().isEmpty() || action == null && type == null) {
                 out.print("{\"status\":\"INVALID_DATA\"}");
                 return;
             }
 
             long articleId = Long.parseLong(artIdParam);
             
-            // Xử lý logic trong bảng interactions
+            if ("bookmark".equals(action)) {
+                boolean success = dao.toggleBookmark(currentUser.getId(), articleId);
+                boolean isNowBookmarked = dao.isBookmarked(currentUser.getId(), articleId);
+                out.print("{\"status\":\"SUCCESS\", \"isBookmarked\":" + isNowBookmarked + "}");
+                return;
+            }
+            
+            if ("report".equals(action)) {
+                String reason = request.getParameter("reason");
+                String details = request.getParameter("details");
+                neuralnews.dao.ReportDao reportDao = new neuralnews.dao.ReportDao();
+                boolean success = reportDao.createReport("ARTICLE", articleId, currentUser.getId(), reason, details, "");
+                out.print("{\"status\":\"" + (success ? "SUCCESS" : "FAILED") + "\"}");
+                return;
+            }
+            
+            // Xử lý logic trong bảng interactions (LIKE/DISLIKE)
             String newStatus = dao.handleReaction(currentUser.getId(), articleId, type);
             
             Article art = dao.getArticleById(articleId); 
 
             if (art != null) {
+                if (art.getAuthorId() != currentUser.getId()) {
+                    String userNameStr = (String) session.getAttribute("userName");
+                    if (userNameStr == null) userNameStr = "Doc gia";
+
+                    Notification noti = new Notification();
+                    noti.setUserId(art.getAuthorId());
+                    noti.setUrl("/user/article?id=" + articleId);
+                    
+                    NotificationDao notiDao = new NotificationDao();
+
+                    if ("LIKE".equals(newStatus)) {
+                        noti.setTitle("Luot Thich Moi");
+                        noti.setContent(userNameStr + " vua nhan Thich bai viet '" + art.getTitle() + "'.");
+                        noti.setType("LIKE");
+                        notiDao.create(noti);
+                    } else if ("DISLIKE".equals(newStatus)) {
+                        noti.setTitle("Luot Khong Thich");
+                        noti.setContent(userNameStr + " vua nhan Khong Thich bài viết '" + art.getTitle() + "'.");
+                        noti.setType("DISLIKE");
+                        notiDao.create(noti);
+                    }
+                }
+
                 String json = String.format(
                     "{\"status\":\"%s\", \"newLikes\":%d, \"newDislikes\":%d}",
                     newStatus,

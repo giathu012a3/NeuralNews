@@ -5,6 +5,7 @@ public class Category {
     private int id;
     private String name;
     private String description;
+    private int articleCount;
 
     public Category() {}
 
@@ -21,4 +22,7 @@ public class Category {
 
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
-}
+
+    public int getArticleCount() { return articleCount; }
+    public void setArticleCount(int articleCount) { this.articleCount = articleCount; }
+}

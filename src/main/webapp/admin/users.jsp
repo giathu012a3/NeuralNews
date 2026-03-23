@@ -1,2 +1,367 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" pageEncoding="UTF-8" %>
-<!DOCTYPE html> <html lang="en">  <head>     <jsp:include page="components/head.jsp" />     <title>User Management | NexusAI Admin</title> </head>  <body class="bg-[#F4F7FE] dark:bg-background-dark font-sans text-slate-800 dark:text-slate-100 overflow-hidden">     <div class="flex min-h-screen">         <jsp:include page="components/sidebar.jsp">             <jsp:param name="activePage" value="users" />         </jsp:include>         <main class="flex-1 ml-64 min-h-screen pb-12">             <header                 class="sticky top-0 z-40 bg-[#F4F7FE]/90 dark:bg-background-dark/90 backdrop-blur-md px-8 py-6 border-b border-slate-200/50 dark:border-slate-800/50">                 <div class="flex items-center justify-between">                     <div>                         <h2 class="text-2xl font-bold text-slate-900 dark:text-white">User Management</h2>                         <p class="text-sm text-slate-500 mt-1">Manage global users, journalists and administrative                             permissions.</p>                     </div>                     <div class="flex items-center gap-4">                         <div class="relative flex items-center group">                             <span                                 class="material-icons absolute left-3 text-slate-400 group-focus-within:text-primary transition-colors">search</span>                             <input                                 class="pl-10 pr-4 py-2.5 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-primary w-64 lg:w-80 shadow-sm transition-all"                                 placeholder="Search by name or email..." type="text" />                         </div>                         <button onclick="openAddUserModal()"                             class="bg-primary hover:bg-primary/90 text-white px-5 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2 shadow-lg shadow-primary/20 transition-all">                             <span class="material-icons text-sm">add</span>                             Add Member                         </button>                         <jsp:include page="components/header_profile.jsp" />                     </div>                 </div>                 <div class="mt-6 flex flex-wrap items-center gap-8">                     <div class="flex items-center gap-3">                         <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Roles:</span>                         <div class="bg-slate-200/50 dark:bg-slate-800 p-1 rounded-lg flex">                             <div                                 class="px-4 py-2 text-sm font-medium transition-all cursor-pointer bg-white dark:bg-slate-700 text-primary shadow-sm rounded-md">                                 All</div>                             <div class="px-4 py-2 text-sm font-medium transition-all cursor-pointer">Admin</div>                             <div class="px-4 py-2 text-sm font-medium transition-all cursor-pointer">Journalist</div>                             <div class="px-4 py-2 text-sm font-medium transition-all cursor-pointer">Member</div>                         </div>                     </div>                     <div class="flex items-center gap-3">                         <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Status:</span>                         <div class="bg-slate-200/50 dark:bg-slate-800 p-1 rounded-lg flex">                             <div                                 class="px-4 py-2 text-sm font-medium transition-all cursor-pointer bg-white dark:bg-slate-700 text-primary shadow-sm rounded-md">                                 All</div>                             <div class="px-4 py-2 text-sm font-medium transition-all cursor-pointer">Active</div>                             <div class="px-4 py-2 text-sm font-medium transition-all cursor-pointer">Banned</div>                             <div class="px-4 py-2 text-sm font-medium transition-all cursor-pointer">Pending</div>                         </div>                     </div>                 </div>             </header>             <div class="p-8 space-y-8">                 <!-- Pending Applications Section -->                 <div                     class="bg-indigo-50 dark:bg-indigo-900/10 rounded-2xl p-6 border border-indigo-100 dark:border-indigo-500/20">                     <div class="flex items-center justify-between mb-6">                         <div class="flex items-center gap-3">                             <div class="p-2 bg-indigo-100 dark:bg-indigo-500/20 rounded-lg">                                 <span class="material-icons text-indigo-600 dark:text-indigo-400">how_to_reg</span>                             </div>                             <div>                                 <h3 class="text-lg font-bold text-slate-900 dark:text-white">Pending Journalist                                     Applications</h3>                                 <p class="text-xs text-slate-500">Review and approve new journalist requests.</p>                             </div>                         </div>                         <span                             class="bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm border border-indigo-100 dark:border-slate-700">1                             Pending Request</span>                     </div>                      <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">                         <!-- Applicant Card -->                         <div                             class="bg-white dark:bg-slate-800 p-5 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 hover:shadow-md transition-shadow relative overflow-hidden group">                             <div                                 class="absolute top-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity">                                 <button class="text-slate-300 hover:text-slate-500"><span                                         class="material-icons text-sm">more_horiz</span></button>                             </div>                             <div class="flex items-start gap-4">                                 <div class="relative">                                     <img alt="Avatar"                                         class="w-12 h-12 rounded-full object-cover ring-2 ring-white dark:ring-slate-700 shadow-sm"                                         src="https://lh3.googleusercontent.com/aida-public/AB6AXuC55r-FPmuWNCA53-kd_rt_KLAl5nu4DaqBh0RTF-cYgZxEV2NQeHrabEkBjRzvbBM1edkuSUHwGCS1yceEeNznZZOq85sva-ol4CGokb4XcEx53GR-20x9tDzWWnWePKd5R6HzkUDzU05zc61reG6O6XMxAy7XAZRvYwgDwl-aEnI8DhDUkThHah3waU1liIDvUr2VmJAZhG4HAlgUO7WdaHRn1LjPLYBdd6LMy_dI-6NG2r2FJHbW_vUttZg4hiMUiM68JCyPGg4u" />                                     <span                                         class="absolute -bottom-1 -right-1 w-4 h-4 bg-amber-500 border-2 border-white dark:border-slate-800 rounded-full flex items-center justify-center">                                         <span class="material-icons text-[8px] text-white">priority_high</span>                                     </span>                                 </div>                                 <div class="flex-1 min-w-0">                                     <h4 class="text-sm font-bold text-slate-900 dark:text-white truncate">New Journalist                                         Applicant</h4>                                     <p class="text-xs text-slate-500 truncate mb-1">applicant@example.com</p>                                     <span                                         class="text-[10px] font-medium px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-500 rounded-md">Applied:                                         Just now</span>                                 </div>                             </div>                             <div class="mt-4 flex items-center gap-2">                                 <button onclick="openModal()"                                     class="flex-1 bg-primary hover:bg-primary/90 text-white text-xs font-bold py-2 rounded-lg transition-all shadow-lg shadow-primary/20">                                     Review Application                                 </button>                                 <button                                     class="px-3 py-2 bg-slate-50 dark:bg-slate-700 hover:bg-rose-50 dark:hover:bg-rose-900/20 text-slate-400 hover:text-rose-500 rounded-lg transition-colors border border-slate-200 dark:border-slate-600">                                     <span class="material-icons text-[18px]">close</span>                                 </button>                             </div>                         </div>                     </div>                 </div>                  <div                     class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">                     <div class="overflow-x-auto">                         <table class="w-full text-left">                             <thead>                                 <tr                                     class="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-100 dark:border-slate-700">                                     <th class="px-8 py-5 text-xs font-bold text-slate-400 uppercase tracking-wider">User                                     </th>                                     <th class="px-6 py-5 text-xs font-bold text-slate-400 uppercase tracking-wider">                                         Email</th>                                     <th class="px-6 py-5 text-xs font-bold text-slate-400 uppercase tracking-wider">Role                                     </th>                                     <th class="px-6 py-5 text-xs font-bold text-slate-400 uppercase tracking-wider">Join                                         Date</th>                                     <th class="px-6 py-5 text-xs font-bold text-slate-400 uppercase tracking-wider">                                         Status</th>                                     <th                                         class="px-8 py-5 text-xs font-bold text-slate-400 uppercase tracking-wider text-right">                                         Actions</th>                                 </tr>                             </thead>                             <tbody class="divide-y divide-slate-100 dark:divide-slate-700">                                 <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors group">                                     <td class="px-8 py-4">                                         <div class="flex items-center gap-3">                                             <img alt="Avatar" class="w-9 h-9 rounded-full"                                                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuAIMiwkUSgzeJwQjnImgm-EtQUStgnx77XaVyk6IYHPqOp0dm7MArK8Jw7O-5W5Y19FcGoIA35dJr6Z0kgbTzlrkQL26UKyUpgHTZNnj8dl2ETxJ_1kcN7J2W0NIK_hu7G22AQDyN34HN0IMEwJyd7WQmpyztp_lt1fqhP6ffdVebb8WfanKR-hDbqiPh-zJtUObWkzP5AtG5DrFUGvU00pu70F-Dtofq_yRSlVbueBpI-6AXsHeMEf3vGQwmO1-ERURjqhpCusHl6e" />                                             <p class="text-sm font-semibold text-slate-900 dark:text-white">Admin Stark                                             </p>                                         </div>                                     </td>                                     <td class="px-6 py-4 text-sm text-slate-500 dark:text-slate-400">                                         stark@nexusai.global</td>                                     <td class="px-6 py-4">                                         <span                                             class="px-3 py-1 text-[11px] font-bold rounded-full bg-indigo-500/10 text-indigo-500 uppercase tracking-tight">Admin</span>                                     </td>                                     <td class="px-6 py-4 text-sm text-slate-500">Oct 12, 2023</td>                                     <td class="px-6 py-4">                                         <span class="flex items-center gap-1.5 text-sm font-medium text-blue-500">                                             <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>                                             Active                                         </span>                                     </td>                                     <td class="px-8 py-4 text-right">                                         <div                                             class="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">                                             <button                                                 class="p-2 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-lg transition-all"                                                 title="Edit">                                                 <span class="material-symbols-outlined text-[18px]">edit</span>                                             </button>                                             <button                                                 class="p-2 text-slate-400 hover:text-amber-500 hover:bg-amber-50 rounded-lg transition-all"                                                 title="Ban">                                                 <span class="material-symbols-outlined text-[18px]">lock</span>                                             </button>                                             <button                                                 class="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"                                                 title="Delete">                                                 <span class="material-symbols-outlined text-[18px]">delete</span>                                             </button>                                         </div>                                     </td>                                 </tr>                                 <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors group">                                     <td class="px-8 py-4">                                         <div class="flex items-center gap-3">                                             <img alt="Avatar" class="w-9 h-9 rounded-full"                                                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuBg4Auvl_Av2vlLpUiIuU3DAXdNhP_qBaw7mwI2I4nI_-NFZUJMq4w3hVdfWxAFlYA_9gaEwZsI5r2of9VhHiEz6RHtPWn28CQZgtD4itnzML9OjDPTmOJ8XZw_bEwlfkE_JSyBheBbWO4Rhz8Ewqb9bYtxhMAwn9oK4_qQVL38z3ZoA3nHB5WoQqnRoMv942YqihVPWPdlre7IFRxV9wHOu2ljEl9aukMNBomaGNewCmMDiMIOy-GrqBDAUEmqd3iSXpVdF3hfP5lz" />                                             <p class="text-sm font-semibold text-slate-900 dark:text-white">Elena                                                 Rodriguez</p>                                         </div>                                     </td>                                     <td class="px-6 py-4 text-sm text-slate-500 dark:text-slate-400">                                         elena.r@nexusai.global</td>                                     <td class="px-6 py-4">                                         <span                                             class="px-3 py-1 text-[11px] font-bold rounded-full bg-emerald-500/10 text-emerald-500 uppercase tracking-tight">Journalist</span>                                     </td>                                     <td class="px-6 py-4 text-sm text-slate-500">Jan 04, 2024</td>                                     <td class="px-6 py-4">                                         <span class="flex items-center gap-1.5 text-sm font-medium text-blue-500">                                             <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>                                             Active                                         </span>                                     </td>                                     <td class="px-8 py-4 text-right">                                         <div                                             class="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">                                             <button                                                 class="p-2 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-lg transition-all">                                                 <span class="material-symbols-outlined text-[18px]">edit</span>                                             </button>                                             <button                                                 class="p-2 text-slate-400 hover:text-amber-500 hover:bg-amber-50 rounded-lg transition-all"                                                 title="Ban">                                                 <span class="material-symbols-outlined text-[18px]">lock</span>                                             </button>                                             <button                                                 class="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"                                                 title="Delete">                                                 <span class="material-symbols-outlined text-[18px]">delete</span>                                             </button>                                         </div>                                     </td>                                 </tr>                                 <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors group">                                     <td class="px-8 py-4">                                         <div class="flex items-center gap-3">                                             <img alt="Avatar" class="w-9 h-9 rounded-full"                                                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuC55r-FPmuWNCA53-kd_rt_KLAl5nu4DaqBh0RTF-cYgZxEV2NQeHrabEkBjRzvbBM1edkuSUHwGCS1yceEeNznZZOq85sva-ol4CGokb4XcEx53GR-20x9tDzWWnWePKd5R6HzkUDzU05zc61reG6O6XMxAy7XAZRvYwgDwl-aEnI8DhDUkThHah3waU1liIDvUr2VmJAZhG4HAlgUO7WdaHRn1LjPLYBdd6LMy_dI-6NG2r2FJHbW_vUttZg4hiMUiM68JCyPGg4u" />                                             <p class="text-sm font-semibold text-slate-900 dark:text-white">Sam Wilson                                             </p>                                         </div>                                     </td>                                     <td class="px-6 py-4 text-sm text-slate-500 dark:text-slate-400">                                         wilson.sam@outlook.com</td>                                     <td class="px-6 py-4">                                         <span                                             class="px-3 py-1 text-[11px] font-bold rounded-full bg-slate-500/10 text-slate-500 uppercase tracking-tight">Member</span>                                     </td>                                     <td class="px-6 py-4 text-sm text-slate-500">Feb 18, 2024</td>                                     <td class="px-6 py-4">                                         <span class="flex items-center gap-1.5 text-sm font-medium text-red-500">                                             <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>                                             Banned                                         </span>                                     </td>                                     <td class="px-8 py-4 text-right">                                         <div                                             class="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">                                             <button                                                 class="p-2 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-lg transition-all">                                                 <span class="material-symbols-outlined text-[18px]">edit</span>                                             </button>                                             <button class="p-2 text-blue-500 hover:bg-blue-50 rounded-lg transition-all"                                                 title="Unban">                                                 <span class="material-symbols-outlined text-[18px]">lock_open</span>                                             </button>                                             <button                                                 class="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"                                                 title="Delete">                                                 <span class="material-symbols-outlined text-[18px]">delete</span>                                             </button>                                         </div>                                     </td>                                 </tr>                             </tbody>                         </table>                     </div>                     <div                         class="px-8 py-5 border-t border-slate-100 dark:border-slate-700 flex items-center justify-between">                         <p class="text-sm text-slate-500">Showing <span                                 class="font-semibold text-slate-900 dark:text-white">1</span> to <span                                 class="font-semibold text-slate-900 dark:text-white">10</span> of <span                                 class="font-semibold text-slate-900 dark:text-white">1,240</span> users</p>                         <div class="flex items-center gap-2">                             <button                                 class="p-2 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50 transition-all"                                 disabled="">                                 <span class="material-icons text-sm">chevron_left</span>                             </button>                             <button                                 class="w-9 h-9 flex items-center justify-center rounded-lg bg-primary text-white text-sm font-bold shadow-md shadow-primary/20">1</button>                             <button                                 class="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 text-sm font-medium">2</button>                             <button                                 class="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 text-sm font-medium">3</button>                             <span class="text-slate-400 mx-1">...</span>                             <button                                 class="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 text-sm font-medium">124</button>                             <button                                 class="p-2 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all">                                 <span class="material-icons text-sm">chevron_right</span>                             </button>                         </div>                     </div>                 </div>             </div>         </main>     </div>      <!-- Modal -->     <div id="userModal" class="fixed inset-0 z-[100] modal-overlay flex items-center justify-center p-4 hidden">         <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onclick="closeModal()"></div>         <div             class="bg-white dark:bg-slate-900 w-full max-w-2xl rounded-2xl shadow-2xl relative overflow-hidden flex flex-col max-h-[90vh] z-10">             <div                 class="px-8 py-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between sticky top-0 bg-white dark:bg-slate-900 z-10">                 <h2 class="text-xl font-bold text-slate-900 dark:text-white leading-none">Journalist Application Details                 </h2>                 <button onclick="closeModal()"                     class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">                     <span class="material-icons">close</span>                 </button>             </div>             <div class="px-8 py-8 overflow-y-auto">                 <div class="flex flex-col md:flex-row gap-8">                     <div class="flex flex-col items-center text-center space-y-4 md:w-1/3">                         <div class="relative">                             <img alt="Julian Casablancas" class="w-32 h-32 rounded-2xl object-cover shadow-lg"                                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuAIMiwkUSgzeJwQjnImgm-EtQUStgnx77XaVyk6IYHPqOp0dm7MArK8Jw7O-5W5Y19FcGoIA35dJr6Z0kgbTzlrkQL26UKyUpgHTZNnj8dl2ETxJ_1kcN7J2W0NIK_hu7G22AQDyN34HN0IMEwJyd7WQmpyztp_lt1fqhP6ffdVebb8WfanKR-hDbqiPh-zJtUObWkzP5AtG5DrFUGvU00pu70F-Dtofq_yRSlVbueBpI-6AXsHeMEf3vGQwmO1-ERURjqhpCusHl6e" />                             <div                                 class="absolute -bottom-2 -right-2 bg-emerald-500 text-white p-1.5 rounded-lg border-4 border-white dark:border-slate-900">                                 <span class="material-icons text-sm">verified</span>                             </div>                         </div>                         <div>                             <h3 class="text-xl font-bold text-slate-900 dark:text-white">Julian Casablancas</h3>                             <p class="text-sm text-slate-500 font-medium">Senior Investigative Reporter</p>                         </div>                         <a class="flex items-center gap-2 text-primary font-semibold text-sm hover:underline" href="#">                             <span class="material-icons text-[18px]">download</span>                             Download CV                         </a>                     </div>                     <div class="flex-1 space-y-6">                         <div>                             <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Professional Bio                             </h4>                             <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">                                 Experienced journalist with over 8 years in the field, specializing in tech culture and                                 emerging AI trends. Previously contributed to several major digital publications and                                 focused on how technology reshapes urban environments.                             </p>                         </div>                         <div class="grid grid-cols-2 gap-6">                             <div>                                 <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Experience                                 </h4>                                 <p class="text-sm font-semibold text-slate-900 dark:text-white">8+ Years</p>                             </div>                             <div>                                 <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Expertise                                 </h4>                                 <div class="flex flex-wrap gap-2">                                     <span                                         class="px-2 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[10px] font-bold rounded uppercase">Tech</span>                                     <span                                         class="px-2 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[10px] font-bold rounded uppercase">Politics</span>                                 </div>                             </div>                         </div>                         <div>                             <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Recent Writing                                 Samples</h4>                             <div class="space-y-2">                                 <a class="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all border border-slate-100 dark:border-slate-700"                                     href="#">                                     <span class="text-sm font-medium text-slate-700 dark:text-slate-200">The Future of                                         Generative AI in Newsrooms</span>                                     <span class="material-icons text-slate-400 text-sm">open_in_new</span>                                 </a>                                 <a class="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all border border-slate-100 dark:border-slate-700"                                     href="#">                                     <span class="text-sm font-medium text-slate-700 dark:text-slate-200">How Algorithm                                         Bias Affects Public Opinion</span>                                     <span class="material-icons text-slate-400 text-sm">open_in_new</span>                                 </a>                                 <a class="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all border border-slate-100 dark:border-slate-700"                                     href="#">                                     <span class="text-sm font-medium text-slate-700 dark:text-slate-200">Decentralized                                         Media: A New Era?</span>                                     <span class="material-icons text-slate-400 text-sm">open_in_new</span>                                 </a>                             </div>                         </div>                     </div>                 </div>             </div>             <div                 class="px-8 py-6 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 flex gap-4 sticky bottom-0">                 <button onclick="approveUser()"                     class="flex-1 bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-xl shadow-lg shadow-green-500/20 transition-all flex items-center justify-center gap-2">                     <span class="material-icons">check_circle</span>                     Approve Journalist                 </button>                 <button onclick="closeModal()"                     class="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold py-3 rounded-xl shadow-lg shadow-red-500/20 transition-all flex items-center justify-center gap-2">                     <span class="material-icons">cancel</span>                     Reject Application                 </button>             </div>         </div>     </div>      <!-- Add User Modal -->     <div id="addUserModal" class="fixed inset-0 z-[100] modal-overlay flex items-center justify-center p-4 hidden">         <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onclick="closeAddUserModal()">         </div>         <div             class="bg-white dark:bg-slate-900 w-full max-w-md rounded-2xl shadow-2xl relative overflow-hidden flex flex-col z-10 transition-all transform scale-100">             <div                 class="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-slate-900 z-10">                 <h2 class="text-lg font-bold text-slate-900 dark:text-white">Add New Member</h2>                 <button onclick="closeAddUserModal()"                     class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">                     <span class="material-icons">close</span>                 </button>             </div>              <div class="p-6 space-y-4">                 <div class="space-y-1.5">                     <label                         class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider ml-1">Full                         Name</label>                     <input type="text"                         class="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:ring-primary focus:border-primary transition-all outline-none"                         placeholder="e.g. John Doe">                 </div>                  <div class="space-y-1.5">                     <label                         class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider ml-1">Email                         Address</label>                     <input type="email"                         class="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:ring-primary focus:border-primary transition-all outline-none"                         placeholder="john@example.com">                 </div>                  <div class="space-y-1.5">                     <label                         class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider ml-1">Password</label>                     <input type="password"                         class="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:ring-primary focus:border-primary transition-all outline-none"                         placeholder="••••••••">                 </div>                  <div class="space-y-1.5">                     <label                         class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider ml-1">Role</label>                     <select                         class="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:ring-primary focus:border-primary transition-all outline-none appearance-none">                         <option value="user">User (Standard)</option>                         <option value="journalist">Journalist</option>                         <option value="admin">Administrator</option>                     </select>                 </div>             </div>              <div                 class="px-6 py-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 flex gap-3">                 <button onclick="closeAddUserModal()"                     class="flex-1 px-4 py-2.5 text-sm font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-xl transition-colors">                     Cancel                 </button>                 <button onclick="createNewUser()"                     class="flex-1 px-4 py-2.5 text-sm font-bold bg-primary text-white hover:bg-primary/90 rounded-xl shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-2">                     <span class="material-icons text-sm">person_add</span>                     Create Account                 </button>             </div>         </div>     </div>      <script>         // Existing modal functions         function openModal() {             document.getElementById('userModal').classList.remove('hidden');         }          function closeModal() {             document.getElementById('userModal').classList.add('hidden');         }          function approveUser() {             alert('Journalist Approved! Access granted to the publishing dashboard.');             closeModal();         }          // New Add User functions         function openAddUserModal() {             document.getElementById('addUserModal').classList.remove('hidden');         }          function closeAddUserModal() {             document.getElementById('addUserModal').classList.add('hidden');         }          function createNewUser() {             // Here you would typically gather form data and send it to the backend via AJAX/Fetch             // For now, we simulate success             const role = document.querySelector('#addUserModal select').value;             alert(`New ${role.charAt(0).toUpperCase() + role.slice(1)} account created successfully!`);             closeAddUserModal();         }     </script> </body>  </html>
+    <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+        <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
+            <!DOCTYPE html>
+            <html lang="vi">
+
+            <head>
+                <jsp:include page="components/head.jsp" />
+                <title>Quản lý Người dùng | NeuralNews Admin</title>
+            </head>
+
+            <body class="bg-dashboard-bg dark:bg-background-dark overflow-x-hidden">
+                <div class="flex min-h-screen">
+                    <jsp:include page="components/sidebar.jsp">
+                        <jsp:param name="activePage" value="users" />
+                    </jsp:include>
+
+                    <main class="flex-1 ml-64 min-h-screen">
+                        <!-- Header Section -->
+                        <header
+                            class="sticky top-0 z-40 bg-dashboard-bg/80 dark:bg-background-dark/80 backdrop-blur-md px-8 py-5 flex items-center justify-between border-b border-slate-200 dark:border-slate-800">
+                            <div>
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Hệ thống
+                                </p>
+                                <h2 class="text-2xl font-bold text-slate-800 dark:text-white">Quản lý người dùng</h2>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <button onclick="AdminUser.exportCsv()"
+                                    class="px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-all flex items-center gap-2">
+                                    <span class="material-icons text-[18px]">download</span> Xuất CSV
+                                </button>
+                                <button onclick="openAddUserModal()"
+                                    class="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 shadow-lg shadow-primary/20 transition-all">
+                                    <span class="material-icons text-sm">person_add</span> Thêm thành viên
+                                </button>
+                                <jsp:include page="components/header_profile.jsp" />
+                            </div>
+                        </header>
+
+                        <div class="p-8 space-y-6">
+                            <!-- Statistics Overview -->
+                            <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                                <button onclick="AdminUser.quickFilter('')"
+                                    class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 flex items-center gap-4 hover:border-primary hover:shadow-md transition-all text-left">
+                                    <div
+                                        class="w-12 h-12 bg-slate-100 dark:bg-slate-700 rounded-xl flex items-center justify-center text-slate-500">
+                                        <span class="material-icons">people</span>
+                                    </div>
+                                    <div>
+                                        <p class="text-[10px] uppercase font-bold text-slate-400">Tổng cộng</p>
+                                        <p class="text-2xl font-bold text-slate-800 dark:text-white">${statTotal}</p>
+                                    </div>
+                                </button>
+                                <button onclick="AdminUser.quickFilter('ACTIVE')"
+                                    class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 flex items-center gap-4 hover:border-emerald-500 hover:shadow-md transition-all text-left">
+                                    <div
+                                        class="w-12 h-12 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl flex items-center justify-center text-emerald-500">
+                                        <span class="material-icons">verified_user</span>
+                                    </div>
+                                    <div>
+                                        <p class="text-[10px] uppercase font-bold text-emerald-500">Đang hoạt động</p>
+                                        <p class="text-2xl font-bold text-slate-800 dark:text-white">${statActive}</p>
+                                    </div>
+                                </button>
+                                <button onclick="AdminUser.quickFilter('PENDING')"
+                                    class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 flex items-center gap-4 hover:border-amber-500 hover:shadow-md transition-all text-left">
+                                    <div
+                                        class="w-12 h-12 bg-amber-50 dark:bg-amber-900/20 rounded-xl flex items-center justify-center text-amber-500">
+                                        <span class="material-icons">pending</span>
+                                    </div>
+                                    <div>
+                                        <p class="text-[10px] uppercase font-bold text-amber-500">Chờ duyệt</p>
+                                        <p class="text-2xl font-bold text-slate-800 dark:text-white">${statPending}</p>
+                                    </div>
+                                </button>
+                                <button onclick="AdminUser.quickFilter('REJECTED')"
+                                    class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 flex items-center gap-4 hover:border-slate-500 hover:shadow-md transition-all text-left">
+                                    <div
+                                        class="w-12 h-12 bg-slate-50 dark:bg-slate-900/20 rounded-xl flex items-center justify-center text-slate-500">
+                                        <span class="material-icons">person_off</span>
+                                    </div>
+                                    <div>
+                                        <p class="text-[10px] uppercase font-bold text-slate-500">Bị từ chối</p>
+                                        <p class="text-2xl font-bold text-slate-800 dark:text-white">${statRejected}</p>
+                                    </div>
+                                </button>
+                                <button onclick="AdminUser.quickFilter('BANNED')"
+                                    class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 flex items-center gap-4 hover:border-red-500 hover:shadow-md transition-all text-left">
+                                    <div
+                                        class="w-12 h-12 bg-red-50 dark:bg-red-900/20 rounded-xl flex items-center justify-center text-red-500">
+                                        <span class="material-icons">block</span>
+                                    </div>
+                                    <div>
+                                        <p class="text-[10px] uppercase font-bold text-red-500">Đã khóa</p>
+                                        <p class="text-2xl font-bold text-slate-800 dark:text-white">${statBanned}</p>
+                                    </div>
+                                </button>
+                            </div>
+
+                            <!-- Filters -->
+                            <div
+                                class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 flex flex-wrap items-end gap-3">
+                                <div class="flex-1 min-w-[200px]">
+                                    <label class="text-[10px] font-bold text-slate-400 uppercase mb-1 block">Tìm người
+                                        dùng</label>
+                                    <div class="relative group">
+                                        <span
+                                            class="material-icons absolute left-3 top-2.5 text-slate-400 group-focus-within:text-primary text-[20px] transition-colors">search</span>
+                                        <input id="searchUser" value="${filterKeyword}"
+                                            oninput="AdminUser.filterUsers(1)"
+                                            class="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-700 rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary transition-all"
+                                            placeholder="Tên hoặc email..." />
+                                    </div>
+                                </div>
+                                <div class="w-32">
+                                    <label class="text-[10px] font-bold text-slate-400 uppercase mb-1 block">Quyền
+                                        hạn</label>
+                                    <select id="roleSelect" onchange="AdminUser.filterUsers(1)"
+                                        class="w-full py-2 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-700 rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary">
+                                        <option value="ALL">Tất cả</option>
+                                        <option value="ADMIN" ${filterRole=='ADMIN' ? 'selected' : '' }>Quản trị viên
+                                        </option>
+                                        <option value="JOURNALIST" ${filterRole=='JOURNALIST' ? 'selected' : '' }>Nhà
+                                            báo</option>
+                                        <option value="USER" ${filterRole=='USER' ? 'selected' : '' }>Độc giả</option>
+                                    </select>
+                                </div>
+                                <div class="w-36">
+                                    <label class="text-[10px] font-bold text-slate-400 uppercase mb-1 block">Trạng
+                                        thái</label>
+                                    <select id="statusSelect" onchange="AdminUser.filterUsers(1)"
+                                        class="w-full py-2 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-700 rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary">
+                                        <option value="ALL">Tất cả</option>
+                                        <option value="ACTIVE" ${filterStatus=='ACTIVE' ? 'selected' : '' }>Hoạt động
+                                        </option>
+                                        <option value="BANNED" ${filterStatus=='BANNED' ? 'selected' : '' }>Đã khóa
+                                        </option>
+                                        <option value="PENDING" ${filterStatus=='PENDING' ? 'selected' : '' }>Chờ duyệt
+                                        </option>
+                                        <option value="REJECTED" ${filterStatus=='REJECTED' ? 'selected' : '' }>Bị từ
+                                            chối</option>
+                                        <option value="DELETED" ${filterStatus=='DELETED' ? 'selected' : '' }>Đã xóa
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="w-32">
+                                    <label class="text-[10px] font-bold text-slate-400 uppercase mb-1 block">Sắp
+                                        xếp</label>
+                                    <select id="sortBySelect" onchange="AdminUser.filterUsers(1)"
+                                        class="w-full py-2 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-700 rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary">
+                                        <option value="created_at">Ngày tham gia</option>
+                                        <option value="name">Tên</option>
+                                        <option value="email">Email</option>
+                                    </select>
+                                </div>
+                                <div class="w-32">
+                                    <label class="text-[10px] font-bold text-slate-400 uppercase mb-1 block">Thứ
+                                        tự</label>
+                                    <select id="sortDirSelect" onchange="AdminUser.filterUsers(1)"
+                                        class="w-full py-2 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-700 rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary">
+                                        <option value="DESC">Mới nhất</option>
+                                        <option value="ASC">Cũ nhất</option>
+                                    </select>
+                                </div>
+                                <button onclick="AdminUser.resetFilters()"
+                                    class="px-4 py-2 border border-slate-200 dark:border-slate-600 rounded-lg text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">Làm
+                                    mới</button>
+                            </div>
+
+                            <!-- User Table Content -->
+                            <div id="user-table-container" class="space-y-6">
+                                <jsp:include page="components/user_table_partial.jsp" />
+                            </div>
+                        </div>
+                    </main>
+                </div>
+
+                <%-- Modals --%>
+                    <div id="addUserModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 hidden">
+                        <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closeAddUserModal()"></div>
+                        <div
+                            class="bg-white dark:bg-slate-900 w-full max-w-md rounded-2xl shadow-2xl relative z-10 overflow-hidden">
+                            <div
+                                class="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                                <h2 class="text-lg font-bold text-slate-900 dark:text-white">Thêm thành viên mới</h2>
+                                <button onclick="closeAddUserModal()" class="text-slate-400 hover:text-slate-600"><span
+                                        class="material-icons">close</span></button>
+                            </div>
+                            <form id="addUserForm" class="p-6 space-y-4">
+                                <div>
+                                    <label class="text-xs font-bold text-slate-500 uppercase mb-1 block">Họ và
+                                        tên</label>
+                                    <input type="text" name="fullName"
+                                        class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-primary"
+                                        placeholder="Nguyen Van A" />
+                                </div>
+                                <div>
+                                    <label class="text-xs font-bold text-slate-500 uppercase mb-1 block">Email</label>
+                                    <input type="email" name="email"
+                                        class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-primary"
+                                        placeholder="example@news.com" />
+                                </div>
+                                <div>
+                                    <label class="text-xs font-bold text-slate-500 uppercase mb-1 block">Vai trò</label>
+                                    <select name="roleId"
+                                        class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-primary">
+                                        <option value="1">Độc giả</option>
+                                        <option value="2">Nhà báo</option>
+                                        <option value="3">Quản trị viên</option>
+                                    </select>
+                                </div>
+                            </form>
+                            <div
+                                class="px-6 py-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 flex gap-3">
+                                <button onclick="closeAddUserModal()"
+                                    class="flex-1 px-4 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-200 rounded-xl">Hủy</button>
+                                <button type="button" onclick="AdminUser.addUser()"
+                                    class="flex-1 px-4 py-2.5 text-sm font-bold bg-primary text-white hover:bg-primary/90 rounded-xl shadow-lg shadow-primary/20 transition-all">Tạo
+                                    tài khoản</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <%-- Edit Role Modal --%>
+                        <div id="editRoleModal"
+                            class="fixed inset-0 z-[100] flex items-center justify-center p-4 hidden">
+                            <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closeEditRoleModal()">
+                            </div>
+                            <div
+                                class="bg-white dark:bg-slate-900 w-full max-w-sm rounded-2xl shadow-2xl relative z-10 overflow-hidden animate-in zoom-in duration-200">
+                                <div
+                                    class="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                                    <h2 class="text-lg font-bold text-slate-900 dark:text-white">Cập nhật vai trò</h2>
+                                    <button onclick="closeEditRoleModal()"
+                                        class="text-slate-400 hover:text-slate-600"><span
+                                            class="material-icons">close</span></button>
+                                </div>
+                                <div class="p-6 space-y-4">
+                                    <input type="hidden" id="editRoleId_userId" />
+                                    <div>
+                                        <p class="text-sm text-slate-500 mb-4">Bạn đang thay đổi vai trò cho người dùng:
+                                            <b id="editRoleId_userName" class="text-slate-900 dark:text-white">...</b>
+                                        </p>
+                                        <label class="text-xs font-bold text-slate-500 uppercase mb-1 block">Chọn vai
+                                            trò mới</label>
+                                        <select id="editRoleId_select"
+                                            class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-primary">
+                                            <option value="1">Độc giả (MEMBER)</option>
+                                            <option value="2">Nhà báo (JOURNALIST)</option>
+                                            <option value="3">Quản trị viên (ADMIN)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div
+                                    class="px-6 py-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 flex gap-3">
+                                    <button onclick="closeEditRoleModal()"
+                                        class="flex-1 px-4 py-2 text-sm font-bold text-slate-600 hover:bg-slate-200 rounded-xl">Hủy</button>
+                                    <button type="button" onclick="AdminUser.submitChangeRole()"
+                                        class="flex-1 px-4 py-2 text-sm font-bold bg-primary text-white hover:bg-primary/90 rounded-xl shadow-lg transition-all">Lưu
+                                        thay đổi</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <%-- Reset Password Modal --%>
+                            <div id="resetPasswordModal"
+                                class="fixed inset-0 z-[100] flex items-center justify-center p-4 hidden">
+                                <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm"
+                                    onclick="closeResetPwdModal()"></div>
+                                <div
+                                    class="bg-white dark:bg-slate-900 w-full max-w-sm rounded-2xl shadow-2xl relative z-10 overflow-hidden animate-in zoom-in duration-200">
+                                    <div
+                                        class="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                                        <h2 class="text-lg font-bold text-slate-900 dark:text-white">Đặt lại mật khẩu
+                                        </h2>
+                                        <button onclick="closeResetPwdModal()"
+                                            class="text-slate-400 hover:text-slate-600"><span
+                                                class="material-icons">close</span></button>
+                                    </div>
+                                    <div class="p-6 space-y-4">
+                                        <input type="hidden" id="resetPwd_userId" />
+                                        <div>
+                                            <p class="text-sm text-slate-500 mb-4">Thay đổi mật khẩu cho: <b
+                                                    id="resetPwd_userName"
+                                                    class="text-slate-900 dark:text-white">...</b></p>
+                                            <label class="text-xs font-bold text-slate-500 uppercase mb-1 block">Mật
+                                                khẩu mới</label>
+                                            <input type="password" id="resetPwd_input"
+                                                class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-primary"
+                                                placeholder="Nhập mật khẩu mới" />
+                                        </div>
+                                    </div>
+                                    <div
+                                        class="px-6 py-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 flex gap-3">
+                                        <button onclick="closeResetPwdModal()"
+                                            class="flex-1 px-4 py-2 text-sm font-bold text-slate-600 hover:bg-slate-200 rounded-xl">Hủy</button>
+                                        <button type="button" onclick="AdminUser.submitResetPassword()"
+                                            class="flex-1 px-4 py-2 text-sm font-bold bg-primary text-white hover:bg-primary/90 rounded-xl shadow-lg transition-all">Cập
+                                            nhật nhanh</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <%-- CV Modal --%>
+                                <div id="cvModal"
+                                    class="fixed inset-0 z-[101] flex items-center justify-center p-4 hidden">
+                                    <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm"
+                                        onclick="AdminUser.closeCV()"></div>
+                                    <div
+                                        class="bg-white dark:bg-slate-900 w-full max-w-lg rounded-2xl shadow-2xl relative z-10 overflow-hidden animate-in fade-in zoom-in duration-200">
+                                        <div class="bg-gradient-to-r from-slate-800 to-slate-900 p-6 text-white">
+                                            <div class="flex justify-between items-start">
+                                                <div>
+                                                    <h2 id="cvName" class="text-2xl font-bold">—</h2>
+                                                    <p id="cvEmail" class="text-slate-400 text-sm">—</p>
+                                                </div>
+                                                <button onclick="AdminUser.closeCV()"
+                                                    class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/10 transition-colors"><span
+                                                        class="material-icons text-[18px]">close</span></button>
+                                            </div>
+                                            <div class="mt-4 flex gap-2">
+                                                <span id="cvRole"
+                                                    class="px-2 py-0.5 bg-primary/20 text-primary border border-primary/20 rounded text-[10px] font-bold uppercase tracking-wider">ROLE</span>
+                                                <span id="cvDate"
+                                                    class="px-2 py-0.5 bg-slate-700/50 text-slate-300 rounded text-[10px] font-medium tracking-tight">DATE</span>
+                                            </div>
+                                        </div>
+                                        <div class="p-6 space-y-6">
+                                            <div>
+                                                <h3
+                                                    class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">
+                                                    Thâm niên kinh nghiệm</h3>
+                                                <p id="cvExp" class="text-xl font-bold text-slate-800 dark:text-white">0
+                                                    năm</p>
+                                            </div>
+                                            <div>
+                                                <h3
+                                                    class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">
+                                                    Giới thiệu kỹ năng</h3>
+                                                <div
+                                                    class="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-100 dark:border-slate-700 min-h-[100px]">
+                                                    <p id="cvBio"
+                                                        class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed italic">
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div
+                                            class="px-6 py-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 flex justify-end">
+                                            <button onclick="AdminUser.closeCV()"
+                                                class="px-6 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 rounded-xl text-sm font-bold hover:bg-slate-50 transition-colors">Đóng</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <script src="${pageContext.request.contextPath}/assets/js/app-utils.js"></script>
+                                <script src="${pageContext.request.contextPath}/assets/js/admin-user.js?v=2"></script>
+                                <script>
+                                    AdminUser.init('${pageContext.request.contextPath}');
+                                    function closeAddUserModal() { document.getElementById('addUserModal').classList.add('hidden'); }
+                                    function openAddUserModal() { document.getElementById('addUserModal').classList.remove('hidden'); }
+                                    function closeEditRoleModal() { document.getElementById('editRoleModal').classList.add('hidden'); }
+                                    function closeResetPwdModal() { document.getElementById('resetPasswordModal').classList.add('hidden'); }
+                                </script>
+            </body>
+
+            </html>

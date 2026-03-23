@@ -1,6 +1,8 @@
 package neuralnews.controller;
 
+import neuralnews.dao.NotificationDao;
 import neuralnews.dao.UserDAO;
+import neuralnews.model.Notification;
 import neuralnews.model.User;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -65,6 +67,20 @@ public class RegisterController extends HttpServlet {
 		if (!isRegistered) {
 			response.sendRedirect(contextPath + "/auth/register.jsp?error=servererror");
 			return;
+		}
+
+		if (isRegistered) {
+			User registeredUser = userDAO.findByEmail(newUser.getEmail());
+			if (registeredUser != null) {
+				Notification welcomeNoti = new Notification(
+					registeredUser.getId(),
+					"Chào mừng!",
+					"Chào mừng " + registeredUser.getFullName() + " đến với NeuralNews. Hãy bắt đầu khám phá tin tức hữu ích nhé!",
+					"SYSTEM",
+					"/user/profile.jsp"
+				);
+				new NotificationDao().create(welcomeNoti);
+			}
 		}
 
 		// Registration successful -> redirect to login
